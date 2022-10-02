@@ -29,12 +29,11 @@ int king_move(struct game *,int,int,int,int);
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt);
 
 void set_initial_board(struct game *gamept);
-void update_board(struct game *gamept,short bCalcCounts);
+void update_board(struct game *gamept);
 int get_piece1(struct game *gamept,int board_offset);
 int get_piece2(struct game *gamept,int row,int column);
 void set_piece1(struct game *gamept,int board_offset,int piece);
 void set_piece2(struct game *gamept,int row,int column,int piece);
-void calculate_seirawan_counts(struct game *gamept);
 
 void print_bd(struct game *gamept);
 void fprint_game_bin(struct game *gamept,char *filename);

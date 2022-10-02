@@ -66,7 +66,7 @@ void fprint_game_bin(struct game *gamept,char *filename)
 
     fprintf_move(fptr,gamept);
 
-    update_board(gamept,FALSE);
+    update_board(gamept);
   }
 
   fclose(fptr);
@@ -91,7 +91,7 @@ void fprint_game(struct game *gamept,char *filename)
     sprintf_move(gamept,buf,20);
     fprintf(fptr,fmt_str,buf);
 
-    update_board(gamept,FALSE);
+    update_board(gamept);
   }
 
   fclose(fptr);

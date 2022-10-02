@@ -533,20 +533,6 @@ static void redisplay_counts(HWND hWnd,HDC hdc)
 
   sprintf_move(&curr_game,buf,20);
   TextOut(local_hdc,rect.left,rect.top,buf,lstrlen(buf));
-
-  rect.top = TOOLBAR_HEIGHT + 16;
-
-  wsprintf(buf,space_fmt,curr_game.seirawan_count[WHITE],
-    curr_game.seirawan_count[BLACK]);
-
-  TextOut(local_hdc,rect.left,rect.top,buf,lstrlen(buf));
-
-  rect.top = TOOLBAR_HEIGHT + 32;
-
-  wsprintf(buf,force_fmt,curr_game.force_count[WHITE],
-    curr_game.force_count[BLACK]);
-
-  TextOut(local_hdc,rect.left,rect.top,buf,lstrlen(buf));
 }
 
 void do_paint(HWND hWnd)
@@ -740,7 +726,7 @@ static void do_move(HWND hWnd,int board_rank,int board_file)
   if (curr_game.curr_move == curr_game.num_moves)
     return;
 
-  update_board(&curr_game,TRUE);
+  update_board(&curr_game);
 
   prev_invalidated_ix = 0;
 
@@ -848,13 +834,11 @@ static void position_game(int move)
   set_initial_board(&curr_game);
 
   for ( ; curr_game.curr_move < move; curr_game.curr_move++) {
-    update_board(&curr_game,FALSE);
+    update_board(&curr_game);
 
     sprintf(position_file_name,"position_%d",curr_game.curr_move+1);
     fprint_bd(&curr_game,position_file_name);
   }
-
-  calculate_seirawan_counts(&curr_game);
 }
 
 void do_new(HWND hWnd,struct game *gamept)
@@ -1586,10 +1570,9 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
           retval = do_pawn_move(&curr_game,direction,algebraic,2);
 
           if (!retval) {
-            update_board(&curr_game,FALSE);
+            update_board(&curr_game);
             curr_game.curr_move++;
             curr_game.num_moves = curr_game.curr_move;
-            calculate_seirawan_counts(&curr_game);
 
             invalidate_rect(hWnd,highlight_rank,highlight_file);
             invalidate_rect(hWnd,rank,file);
@@ -1636,10 +1619,9 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
           retval = do_piece_move(&curr_game,direction,algebraic,3);
 
           if (!retval) {
-            update_board(&curr_game,FALSE);
+            update_board(&curr_game);
             curr_game.curr_move++;
             curr_game.num_moves = curr_game.curr_move;
-            calculate_seirawan_counts(&curr_game);
 
             invalidate_rect(hWnd,highlight_rank,highlight_file);
             invalidate_rect(hWnd,rank,file);

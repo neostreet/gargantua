@@ -93,27 +93,9 @@ int get_piece_type_ix(int chara)
 void set_initial_board(struct game *gamept)
 {
   int n;
-  short piece;
 
   for (n = 0; n < CHARS_IN_BOARD; n++)
     gamept->board[n] = initial_board[n];
-
-  for (n = 0; n < 2; n++) {
-    gamept->seirawan_count[n] = 0;
-    gamept->force_count[n] = 0;
-  }
-
-  for (n = 0; n < NUM_BOARD_SQUARES; n++) {
-    piece = get_piece1(gamept,n);
-
-    if (!piece)
-      continue;
-
-    if (piece < 0)
-      gamept->force_count[BLACK] += force_value_of(piece);
-    else
-      gamept->force_count[WHITE] += force_value_of(piece);
-  }
 }
 
 int read_game(char *filename,struct game *gamept,char *err_msg)
@@ -253,12 +235,11 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
     if (got_error)
       break;
 
-    update_board(gamept,FALSE);
+    update_board(gamept);
     gamept->curr_move++;
   }
 
   gamept->num_moves = gamept->curr_move;
-  calculate_seirawan_counts(gamept);
 
   return 0;
 }
@@ -408,7 +389,7 @@ int get_word(FILE *fptr,char *word,int maxlen,int *wordlenpt)
   return end_of_file;
 }
 
-void update_board(struct game *gamept,short bCalcCounts)
+void update_board(struct game *gamept)
 {
   if (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_KINGSIDE_CASTLE) {
     if (gamept->curr_move & 0x1) {
@@ -452,9 +433,6 @@ void update_board(struct game *gamept,short bCalcCounts)
 
     set_piece1(gamept,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
   }
-
-  if (bCalcCounts)
-    calculate_seirawan_counts(gamept);
 }
 
 int get_piece1(struct game *gamept,int board_offset)
@@ -496,46 +474,6 @@ void set_piece2(struct game *gamept,int row,int column,int piece)
 
   board_offset = row * 8 + column;
   set_piece1(gamept,board_offset,piece);
-}
-
-void calculate_seirawan_counts(struct game *gamept)
-{
-  int m;
-  int n;
-  int o;
-  int direction;
-  int piece;
-  int low;
-  int high;
-
-  for (m = 0; m < 2; m++) {
-    gamept->seirawan_count[m] = 0;
-
-    if (!m)
-      direction = 1;
-    else
-      direction = -1;
-
-    for (n = 0; n < NUM_BOARD_SQUARES; n++) {
-      piece = get_piece1(gamept,n);
-
-      if (piece * direction > 0) {
-        if (piece < 0) {
-          low = 0;
-          high = 32;
-        }
-        else {
-          low = 32;
-          high = 64;
-        }
-
-        for (o = low; o < high; o++) {
-          if (square_attacks_square(gamept,n,o))
-            gamept->seirawan_count[m]++;
-        }
-      }
-    }
-  }
 }
 
 #define MAX_FEN_LINE_LEN 256

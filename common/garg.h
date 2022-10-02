@@ -99,8 +99,6 @@ struct game {
   int num_moves;
   int curr_move;
   unsigned char board[CHARS_IN_BOARD];  /* 8 columns * 8 rows / 2 (nibbles per char) */
-  short seirawan_count[NUM_PLAYERS];
-  short force_count[NUM_PLAYERS];
   struct move moves[MAX_MOVES];
 };
 
