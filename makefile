@@ -1,0 +1,32 @@
+gargantua: gargantua.o gargatk.o gargdbg.o gargimg.o gargmsc.o gargmvs.o gargrd.o bitfuns.o ioutil.o gargantua.res
+	g++ -mwindows -g -L"/cygdrive/c/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x86" -o gargantua gargantua.o gargatk.o gargimg.o gargmsc.o gargdbg.o gargmvs.o gargrd.o ioutil.o bitfuns.o gargantua.res -lGdi32 -lcurses -lComDlg32 -lComCtl32
+
+gargantua.o: gargantua.c
+	g++ -g -c -I./common gargantua.c
+
+gargatk.o: ./common/gargatk.c
+	g++ -g -c -I./common ./common/gargatk.c
+
+gargdbg.o: ./common/gargdbg.c
+	g++ -g -c -I./common ./common/gargdbg.c
+
+gargimg.o: ./common/gargimg.c
+	g++ -g -c -I./common ./common/gargimg.c
+
+gargmsc.o: ./common/gargmsc.c
+	g++ -g -c -I./common ./common/gargmsc.c
+
+gargmvs.o: ./common/gargmvs.c
+	g++ -g -c -I./common ./common/gargmvs.c
+
+gargrd.o: ./common/gargrd.c
+	g++ -g -c -I./common ./common/gargrd.c
+
+bitfuns.o: ./common/bitfuns.c
+	g++ -g -c -I./common ./common/bitfuns.c
+
+ioutil.o: ./common/ioutil.c
+	g++ -g -c -I./common ./common/ioutil.c
+
+gargantua.res: ./common/gargantua.rc
+	windres ./common/gargantua.rc -O coff -o gargantua.res
