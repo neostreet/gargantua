@@ -5,13 +5,13 @@
 #define BLACK 1
 #define NUM_PLAYERS 2
 
-#define NUM_RANKS 8
-#define NUM_FILES 8
+#define NUM_RANKS 10
+#define NUM_FILES 10
 
 #define NUM_BOARD_SQUARES (NUM_RANKS * NUM_FILES)
 
 #define CHARS_IN_BOARD \
-(NUM_BOARD_SQUARES / 2)  // 64 squares / 2 (nibbles per char)
+(NUM_BOARD_SQUARES / 2)  // 100 squares / 2 (nibbles per char)
 
 #define PAWN_ID       1
 #define ROOK_ID       2
@@ -81,7 +81,7 @@ struct game {
   int orientation;
   int num_moves;
   int curr_move;
-  unsigned char board[CHARS_IN_BOARD];  /* 8 columns * 8 rows / 2 (nibbles per char) */
+  unsigned char board[CHARS_IN_BOARD];  /* 10 columns * 10 rows / 2 (nibbles per char) */
   struct move moves[MAX_MOVES];
 };
 

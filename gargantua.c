@@ -475,9 +475,9 @@ void invalidate_square(HWND hWnd,int square)
   file = FILE_OF(square);
 
   if (!curr_game.orientation)
-    rank = 7 - rank;
+    rank = (NUM_RANKS - 1) - rank;
   else
-    file = 7 - file;
+    file = (NUM_FILES - 1) - file;
 
   if (debug_fptr) {
     fprintf(debug_fptr,"invalidate_square(): rank = %d, file = %d\n",
@@ -581,9 +581,9 @@ void do_paint(HWND hWnd)
       }
 
       if (!curr_game.orientation)
-        piece = get_piece2(&curr_game,7 - m,n);
+        piece = get_piece2(&curr_game,(NUM_RANKS - 1) - m,n);
       else
-        piece = get_piece2(&curr_game,m,7 - n);
+        piece = get_piece2(&curr_game,m,(NUM_FILES - 1) - n);
 
       if (debug_level == 2) {
         if (debug_fptr)
@@ -675,17 +675,25 @@ void do_paint(HWND hWnd)
         bSelectedFont = TRUE;
       }
 
-      if (!curr_game.orientation)
-        buf[0] = '1' + 7 - m;
-      else
-        buf[0] = '1' + m;
+      if (!curr_game.orientation) {
+        if (!m)
+          buf[0] = 'T';
+        else
+          buf[0] = '1' + (NUM_FILES - 1) - m;
+      }
+      else {
+        if (m < NUM_FILES - 1)
+          buf[0] = '1' + m;
+        else
+          buf[0] = 'T';
+      }
 
       TextOut(hdc,rect.left,rect.top,buf,1);
     }
   }
 
   // display the files, if necessary
-  rect.top = board_y_offset + 8 * height_in_pixels + 2;
+  rect.top = board_y_offset + NUM_RANKS * height_in_pixels + 2;
   rect.bottom = rect.top + CHARACTER_HEIGHT;
 
   for (m = 0; m < NUM_FILES; m++) {
@@ -707,7 +715,7 @@ void do_paint(HWND hWnd)
       if (!curr_game.orientation)
         buf[0] = 'a' + m;
       else
-        buf[0] = 'a' + 7 - m;
+        buf[0] = 'a' + (NUM_FILES - 1) - m;
 
       TextOut(hdc,rect.left,rect.top,buf,1);
     }
@@ -780,8 +788,8 @@ static void toggle_orientation(HWND hWnd)
   curr_game.orientation ^= 1;
 
   if (highlight_rank != -1) {
-    highlight_rank = 7 - highlight_rank;
-    highlight_file = 7 - highlight_file;
+    highlight_rank = (NUM_RANKS - 1) - highlight_rank;
+    highlight_file = (NUM_FILES - 1) - highlight_file;
   }
 
   invalidate_board_and_coords(hWnd);
@@ -1531,13 +1539,13 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     }
     else {
       if (!curr_game.orientation) {
-        piece = get_piece2(&curr_game,7 - rank,file);
+        piece = get_piece2(&curr_game,(NUM_RANKS - 1) - rank,file);
         algebraic[0] = 'a' + file;
-        algebraic[1] = '1' + 7 - rank;
+        algebraic[1] = '1' + (NUM_RANKS - 1) - rank;
       }
       else {
-        piece = get_piece2(&curr_game,rank,7 - file);
-        algebraic[0] = 'a' + 7 - file;
+        piece = get_piece2(&curr_game,rank,(NUM_FILES - 1) - file);
+        algebraic[0] = 'a' + (NUM_FILES - 1) - file;
         algebraic[1] = '1' + rank;
       }
 

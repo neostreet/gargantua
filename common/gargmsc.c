@@ -39,9 +39,9 @@ void print_bd(struct game *gamept)
   int n;
   int square;
 
-  for (m = 0; m < 8; m++) {
-    for (n = 0; n < 8; n++) {
-      square = get_piece2(gamept,7 - m,n);
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      square = get_piece2(gamept,(NUM_RANKS - 1) - m,n);
       printf("%c ",format_square(square));
     }
 
@@ -107,9 +107,9 @@ void fprint_bd(struct game *gamept,char *filename)
   if ((fptr = fopen(filename,"w")) == NULL)
     return;
 
-  for (m = 0; m < 8; m++) {
-    for (n = 0; n < 8; n++) {
-      square = get_piece2(gamept,7 - m,n);
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      square = get_piece2(gamept,(NUM_RANKS - 1) - m,n);
       fprintf(fptr,"%c ",format_square(square));
     }
 
