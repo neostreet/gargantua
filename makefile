@@ -27,3 +27,6 @@ ioutil.o: ./common/ioutil.c
 
 gargantua.res: ./common/gargantua.rc
 	windres ./common/gargantua.rc -O coff -o gargantua.res
+
+clean:
+	rm *.o *.res *.exe
