@@ -458,7 +458,7 @@ int get_piece2(struct game *gamept,int row,int column)
 {
   int board_offset;
 
-  board_offset = row * 8 + column;
+  board_offset = row * NUM_RANKS + column;
   return get_piece1(gamept,board_offset);
 }
 
@@ -474,7 +474,7 @@ void set_piece2(struct game *gamept,int row,int column,int piece)
 {
   int board_offset;
 
-  board_offset = row * 8 + column;
+  board_offset = row * NUM_RANKS + column;
   set_piece1(gamept,board_offset,piece);
 }
 
