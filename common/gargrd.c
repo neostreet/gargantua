@@ -17,7 +17,7 @@
 #include "bitfuns.h"
 
 static unsigned char initial_board[] = {
-  (unsigned char)0x23, (unsigned char)0x34, (unsigned char)0x65, (unsigned char)0x43, (unsigned char)0x32,
+  (unsigned char)0x27, (unsigned char)0x34, (unsigned char)0x65, (unsigned char)0x43, (unsigned char)0x72,
   (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
@@ -26,7 +26,7 @@ static unsigned char initial_board[] = {
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff,
-  (unsigned char)0xed, (unsigned char)0xdc, (unsigned char)0xab, (unsigned char)0xcd, (unsigned char)0xde
+  (unsigned char)0xe9, (unsigned char)0xdc, (unsigned char)0xab, (unsigned char)0xcd, (unsigned char)0x9e
 };
 
 static int force_values[] = {

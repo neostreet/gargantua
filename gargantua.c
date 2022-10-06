@@ -384,6 +384,9 @@ int get_piece_offset(int piece,int rank,int file)
         rank,file,piece);
   }
 
+  if (piece == GARGANTUA_ID)
+    piece = KNIGHT_ID; // for now
+
   if (!piece) {
     /* this is a blank square; these are represented in the bitmap as well
        as pieces
