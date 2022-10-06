@@ -205,7 +205,7 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
   return 0;
 }
 
-char piece_ids[] = "RNBQK";
+char piece_ids[] = "RNBQKG";
 
 int get_piece_id_ix(char piece)
 {
@@ -225,7 +225,8 @@ int (*piece_functions[])(struct game *,int,int,int,int) = {
   knight_move,
   bishop_move,
   queen_move,
-  king_move
+  king_move,
+  gargantua_move
 };
 
 int do_piece_move(struct game *gamept,int direction,char *word,int wordlen)
@@ -495,4 +496,34 @@ int king_move(
     return 0;  /* success */
 
   return 1;  /* failure */
+}
+
+int gargantua_move(
+  struct game *gamept,
+  int file1,
+  int rank1,
+  int file2,
+  int rank2
+)
+{
+  int dist1;
+  int dist2;
+
+  dist1 = (file1 - file2);
+
+  if (dist1 < 0)
+    dist1 *= -1;
+
+  dist2 = (rank1 - rank2);
+
+  if (dist2 < 0)
+    dist2 *= -1;
+
+  if ((dist1 == 2) && (dist2 == 3))
+    return 0;  /* success */
+
+  if ((dist1 == 3) && (dist2 == 2))
+    return 0;  /* success */
+
+  return 1;    /* failure */
 }

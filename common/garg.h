@@ -52,7 +52,7 @@
 #define BOARD_WIDTH (NUM_FILES * width_in_pixels)
 #define BOARD_HEIGHT (NUM_RANKS * height_in_pixels)
 
-#define NUM_PIECE_TYPES 5
+#define NUM_PIECE_TYPES 6
 
 struct move {
   char from;

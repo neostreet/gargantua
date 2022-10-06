@@ -1625,6 +1625,10 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
               algebraic[0] = 'K';
 
               break;
+            case GARGANTUA_ID:
+              algebraic[0] = 'G';
+
+              break;
           }
 
           retval = do_piece_move(&curr_game,direction,algebraic,3);

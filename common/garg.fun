@@ -25,6 +25,7 @@ int knight_move(struct game *,int,int,int,int);
 int bishop_move(struct game *,int,int,int,int);
 int queen_move(struct game *,int,int,int,int);
 int king_move(struct game *,int,int,int,int);
+int gargantua_move(struct game *,int,int,int,int);
 
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt);
 
