@@ -217,7 +217,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   else
     window_extra_height = WINDOW_EXTRA_HEIGHT;
 
-  board_y_offset = TOOLBAR_HEIGHT + font_height * 3;
+  board_y_offset = TOOLBAR_HEIGHT; // + font_height * 3;
 
   // Initialize global strings
   lstrcpy (szAppName, appname);
@@ -521,6 +521,8 @@ static void redisplay_counts(HWND hWnd,HDC hdc)
   HDC local_hdc;
   RECT rect;
   char buf[80];
+
+  return; // for now
 
   if (hdc != NULL)
     local_hdc = hdc;
