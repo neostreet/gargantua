@@ -16,8 +16,10 @@ int read_fen(FILE *fptr,struct game *gamept);
 
 int do_castle(struct game *gamept,int direction,char *word,int wordlen);
 int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen);
+int do_pawn_move2(struct game *gamept,int direction);
 int get_piece_id_ix(char piece);
 int do_piece_move(struct game *gamept,int direction,char *word,int wordlen);
+int do_piece_move2(struct game *gamept,int direction);
 int allow_user_moves(struct game *gamept);
 
 int rook_move(struct game *,int,int,int,int);

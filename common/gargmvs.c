@@ -205,6 +205,11 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
   return 0;
 }
 
+int do_pawn_move2(struct game *gamept,int direction)
+{
+  return 1; // for now
+}
+
 char piece_ids[] = "RNBQKG";
 
 int get_piece_id_ix(char piece)
@@ -316,6 +321,11 @@ int do_piece_move(struct game *gamept,int direction,char *word,int wordlen)
   }
 
   return 5;
+}
+
+int do_piece_move2(struct game *gamept,int direction)
+{
+  return 1; // for now
 }
 
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt)

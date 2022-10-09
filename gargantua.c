@@ -1530,126 +1530,61 @@ BOOL CenterWindow (HWND hwndChild, HWND hwndParent)
 void do_lbuttondown(HWND hWnd,int file,int rank)
 {
   int piece;
-  char algebraic[10];
   int direction;
   int retval;
-  int local_move_start_piece;
 
   if ((file >= 0) && (file < NUM_FILES) &&
-      (rank >= 0) && (rank < NUM_RANKS)) {
+      (rank >= 0) && (rank < NUM_RANKS))
+    ;
+  else
+    return;
 
-    if ((highlight_rank == rank) && (highlight_file == file)) {
-      highlight_rank = -1;
-      highlight_file = -1;
+  if ((highlight_rank == rank) && (highlight_file == file)) {
+    highlight_rank = -1;
+    highlight_file = -1;
+
+    invalidate_rect(hWnd,rank,file);
+    return;
+  }
+
+  if (!curr_game.orientation)
+    piece = get_piece2(&curr_game,(NUM_RANKS - 1) - rank,file);
+  else
+    piece = get_piece2(&curr_game,rank,(NUM_FILES - 1) - file);
+
+  if (highlight_rank == -1) {
+    if ( ((piece > 0) && !((curr_game.black_to_play + curr_game.curr_move) % 2)) ||
+         ((piece < 0) &&  ((curr_game.black_to_play + curr_game.curr_move) % 2)) ) {
+      highlight_file = file;
+      highlight_rank = rank;
+      move_start_piece = piece;
 
       invalidate_rect(hWnd,rank,file);
+      return;
     }
-    else {
-      if (!curr_game.orientation) {
-        piece = get_piece2(&curr_game,(NUM_RANKS - 1) - rank,file);
-        algebraic[0] = 'a' + file;
-        algebraic[1] = '1' + (NUM_RANKS - 1) - rank;
-      }
-      else {
-        piece = get_piece2(&curr_game,rank,(NUM_FILES - 1) - file);
-        algebraic[0] = 'a' + (NUM_FILES - 1) - file;
-        algebraic[1] = '1' + rank;
-      }
+  }
 
-      algebraic[2] = 0;
+  if (move_start_piece > 0)
+    direction = 1;            /* white's move */
+  else
+    direction = -1;           /* black's move */
 
-      if (highlight_rank == -1) {
-        if ( ((piece > 0) && !((curr_game.black_to_play + curr_game.curr_move) % 2)) ||
-             ((piece < 0) &&  ((curr_game.black_to_play + curr_game.curr_move) % 2)) ) {
-          highlight_file = file;
-          highlight_rank = rank;
-          move_start_piece = piece;
+  if ((move_start_piece == PAWN_ID) ||
+      (move_start_piece == PAWN_ID * -1)) {
+    retval = do_pawn_move2(&curr_game,direction);
+  }
+  else
+    retval = do_piece_move2(&curr_game,direction);
 
-          invalidate_rect(hWnd,rank,file);
-        }
-      }
-      else {
-        if ((move_start_piece == PAWN_ID) ||
-            (move_start_piece == PAWN_ID * -1)) {
+  if (!retval) {
+    update_board(&curr_game);
+    curr_game.curr_move++;
+    curr_game.num_moves = curr_game.curr_move;
 
-          if (move_start_piece == PAWN_ID)
-            direction = 1;            /* white's move */
-          else
-            direction = -1;           /* black's move */
+    invalidate_rect(hWnd,highlight_rank,highlight_file);
+    invalidate_rect(hWnd,rank,file);
 
-          if (highlight_file != file) {
-            algebraic[0] = 'a' + highlight_file;
-            algebraic[1] = 'a' + file;
-          }
-
-          retval = do_pawn_move(&curr_game,direction,algebraic,2);
-
-          if (!retval) {
-            update_board(&curr_game);
-            curr_game.curr_move++;
-            curr_game.num_moves = curr_game.curr_move;
-
-            invalidate_rect(hWnd,highlight_rank,highlight_file);
-            invalidate_rect(hWnd,rank,file);
-
-            highlight_rank = -1;
-            highlight_file = -1;
-          }
-        }
-        else {
-          algebraic[3] = 0;
-          algebraic[2] = algebraic[1];
-          algebraic[1] = algebraic[0];
-
-          if (move_start_piece > 0)
-            direction = 1;            /* white's move */
-          else
-            direction = -1;           /* black's move */
-
-          local_move_start_piece = move_start_piece * direction;
-
-          switch (local_move_start_piece) {
-            case ROOK_ID:
-              algebraic[0] = 'R';
-
-              break;
-            case KNIGHT_ID:
-              algebraic[0] = 'N';
-
-              break;
-            case BISHOP_ID:
-              algebraic[0] = 'B';
-
-              break;
-            case QUEEN_ID:
-              algebraic[0] = 'Q';
-
-              break;
-            case KING_ID:
-              algebraic[0] = 'K';
-
-              break;
-            case GARGANTUA_ID:
-              algebraic[0] = 'G';
-
-              break;
-          }
-
-          retval = do_piece_move(&curr_game,direction,algebraic,3);
-
-          if (!retval) {
-            update_board(&curr_game);
-            curr_game.curr_move++;
-            curr_game.num_moves = curr_game.curr_move;
-
-            invalidate_rect(hWnd,highlight_rank,highlight_file);
-            invalidate_rect(hWnd,rank,file);
-
-            highlight_rank = -1;
-            highlight_file = -1;
-          }
-        }
-      }
-    }
+    highlight_rank = -1;
+    highlight_file = -1;
   }
 }
