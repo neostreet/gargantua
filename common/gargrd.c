@@ -393,7 +393,7 @@ int get_word(FILE *fptr,char *word,int maxlen,int *wordlenpt)
 
 void update_board(struct game *gamept)
 {
-  if (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_KINGSIDE_CASTLE) {
+  if (gamept->moves[gamept->curr_move].from == SPECIAL_MOVE_KINGSIDE_CASTLE) {
     if (gamept->curr_move & 0x1) {
       /* black's move */
 
@@ -411,7 +411,7 @@ void update_board(struct game *gamept)
       set_piece1(gamept,7,0);
     }
   }
-  else if (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_QUEENSIDE_CASTLE) {
+  else if (gamept->moves[gamept->curr_move].from == SPECIAL_MOVE_QUEENSIDE_CASTLE) {
     if (gamept->curr_move & 0x1) {
       /* black's move */
 

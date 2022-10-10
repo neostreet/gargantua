@@ -28,8 +28,7 @@ int do_castle(struct game *gamept,int direction,char *word,int wordlen)
     if (get_piece2(gamept,rank,5) || get_piece2(gamept,rank,6))
       return 3;
 
-    gamept->moves[gamept->curr_move].special_move_info =
-      SPECIAL_MOVE_KINGSIDE_CASTLE;
+    gamept->moves[gamept->curr_move].from = SPECIAL_MOVE_KINGSIDE_CASTLE;
   }
   else if (wordlen == 5) {  /* queenside castle */
     /* make sure there is a rook in the corner: */
@@ -40,8 +39,7 @@ int do_castle(struct game *gamept,int direction,char *word,int wordlen)
     if (get_piece2(gamept,rank,1) || get_piece2(gamept,rank,2) || get_piece2(gamept,rank,3))
       return 5;
 
-    gamept->moves[gamept->curr_move].special_move_info =
-      SPECIAL_MOVE_QUEENSIDE_CASTLE;
+    gamept->moves[gamept->curr_move].from = SPECIAL_MOVE_QUEENSIDE_CASTLE;
   }
   else
     return 6;
@@ -72,7 +70,6 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
     to_rank = rank;
 
     /* pawn advance */
-    gamept->moves[gamept->curr_move].special_move_info = 0;
     gamept->moves[gamept->curr_move].to = POS_OF(rank,file);
 
     for (n = 0; n < 2; n++) {
@@ -116,8 +113,7 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
         if (which_piece == NUM_PIECE_TYPES)
           return 7;
 
-        gamept->moves[gamept->curr_move].special_move_info =
-          which_piece + 2;
+        gamept->moves[gamept->curr_move].from = SPECIAL_MOVE_PROMOTION_QUEEN; // for now
       }
     }
     else {
@@ -131,8 +127,7 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
         if (which_piece == NUM_PIECE_TYPES)
           return 9;
 
-        gamept->moves[gamept->curr_move].special_move_info =
-          (which_piece + 2) * -1;
+        gamept->moves[gamept->curr_move].from = SPECIAL_MOVE_PROMOTION_QUEEN; // for now
       }
     }
 
@@ -168,8 +163,7 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
           if (word[2] - '1' != rank+direction)
             continue;
 
-        gamept->moves[gamept->curr_move].special_move_info =
-          SPECIAL_MOVE_CAPTURE;
+        gamept->moves[gamept->curr_move].from = SPECIAL_MOVE_CAPTURE;
         gamept->moves[gamept->curr_move].from = POS_OF(rank,file);
         gamept->moves[gamept->curr_move].to = POS_OF(rank+direction,capture_file);
         return 0;
@@ -189,8 +183,7 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
 
       if ((get_piece2(gamept,rank,file) == direction) &&
         (get_piece2(gamept,rank,capture_file) * direction < 0)) {
-        gamept->moves[gamept->curr_move].special_move_info =
-          SPECIAL_MOVE_CAPTURE | SPECIAL_MOVE_EN_PASSANT;
+        gamept->moves[gamept->curr_move].from = SPECIAL_MOVE_EN_PASSANT;
         gamept->moves[gamept->curr_move].from = POS_OF(rank,file);
         gamept->moves[gamept->curr_move].to = POS_OF(rank+direction,capture_file);
         return 0;
@@ -293,11 +286,8 @@ int do_piece_move(struct game *gamept,int direction,char *word,int wordlen)
 
   if (to_piece != 0) {
     /* a capture; move the captured piece off the board: */
-    gamept->moves[gamept->curr_move].special_move_info =
-      SPECIAL_MOVE_CAPTURE;
+    gamept->moves[gamept->curr_move].from = SPECIAL_MOVE_CAPTURE;
   }
-  else
-    gamept->moves[gamept->curr_move].special_move_info = 0;
 
   /* search the board for the search piece: */
   for (curr_rank = rank_start; curr_rank < rank_end; curr_rank++) {

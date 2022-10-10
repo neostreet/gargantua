@@ -13,14 +13,12 @@ char fmt_str[] = "%s\n";
 
 int kingside_castle(struct game *gamept)
 {
-  return (gamept->moves[gamept->curr_move-1].special_move_info &
-    SPECIAL_MOVE_KINGSIDE_CASTLE);
+  return (gamept->moves[gamept->curr_move-1].from == SPECIAL_MOVE_KINGSIDE_CASTLE);
 }
 
 int queenside_castle(struct game *gamept)
 {
-  return (gamept->moves[gamept->curr_move-1].special_move_info &
-    SPECIAL_MOVE_QUEENSIDE_CASTLE);
+  return (gamept->moves[gamept->curr_move-1].from == SPECIAL_MOVE_QUEENSIDE_CASTLE);
 }
 
 char decode_piece(int piece,int bShowBlack)
@@ -83,10 +81,9 @@ void fprintf_move(FILE *fptr,struct game *gamept)
   if (gamept->curr_move == gamept->num_moves)
     return;
 
-  fprintf(fptr,"%d %d %d\n",
+  fprintf(fptr,"%d %d\n",
     gamept->moves[gamept->curr_move].from,
-    gamept->moves[gamept->curr_move].to,
-    gamept->moves[gamept->curr_move].special_move_info);
+    gamept->moves[gamept->curr_move].to);
 }
 
 void sprintf_move(struct game *gamept,char *buf,int buf_len)
@@ -135,8 +132,7 @@ void sprintf_move(struct game *gamept,char *buf,int buf_len)
     decoded_piece = get_decoded_piece(gamept);
 
     if (decoded_piece == 'P') {
-      if (gamept->moves[gamept->curr_move-1].special_move_info &
-        SPECIAL_MOVE_CAPTURE) {
+      if (gamept->moves[gamept->curr_move-1].from == SPECIAL_MOVE_CAPTURE) {
         from = gamept->moves[gamept->curr_move-1].from;
         from_file = FILE_OF(from);
         to = gamept->moves[gamept->curr_move-1].to;
@@ -153,8 +149,7 @@ void sprintf_move(struct game *gamept,char *buf,int buf_len)
       buf[put_count++] = decoded_piece;
       bDone = FALSE;
 
-      if (gamept->moves[gamept->curr_move-1].special_move_info &
-        SPECIAL_MOVE_CAPTURE)
+      if (gamept->moves[gamept->curr_move-1].from == SPECIAL_MOVE_CAPTURE)
         buf[put_count++] = 'x';
     }
 
