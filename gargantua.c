@@ -1564,6 +1564,10 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     }
   }
 
+  // exit early if the square to be moved to contains a piece of the same color as the piece to be moved
+  if ((move_start_piece * piece) > 0)
+    return;
+
   if (move_start_piece > 0)
     direction = 1;            /* white's move */
   else
