@@ -82,6 +82,10 @@ struct game {
   int orientation;
   int num_moves;
   int curr_move;
+  int bBig;
+  int highlight_rank;
+  int highlight_file;
+  int move_start_piece;
   unsigned char board[CHARS_IN_BOARD];  /* 10 columns * 10 rows / 2 (nibbles per char) */
   struct move moves[MAX_MOVES];
 };

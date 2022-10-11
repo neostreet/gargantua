@@ -119,6 +119,11 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
   if ((fptr = fopen(filename,"r")) == NULL)
     return 1;
 
+  gamept->bBig = TRUE;
+  gamept->highlight_rank = -1;
+  gamept->highlight_file = -1;
+  gamept->move_start_piece = 0;
+
   strcpy(gamept->gargfilename,filename);
 
   fscanf(fptr,"%d",&gamept->orientation);  /* get board orientation */

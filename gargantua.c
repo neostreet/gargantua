@@ -168,13 +168,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   MSG msg;
   char *cpt;
 
-  bBig = TRUE;
-
   width_in_pixels = WIDTH_IN_PIXELS;
   height_in_pixels = HEIGHT_IN_PIXELS;
 
-  highlight_rank = -1;
-  highlight_file = -1;
+  curr_game.highlight_rank = -1;
+  curr_game.highlight_file = -1;
 
   cpt = getenv("DEBUG_GARGANTUA");
 
@@ -562,8 +560,8 @@ void do_paint(HWND hWnd)
   if (debug_level == 2) {
     if (debug_fptr) {
       fprintf(debug_fptr,"do_paint():\n");
-      fprintf(debug_fptr,"  highlight_rank = %d\n",highlight_rank);
-      fprintf(debug_fptr,"  highlight_file = %d\n",highlight_file);
+      fprintf(debug_fptr,"  highlight_rank = %d\n",curr_game.highlight_rank);
+      fprintf(debug_fptr,"  highlight_file = %d\n",curr_game.highlight_file);
     }
   }
 
@@ -602,14 +600,14 @@ void do_paint(HWND hWnd)
       if (piece_offset >= 0) {
         bigbmp_column = BIGBMP_COLUMN_OF(piece_offset);
 
-        if ((m == highlight_rank) && (n == highlight_file))
+        if ((m == curr_game.highlight_rank) && (n == curr_game.highlight_file))
           bigbmp_row = 1;
         else
           bigbmp_row = 0;
 
         BitBlt(hdc,rect.left,rect.top,
           width_in_pixels,height_in_pixels,
-          hdc_compatible[bBig],
+          hdc_compatible[curr_game.bBig],
           bigbmp_column * width_in_pixels,
           bigbmp_row * height_in_pixels,
           SRCCOPY);
@@ -668,7 +666,7 @@ void do_paint(HWND hWnd)
 
   for (m = 0; m < NUM_RANKS; m++) {
     rect.top = board_y_offset + m * height_in_pixels +
-      (bBig ? 19 : 6);
+      (curr_game.bBig ? 19 : 6);
     rect.bottom = rect.top + CHARACTER_HEIGHT;
 
     if (RectVisible(hdc,&rect)) {
@@ -705,7 +703,7 @@ void do_paint(HWND hWnd)
 
   for (m = 0; m < NUM_FILES; m++) {
     rect.left = board_x_offset + m * width_in_pixels +
-      (bBig ? 21 : 8);
+      (curr_game.bBig ? 21 : 8);
     rect.right = rect.left + CHARACTER_WIDTH;
 
     if (RectVisible(hdc,&rect)) {
@@ -794,9 +792,9 @@ static void toggle_orientation(HWND hWnd)
 {
   curr_game.orientation ^= 1;
 
-  if (highlight_rank != -1) {
-    highlight_rank = (NUM_RANKS - 1) - highlight_rank;
-    highlight_file = (NUM_FILES - 1) - highlight_file;
+  if (curr_game.highlight_rank != -1) {
+    curr_game.highlight_rank = (NUM_RANKS - 1) - curr_game.highlight_rank;
+    curr_game.highlight_file = (NUM_FILES - 1) - curr_game.highlight_file;
   }
 
   invalidate_board_and_coords(hWnd);
@@ -808,20 +806,20 @@ static void toggle_board_size(HWND hWnd)
 
   if (debug_fptr) {
     fprintf(debug_fptr,"toggle_board_size()\n");
-    fprintf(debug_fptr,"  bBig = %d\n",bBig);
-    fprintf(debug_fptr,"  highlight_rank = %d\n",highlight_rank);
-    fprintf(debug_fptr,"  highlight_file = %d\n",highlight_file);
+    fprintf(debug_fptr,"  bBig = %d\n",curr_game.bBig);
+    fprintf(debug_fptr,"  highlight_rank = %d\n",curr_game.highlight_rank);
+    fprintf(debug_fptr,"  highlight_file = %d\n",curr_game.highlight_file);
   }
 
-  if (!bBig) {
+  if (!curr_game.bBig) {
     width_in_pixels = WIDTH_IN_PIXELS;
     height_in_pixels = HEIGHT_IN_PIXELS;
-    bBig = TRUE;
+    curr_game.bBig = TRUE;
   }
   else {
     width_in_pixels = SHRUNK_WIDTH_IN_PIXELS;
     height_in_pixels = SHRUNK_HEIGHT_IN_PIXELS;
-    bBig = FALSE;
+    curr_game.bBig = FALSE;
   }
 
   garg_window_width = board_x_offset + BOARD_WIDTH + window_extra_width;
@@ -834,7 +832,7 @@ static void toggle_board_size(HWND hWnd)
   if (debug_fptr) {
     fprintf(debug_fptr,"  width_in_pixels = %d\n",width_in_pixels);
     fprintf(debug_fptr,"  height_in_pixels = %d\n",height_in_pixels);
-    fprintf(debug_fptr,"  bBig = %d\n",bBig);
+    fprintf(debug_fptr,"  bBig = %d\n",curr_game.bBig);
   }
 
   MoveWindow(hWnd,rect.left,rect.top,
@@ -1044,8 +1042,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       else
         do_new(hWnd,&curr_game);
 
-      highlight_rank = -1;
-      highlight_file = -1;
+      curr_game.highlight_rank = -1;
+      curr_game.highlight_file = -1;
       InvalidateRect(hWnd,NULL,TRUE);
 
       break;
@@ -1100,8 +1098,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
               wsprintf(szTitle,"%s - %s",szAppName,
                 trim_name(garg_file_list[curr_garg_file]));
               SetWindowText(hWnd,szTitle);
-              highlight_rank = -1;
-              highlight_file = -1;
+              curr_game.highlight_rank = -1;
+              curr_game.highlight_file = -1;
               InvalidateRect(hWnd,NULL,TRUE);
             }
             else {
@@ -1188,8 +1186,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 wsprintf(szTitle,"%s - %s",szAppName,
                   trim_name(name));
                 SetWindowText(hWnd,szTitle);
-                highlight_rank = -1;
-                highlight_file = -1;
+                curr_game.highlight_rank = -1;
+                curr_game.highlight_file = -1;
                 InvalidateRect(hWnd,NULL,TRUE);
               }
               else {
@@ -1539,9 +1537,9 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   else
     return;
 
-  if ((highlight_rank == rank) && (highlight_file == file)) {
-    highlight_rank = -1;
-    highlight_file = -1;
+  if ((curr_game.highlight_rank == rank) && (curr_game.highlight_file == file)) {
+    curr_game.highlight_rank = -1;
+    curr_game.highlight_file = -1;
 
     invalidate_rect(hWnd,rank,file);
     return;
@@ -1552,12 +1550,12 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   else
     piece = get_piece2(&curr_game,rank,(NUM_FILES - 1) - file);
 
-  if (highlight_rank == -1) {
+  if (curr_game.highlight_rank == -1) {
     if ( ((piece > 0) && !((curr_game.black_to_play + curr_game.curr_move) % 2)) ||
          ((piece < 0) &&  ((curr_game.black_to_play + curr_game.curr_move) % 2)) ) {
-      highlight_file = file;
-      highlight_rank = rank;
-      move_start_piece = piece;
+      curr_game.highlight_file = file;
+      curr_game.highlight_rank = rank;
+      curr_game.move_start_piece = piece;
 
       invalidate_rect(hWnd,rank,file);
       return;
@@ -1565,16 +1563,16 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   }
 
   // exit early if the square to be moved to contains a piece of the same color as the piece to be moved
-  if ((move_start_piece * piece) > 0)
+  if ((curr_game.move_start_piece * piece) > 0)
     return;
 
-  if (move_start_piece > 0)
+  if (curr_game.move_start_piece > 0)
     direction = 1;            /* white's move */
   else
     direction = -1;           /* black's move */
 
-  if ((move_start_piece == PAWN_ID) ||
-      (move_start_piece == PAWN_ID * -1)) {
+  if ((curr_game.move_start_piece == PAWN_ID) ||
+      (curr_game.move_start_piece == PAWN_ID * -1)) {
     retval = do_pawn_move2(&curr_game,direction);
   }
   else
@@ -1585,10 +1583,10 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     curr_game.curr_move++;
     curr_game.num_moves = curr_game.curr_move;
 
-    invalidate_rect(hWnd,highlight_rank,highlight_file);
+    invalidate_rect(hWnd,curr_game.highlight_rank,curr_game.highlight_file);
     invalidate_rect(hWnd,rank,file);
 
-    highlight_rank = -1;
-    highlight_file = -1;
+    curr_game.highlight_rank = -1;
+    curr_game.highlight_file = -1;
   }
 }
