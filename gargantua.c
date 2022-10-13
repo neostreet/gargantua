@@ -337,6 +337,23 @@ BOOL InitApplication(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
   HWND hWnd;
+  char *cpt;
+  int debug_x_offset;
+  int debug_y_offset;
+
+  cpt = getenv("DEBUG_X_OFFSET");
+
+  if (cpt != NULL)
+    debug_x_offset = atoi(cpt);
+  else
+    debug_x_offset = 0;
+
+  cpt = getenv("DEBUG_Y_OFFSET");
+
+  if (cpt != NULL)
+    debug_y_offset = atoi(cpt);
+  else
+    debug_y_offset = 0;
 
   hInst = hInstance; // Store instance handle in our global variable
 
@@ -346,8 +363,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
   SystemParametersInfo(SPI_GETWORKAREA,0,&spi_rect,0);
 
-  initial_x_pos = ((spi_rect.right - spi_rect.left) - garg_window_width) / 2;
-  initial_y_pos = ((spi_rect.bottom - spi_rect.top) - garg_window_height) / 2;
+  initial_x_pos = debug_x_offset + ((spi_rect.right - spi_rect.left) - garg_window_width) / 2;
+  initial_y_pos = debug_y_offset + ((spi_rect.bottom - spi_rect.top) - garg_window_height) / 2;
 
   if (debug_fptr) {
     fprintf(debug_fptr,"initial_x_pos = %d\n",initial_x_pos);
