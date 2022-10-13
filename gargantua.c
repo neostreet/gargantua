@@ -875,9 +875,16 @@ static void position_game(int move)
 
 void do_new(HWND hWnd,struct game *gamept)
 {
+  char *cpt;
+
   gamept->gargfilename[0] = 0;
   gamept->title[0] = 0;
-  gamept->orientation = 0;
+
+  if ((cpt = getenv("DEBUG_ORIENTATION")) != NULL)
+    gamept->orientation = atoi(cpt);
+  else
+    gamept->orientation = 0;
+
   gamept->num_moves = 0;
   gamept->curr_move = 0;
 
