@@ -1,11 +1,8 @@
-gargantua: gargantua.o gargatk.o gargdbg.o gargmsc.o gargmvs.o gargrd.o bitfuns.o ioutil.o gargantua.res
-	g++ -mwindows -g -L"/cygdrive/c/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x86" -o gargantua gargantua.o gargatk.o gargmsc.o gargdbg.o gargmvs.o gargrd.o ioutil.o bitfuns.o gargantua.res -lGdi32 -lcurses -lComDlg32 -lComCtl32
+gargantua: gargantua.o gargdbg.o gargmsc.o gargmvs.o gargrd.o bitfuns.o ioutil.o gargantua.res
+	g++ -mwindows -g -L"/cygdrive/c/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x86" -o gargantua gargantua.o gargmsc.o gargdbg.o gargmvs.o gargrd.o ioutil.o bitfuns.o gargantua.res -lGdi32 -lcurses -lComDlg32 -lComCtl32
 
 gargantua.o: gargantua.c
 	g++ -g -c -I./common gargantua.c
-
-gargatk.o: ./common/gargatk.c
-	g++ -g -c -I./common ./common/gargatk.c
 
 gargdbg.o: ./common/gargdbg.c
 	g++ -g -c -I./common ./common/gargdbg.c
