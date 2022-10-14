@@ -1581,7 +1581,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
          ((piece < 0) &&  ((curr_game.black_to_play + curr_game.curr_move) % 2)) ) {
       curr_game.highlight_file = file;
       curr_game.highlight_rank = rank;
-      curr_game.move_start_piece = piece;
+      curr_game.move_piece = piece;
 
       invalidate_rect(hWnd,rank,file);
       return;
@@ -1589,16 +1589,16 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   }
 
   // exit early if the square to be moved to contains a piece of the same color as the piece to be moved
-  if ((curr_game.move_start_piece * piece) > 0)
+  if ((curr_game.move_piece * piece) > 0)
     return;
 
-  if (curr_game.move_start_piece > 0)
+  if (curr_game.move_piece > 0)
     direction = 1;            /* white's move */
   else
     direction = -1;           /* black's move */
 
-  if ((curr_game.move_start_piece == PAWN_ID) ||
-      (curr_game.move_start_piece == PAWN_ID * -1)) {
+  if ((curr_game.move_piece == PAWN_ID) ||
+      (curr_game.move_piece == PAWN_ID * -1)) {
     retval = do_pawn_move2(&curr_game,direction);
   }
   else
