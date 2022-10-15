@@ -1572,9 +1572,11 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   }
 
   if (!curr_game.orientation)
-    piece = get_piece2(&curr_game,(NUM_RANKS - 1) - rank,file);
+    curr_game.move_start_square = ((NUM_RANKS - 1) - rank) * NUM_FILES + file;
   else
-    piece = get_piece2(&curr_game,rank,(NUM_FILES - 1) - file);
+    curr_game.move_start_square = rank * NUM_FILES + (NUM_FILES - 1) - file;
+
+  piece = get_piece1(&curr_game,curr_game.move_start_square);
 
   if (curr_game.highlight_rank == -1) {
     if ( ((piece > 0) && !((curr_game.black_to_play + curr_game.curr_move) % 2)) ||
