@@ -16,10 +16,10 @@ int read_fen(FILE *fptr,struct game *gamept);
 
 int do_castle(struct game *gamept,int direction,char *word,int wordlen);
 int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen);
-int do_pawn_move2(struct game *gamept,int direction);
+int do_pawn_move2(struct game *gamept);
 int get_piece_id_ix(char piece);
 int do_piece_move(struct game *gamept,int direction,char *word,int wordlen);
-int do_piece_move2(struct game *gamept,int direction);
+int do_piece_move2(struct game *gamept);
 int allow_user_moves(struct game *gamept);
 
 int rook_move(struct game *,int,int,int,int);
@@ -46,11 +46,3 @@ void fprint_bd(struct game *gamept,char *filename);
 void print_game(struct game *gamept);
 void fprintf_move(FILE *fptr,struct game *gamept);
 void sprintf_move(struct game *gamept,char *buf,int buf_len);
-
-int square_attacks_square(struct game *gampt,int square1,int square2);
-int pawn_attacks_square(struct game *gampt,int square1,int color,int square2);
-int rook_attacks_square(struct game *gampt,int square1,int square2);
-int knight_attacks_square(struct game *gampt,int square1,int square2);
-int bishop_attacks_square(struct game *gampt,int square1,int square2);
-int queen_attacks_square(struct game *gampt,int square1,int square2);
-int king_attacks_square(struct game *gampt,int square1,int square2);

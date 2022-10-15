@@ -198,7 +198,7 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
   return 0;
 }
 
-int do_pawn_move2(struct game *gamept,int direction)
+int do_pawn_move2(struct game *gamept)
 {
   return 1; // for now
 }
@@ -313,7 +313,7 @@ int do_piece_move(struct game *gamept,int direction,char *word,int wordlen)
   return 5;
 }
 
-int do_piece_move2(struct game *gamept,int direction)
+int do_piece_move2(struct game *gamept)
 {
   return 1; // for now
 }

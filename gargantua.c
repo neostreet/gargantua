@@ -1554,7 +1554,6 @@ BOOL CenterWindow (HWND hwndChild, HWND hwndParent)
 void do_lbuttondown(HWND hWnd,int file,int rank)
 {
   int piece;
-  int direction;
   int retval;
 
   if ((file >= 0) && (file < NUM_FILES) &&
@@ -1594,17 +1593,12 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   if ((curr_game.move_piece * piece) > 0)
     return;
 
-  if (curr_game.move_piece > 0)
-    direction = 1;            /* white's move */
-  else
-    direction = -1;           /* black's move */
-
   if ((curr_game.move_piece == PAWN_ID) ||
       (curr_game.move_piece == PAWN_ID * -1)) {
-    retval = do_pawn_move2(&curr_game,direction);
+    retval = do_pawn_move2(&curr_game);
   }
   else
-    retval = do_piece_move2(&curr_game,direction);
+    retval = do_piece_move2(&curr_game);
 
   if (!retval) {
     update_board(&curr_game);
