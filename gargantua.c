@@ -1570,10 +1570,18 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     return;
   }
 
-  if (!curr_game.orientation)
-    curr_game.move_start_square = ((NUM_RANKS - 1) - rank) * NUM_FILES + file;
-  else
-    curr_game.move_start_square = rank * NUM_FILES + (NUM_FILES - 1) - file;
+  if (!curr_game.orientation) {
+    if (curr_game.highlight_rank == -1)
+      curr_game.move_start_square = ((NUM_RANKS - 1) - rank) * NUM_FILES + file;
+    else
+      curr_game.move_end_square = ((NUM_RANKS - 1) - rank) * NUM_FILES + file;
+  }
+  else {
+    if (curr_game.highlight_rank == -1)
+      curr_game.move_start_square = rank * NUM_FILES + (NUM_FILES - 1) - file;
+    else
+      curr_game.move_end_square = rank * NUM_FILES + (NUM_FILES - 1) - file;
+  }
 
   piece = get_piece1(&curr_game,curr_game.move_start_square);
 
