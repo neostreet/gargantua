@@ -86,8 +86,9 @@ struct game {
   int highlight_rank;
   int highlight_file;
   int move_start_square;
+  int move_start_square_piece;
   int move_end_square;
-  int move_piece;
+  int move_end_square_piece;
   unsigned char board[CHARS_IN_BOARD];  /* 10 columns * 10 rows / 2 (nibbles per char) */
   struct move moves[MAX_MOVES];
 };

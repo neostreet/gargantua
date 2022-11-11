@@ -122,7 +122,6 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
   gamept->bBig = TRUE;
   gamept->highlight_rank = -1;
   gamept->highlight_file = -1;
-  gamept->move_piece = 0;
 
   strcpy(gamept->gargfilename,filename);
 

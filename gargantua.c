@@ -1553,7 +1553,6 @@ BOOL CenterWindow (HWND hwndChild, HWND hwndParent)
 
 void do_lbuttondown(HWND hWnd,int file,int rank)
 {
-  int piece;
   int retval;
 
   if ((file >= 0) && (file < NUM_FILES) &&
@@ -1571,26 +1570,37 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   }
 
   if (!curr_game.orientation) {
-    if (curr_game.highlight_rank == -1)
+    if (curr_game.highlight_rank == -1) {
       curr_game.move_start_square = ((NUM_RANKS - 1) - rank) * NUM_FILES + file;
-    else
+      curr_game.move_start_square_piece = get_piece1(&curr_game,curr_game.move_start_square);
+
+      if (!curr_game.move_start_square_piece)
+        return;
+    }
+    else {
       curr_game.move_end_square = ((NUM_RANKS - 1) - rank) * NUM_FILES + file;
+      curr_game.move_end_square_piece = get_piece1(&curr_game,curr_game.move_end_square);
+    }
   }
   else {
-    if (curr_game.highlight_rank == -1)
+    if (curr_game.highlight_rank == -1) {
       curr_game.move_start_square = rank * NUM_FILES + (NUM_FILES - 1) - file;
-    else
+      curr_game.move_start_square_piece = get_piece1(&curr_game,curr_game.move_start_square);
+
+      if (!curr_game.move_start_square_piece)
+        return;
+    }
+    else {
       curr_game.move_end_square = rank * NUM_FILES + (NUM_FILES - 1) - file;
+      curr_game.move_end_square_piece = get_piece1(&curr_game,curr_game.move_end_square);
+    }
   }
 
-  piece = get_piece1(&curr_game,curr_game.move_start_square);
-
   if (curr_game.highlight_rank == -1) {
-    if ( ((piece > 0) && !((curr_game.black_to_play + curr_game.curr_move) % 2)) ||
-         ((piece < 0) &&  ((curr_game.black_to_play + curr_game.curr_move) % 2)) ) {
+    if ( ((curr_game.move_start_square_piece > 0) && !((curr_game.black_to_play + curr_game.curr_move) % 2)) ||
+         ((curr_game.move_start_square_piece < 0) &&  ((curr_game.black_to_play + curr_game.curr_move) % 2)) ) {
       curr_game.highlight_file = file;
       curr_game.highlight_rank = rank;
-      curr_game.move_piece = piece;
 
       invalidate_rect(hWnd,rank,file);
       return;
@@ -1598,11 +1608,11 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   }
 
   // exit early if the square to be moved to contains a piece of the same color as the piece to be moved
-  if ((curr_game.move_piece * piece) > 0)
+  if ((curr_game.move_start_square_piece * curr_game.move_end_square_piece) > 0)
     return;
 
-  if ((curr_game.move_piece == PAWN_ID) ||
-      (curr_game.move_piece == PAWN_ID * -1)) {
+  if ((curr_game.move_start_square_piece == PAWN_ID) ||
+      (curr_game.move_start_square_piece == PAWN_ID * -1)) {
     retval = do_pawn_move2(&curr_game);
   }
   else
