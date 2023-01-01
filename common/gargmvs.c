@@ -227,6 +227,15 @@ int (*piece_functions[])(struct game *,int,int,int,int) = {
   gargantua_move
 };
 
+int (*piece_functions2[])(struct game *) = {
+  rook_move2,
+  knight_move2,
+  bishop_move2,
+  queen_move2,
+  king_move2,
+  gargantua_move2
+};
+
 int do_piece_move(struct game *gamept,int direction,char *word,int wordlen)
 {
   int which_piece;
@@ -315,6 +324,18 @@ int do_piece_move(struct game *gamept,int direction,char *word,int wordlen)
 
 int do_piece_move2(struct game *gamept)
 {
+  int which_piece;
+  int retval;
+
+  which_piece = gamept->move_start_square_piece;
+
+  if (which_piece < 0)
+    which_piece *= -1;
+
+  which_piece -= ROOK_ID;
+
+  retval = (*piece_functions2[which_piece])(gamept);
+
   return 1; // for now
 }
 
@@ -374,6 +395,23 @@ int rook_move(
   return 3;  /* failure */
 }
 
+int rook_move2(
+  struct game *gamept
+)
+{
+  int retval;
+
+  retval = rook_move(
+    gamept,
+    FILE_OF(gamept->move_start_square),
+    RANK_OF(gamept->move_start_square),
+    FILE_OF(gamept->move_end_square),
+    RANK_OF(gamept->move_end_square)
+    );
+
+  return retval;
+}
+
 int knight_move(
   struct game *gamept,
   int file1,
@@ -402,6 +440,23 @@ int knight_move(
     return 0;  /* success */
 
   return 1;    /* failure */
+}
+
+int knight_move2(
+  struct game *gamept
+)
+{
+  int retval;
+
+  retval = knight_move(
+    gamept,
+    FILE_OF(gamept->move_start_square),
+    RANK_OF(gamept->move_start_square),
+    FILE_OF(gamept->move_end_square),
+    RANK_OF(gamept->move_end_square)
+    );
+
+  return retval;
 }
 
 int bishop_move(
@@ -454,6 +509,23 @@ int bishop_move(
   return 0;  /* success */
 }
 
+int bishop_move2(
+  struct game *gamept
+)
+{
+  int retval;
+
+  retval = bishop_move(
+    gamept,
+    FILE_OF(gamept->move_start_square),
+    RANK_OF(gamept->move_start_square),
+    FILE_OF(gamept->move_end_square),
+    RANK_OF(gamept->move_end_square)
+    );
+
+  return retval;
+}
+
 int queen_move(
   struct game *gamept,
   int file1,
@@ -469,6 +541,23 @@ int queen_move(
     return 0;  /* success */
 
   return 1;    /* failure */
+}
+
+int queen_move2(
+  struct game *gamept
+)
+{
+  int retval;
+
+  retval = queen_move(
+    gamept,
+    FILE_OF(gamept->move_start_square),
+    RANK_OF(gamept->move_start_square),
+    FILE_OF(gamept->move_end_square),
+    RANK_OF(gamept->move_end_square)
+    );
+
+  return retval;
 }
 
 int king_move(
@@ -496,6 +585,23 @@ int king_move(
     return 0;  /* success */
 
   return 1;  /* failure */
+}
+
+int king_move2(
+  struct game *gamept
+)
+{
+  int retval;
+
+  retval = king_move(
+    gamept,
+    FILE_OF(gamept->move_start_square),
+    RANK_OF(gamept->move_start_square),
+    FILE_OF(gamept->move_end_square),
+    RANK_OF(gamept->move_end_square)
+    );
+
+  return retval;
 }
 
 int gargantua_move(
@@ -526,4 +632,21 @@ int gargantua_move(
     return 0;  /* success */
 
   return 1;    /* failure */
+}
+
+int gargantua_move2(
+  struct game *gamept
+)
+{
+  int retval;
+
+  retval = gargantua_move(
+    gamept,
+    FILE_OF(gamept->move_start_square),
+    RANK_OF(gamept->move_start_square),
+    FILE_OF(gamept->move_end_square),
+    RANK_OF(gamept->move_end_square)
+    );
+
+  return retval;
 }
