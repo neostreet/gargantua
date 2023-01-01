@@ -25,9 +25,6 @@ static int height_in_pixels;
 char couldnt_get_status[] = "couldn't get status of %s\n";
 char couldnt_open[] = "couldn't open %s\n";
 
-static char read_game_failure[] =
-  "read_game() of %s failed: %d, curr_move = %d";
-
 static int bChangesMade;
 
 static char *garg_piece_bitmap_names[] = {
@@ -112,13 +109,6 @@ static HWND hWndToolBar;
 static char szAppName[100];  // Name of the app
 static char szTitle[100];    // The title bar text
 
-static int bHaveListFile;
-static int num_files_in_list;
-static int curr_garg_file;
-
-static GARG_FILE_LIST garg_file_list;
-
-static int bHaveGame;
 static struct game curr_game;
 
 static int debug_level;
@@ -141,9 +131,6 @@ BOOL InitApplication(HINSTANCE);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 char *trim_name(char *name);
-
-int is_list_file(LPSTR file_name);
-int read_list_file(LPSTR file_name,GARG_FILE_LIST *cfl_ptr,int *num_files);
 
 LRESULT CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 BOOL CenterWindow (HWND, HWND);
@@ -950,7 +937,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   int rank;
   int retval;
   LPSTR name;
-  int bHaveName;
   HDC hdc;
   RECT rect;
   char buf[80];
@@ -1029,44 +1015,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           16,16,                  // width & height of the bitmaps
           sizeof(TBBUTTON));      // structure size
 
-      // read the game passed on the command line, if there is one
-      if (szFile[0]) {
-        bHaveName = FALSE;
-        retval = is_list_file(szFile);
-
-        if (retval) {
-          if (!read_list_file(szFile,
-            &garg_file_list,&num_files_in_list)) {
-            name = garg_file_list[curr_garg_file];
-            bHaveName = TRUE;
-          }
-        }
-        else {
-          name = szFile;
-          bHaveName = TRUE;
-        }
-
-        if (bHaveName) {
-          retval = read_game(name,&curr_game,err_msg);
-
-          if (!retval) {
-            bHaveGame = TRUE;
-
-            if (bHome)
-              position_game(FALSE);
-
-            wsprintf(szTitle,"%s - %s",szAppName,
-              trim_name(name));
-            SetWindowText(hWnd,szTitle);
-          }
-          else
-            do_new(hWnd,&curr_game);
-        }
-        else
-          do_new(hWnd,&curr_game);
-      }
-      else
-        do_new(hWnd,&curr_game);
+      do_new(hWnd,&curr_game);
 
       curr_game.highlight_rank = -1;
       curr_game.highlight_file = -1;
@@ -1093,52 +1042,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case VK_F3:
           toggle_board_size(hWnd);
-
-          break;
-
-        case VK_F6:
-        case VK_F7:
-          if (bHaveListFile) {
-            if (wParam == VK_F6) {
-              curr_garg_file++;
-
-              if (curr_garg_file == num_files_in_list)
-                curr_garg_file = 0;
-            }
-            else {
-              curr_garg_file--;
-
-              if (curr_garg_file < 0)
-                curr_garg_file = num_files_in_list - 1;
-            }
-
-            retval = read_game(garg_file_list[curr_garg_file],
-              &curr_game,err_msg);
-
-            if (!retval) {
-              bHaveGame = TRUE;
-
-              if (bHome)
-                position_game(FALSE);
-
-              wsprintf(szTitle,"%s - %s",szAppName,
-                trim_name(garg_file_list[curr_garg_file]));
-              SetWindowText(hWnd,szTitle);
-              curr_game.highlight_rank = -1;
-              curr_game.highlight_file = -1;
-              InvalidateRect(hWnd,NULL,TRUE);
-            }
-            else {
-              hdc = GetDC(hWnd);
-              rect.left = 0;
-              rect.top = 0;
-              rect.right = garg_window_width;
-              rect.bottom = 16;
-              wsprintf(buf,read_game_failure,
-                garg_file_list[curr_garg_file],retval,curr_game.curr_move);
-              TextOut(hdc,rect.left,rect.top,buf,lstrlen(buf));
-            }
-          }
 
           break;
 
@@ -1173,63 +1076,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       switch (wmId) {
         case IDM_NEW:
           do_new(hWnd,&curr_game);
-
-          break;
-
-        case IDM_OPEN:
-        case IDM_OPEN_BINARY_GAME:
-	  // Call the common dialog function.
-          bHaveName = FALSE;
-          bHaveGame = FALSE;
-
-          if (GetOpenFileName(&OpenFileName)) {
-            retval = is_list_file(OpenFileName.lpstrFile);
-
-            if (retval) {
-              if (!read_list_file(OpenFileName.lpstrFile,
-                &garg_file_list,&num_files_in_list)) {
-                name = garg_file_list[curr_garg_file];
-                bHaveName = TRUE;
-              }
-            }
-            else {
-              name = OpenFileName.lpstrFile;
-              bHaveName = TRUE;
-            }
-
-            if (bHaveName) {
-              if (wmId == IDM_OPEN)
-                retval = read_game(name,&curr_game,err_msg);
-              else
-                retval = read_binary_game(name,&curr_game);
-
-              if (!retval) {
-                bHaveGame = TRUE;
-
-                if (bHome)
-                  position_game(FALSE);
-
-                wsprintf(szTitle,"%s - %s",szAppName,
-                  trim_name(name));
-                SetWindowText(hWnd,szTitle);
-                curr_game.highlight_rank = -1;
-                curr_game.highlight_file = -1;
-                InvalidateRect(hWnd,NULL,TRUE);
-              }
-              else {
-                hdc = GetDC(hWnd);
-                rect.left = 0;
-                rect.top = 0;
-                rect.right = garg_window_width;
-                rect.bottom = 16;
-                wsprintf(buf,"read_game() of %s: %d",
-                  name,retval);
-                wsprintf(buf,read_game_failure,
-                  name,retval,curr_game.curr_move);
-                TextOut(hdc,rect.left,rect.top,buf,lstrlen(buf));
-              }
-            }
-          }
 
           break;
 
@@ -1292,24 +1138,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
-        case IDM_SAVE:
-          write_binary_game(szFile,&curr_game);
-
-          break;
-
-        case IDM_SAVEAS:
-	  // Call the common dialog function.
-          bHaveName = FALSE;
-          bHaveGame = FALSE;
-
-          if (GetOpenFileName(&WriteFileName)) {
-            bHaveName = TRUE;
-            lstrcpy(szFile,szWriteFileName);
-            write_binary_game(szFile,&curr_game);
-          }
-
-          break;
-
         // Here are all the other possible menu options,
         // all of these are currently disabled:
         case IDM_PRINT:
@@ -1363,94 +1191,6 @@ char *trim_name(char *name)
   n++;
 
   return &name[n];
-}
-
-int is_list_file(LPSTR file_name)
-{
-  int n;
-  int len;
-
-  len = lstrlen(file_name);
-
-  for (n = len - 1; (n >= 0); n--) {
-    if (file_name[n] == '.')
-      break;
-  }
-
-  if (n < 0)
-    return FALSE;
-
-  n++;
-
-  if (!strcmp(&file_name[n],"lst"))
-    return TRUE;
-
-  return FALSE;
-}
-
-
-int read_list_file(LPSTR file_name,GARG_FILE_LIST *cfl_ptr,int *num_files)
-{
-  int m;
-  int n;
-  FILE *fptr;
-  int chara;
-  char *cpt;
-
-  if (garg_file_list != NULL) {
-    free(garg_file_list);
-    garg_file_list = NULL;
-  }
-
-  if ((fptr = fopen(file_name,"r")) == NULL)
-    return 1;
-
-  num_files_in_list = 0;
-
-  for ( ; ; ) {
-    chara = fgetc(fptr);
-
-    if (feof(fptr))
-      break;
-
-    if (chara == 0x0a)
-      num_files_in_list++;
-  }
-
-  fseek(fptr,0,SEEK_SET);
-
-  garg_file_list = (GARG_FILE_LIST)malloc(MAX_FILE_NAME_LEN *
-    num_files_in_list);
-
-  if (garg_file_list == NULL)
-    return 2;
-
-  n = 0;
-  m = 0;
-  cpt = (char *)garg_file_list[n];
-
-  for ( ; ; ) {
-    chara = fgetc(fptr);
-
-    if (feof(fptr))
-      break;
-
-    if (chara == 0x0a) {
-      cpt[m] = 0;
-      m = 0;
-      n++;
-      cpt = (char *)garg_file_list[n];
-    }
-    else
-      cpt[m++] = chara;
-  }
-
-  fclose(fptr);
-
-  bHaveListFile = TRUE;
-  curr_garg_file = 0;
-
-  return 0;
 }
 
 //
