@@ -23,11 +23,17 @@ int do_piece_move2(struct game *gamept);
 int allow_user_moves(struct game *gamept);
 
 int rook_move(struct game *,int,int,int,int);
+int rook_move2(struct game *);
 int knight_move(struct game *,int,int,int,int);
+int knight_move2(struct game *);
 int bishop_move(struct game *,int,int,int,int);
+int bishop_move2(struct game *);
 int queen_move(struct game *,int,int,int,int);
+int queen_move2(struct game *);
 int king_move(struct game *,int,int,int,int);
+int king_move2(struct game *);
 int gargantua_move(struct game *,int,int,int,int);
+int gargantua_move2(struct game *);
 
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt);
 
