@@ -1,18 +1,12 @@
 /*** Gargantua function declarations ***/
 
-int read_game(char *filename,struct game *gamept,char *err_msg);
-int read_binary_game(char *filename,struct game *gamept);
-int read_game_and_display(FILE *fptr,struct game *gamept,char *err_msg);
-int write_binary_game(char *filename,struct game *gamept);
 char xlate_piece(char);
-int get_word(FILE *fptr,char *word,int maxlen,int *wordlenpt);
 int get_draw_input(struct game *gamept);
 int get_xstart(struct game *gamept,int board_offset);
 int get_ystart(struct game *gamept,int board_offset);
 int get_color(int);
 void put_square(struct game *gamept,int what,int where);
 void update_move_number(struct game *gamept);
-int read_fen(FILE *fptr,struct game *gamept);
 
 int do_castle(struct game *gamept,int direction,char *word,int wordlen);
 int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen);
