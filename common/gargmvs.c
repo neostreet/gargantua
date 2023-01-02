@@ -200,7 +200,23 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
 
 int do_pawn_move2(struct game *gamept)
 {
-  return 1; // for now
+  if (gamept->move_start_square_piece > 0) {
+    // white pawn move
+
+    if (gamept->move_start_square > gamept->move_end_square)
+      return 1;
+  }
+  else {
+    // black pawn move
+
+    if (gamept->move_start_square < gamept->move_end_square)
+      return 2;
+  }
+
+  gamept->moves[gamept->curr_move].from = gamept->move_start_square;
+  gamept->moves[gamept->curr_move].to = gamept->move_end_square;
+
+  return 0;  /* success */
 }
 
 char piece_ids[] = "RNBQKG";
@@ -336,7 +352,13 @@ int do_piece_move2(struct game *gamept)
 
   retval = (*piece_functions2[which_piece])(gamept);
 
-  return 1; // for now
+  if (!retval) {
+    gamept->moves[gamept->curr_move].from = gamept->move_start_square;
+    gamept->moves[gamept->curr_move].to = gamept->move_end_square;
+    return 0;  /* success */
+  }
+
+  return 1;
 }
 
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt)
@@ -624,6 +646,12 @@ int gargantua_move(
 
   if (dist2 < 0)
     dist2 *= -1;
+
+  if ((dist1 == 1) && (dist2 == 2))
+    return 0;  /* success */
+
+  if ((dist1 == 2) && (dist2 == 1))
+    return 0;  /* success */
 
   if ((dist1 == 2) && (dist2 == 3))
     return 0;  /* success */
