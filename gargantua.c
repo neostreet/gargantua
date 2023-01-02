@@ -398,9 +398,9 @@ int get_piece_offset(int piece,int rank,int file)
        as pieces
     */
     if (!((rank + file) % 2))
-      retval = 24;
-    else
       retval = 25;
+    else
+      retval = 24;
   }
   else {
     if (piece < 0) {
@@ -417,7 +417,7 @@ int get_piece_offset(int piece,int rank,int file)
       if (bBlack)
         offset += 2;
 
-      if ((rank + file) % 2)
+      if (!((rank + file) % 2))
         offset++;
 
       retval = offset;
