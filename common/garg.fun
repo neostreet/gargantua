@@ -1,6 +1,9 @@
 /*** Gargantua function declarations ***/
 
+int read_binary_game(char *filename,struct game *gamept);
+int write_binary_game(char *filename,struct game *gamept);
 char xlate_piece(char);
+int get_word(FILE *fptr,char *word,int maxlen,int *wordlenpt);
 int get_draw_input(struct game *gamept);
 int get_xstart(struct game *gamept,int board_offset);
 int get_ystart(struct game *gamept,int board_offset);
