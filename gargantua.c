@@ -25,6 +25,9 @@ static int height_in_pixels;
 char couldnt_get_status[] = "couldn't get status of %s\n";
 char couldnt_open[] = "couldn't open %s\n";
 
+static char read_game_failure[] =
+  "read_game() of %s failed: %d, curr_move = %d";
+
 static int bChangesMade;
 
 static char *garg_piece_bitmap_names[] = {
@@ -104,6 +107,7 @@ static HWND hWndToolBar;
 static char szAppName[100];  // Name of the app
 static char szTitle[100];    // The title bar text
 
+static int bHaveGame;
 static struct game curr_game;
 
 static int debug_level;
@@ -936,6 +940,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   int rank;
   int retval;
   LPSTR name;
+  int bHaveName;
   HDC hdc;
   RECT rect;
   char buf[80];
@@ -1078,6 +1083,44 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
+        case IDM_OPEN_BINARY_GAME:
+	  // Call the common dialog function.
+          bHaveGame = FALSE;
+
+          if (GetOpenFileName(&OpenFileName)) {
+            name = OpenFileName.lpstrFile;
+
+            retval = read_binary_game(name,&curr_game);
+
+            if (!retval) {
+              bHaveGame = TRUE;
+
+              if (bHome)
+                position_game(FALSE);
+
+              wsprintf(szTitle,"%s - %s",szAppName,
+                trim_name(name));
+              SetWindowText(hWnd,szTitle);
+              curr_game.highlight_rank = -1;
+              curr_game.highlight_file = -1;
+              InvalidateRect(hWnd,NULL,TRUE);
+            }
+            else {
+              hdc = GetDC(hWnd);
+              rect.left = 0;
+              rect.top = 0;
+              rect.right = garg_window_width;
+              rect.bottom = 16;
+              wsprintf(buf,"read_game() of %s: %d",
+                name,retval);
+              wsprintf(buf,read_game_failure,
+                name,retval,curr_game.curr_move);
+              TextOut(hdc,rect.left,rect.top,buf,lstrlen(buf));
+            }
+          }
+
+          break;
+
         case IDM_ABOUT:
            DialogBox(hInst,"AboutBox",hWnd,(DLGPROC)About);
 
@@ -1134,6 +1177,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDM_FPRINT_BD:
           sprintf(buf,"position_%d",curr_game.curr_move);
           fprint_bd(&curr_game,buf);
+
+          break;
+
+        case IDM_SAVE:
+          write_binary_game(szFile,&curr_game);
+
+          break;
+
+        case IDM_SAVEAS:
+	  // Call the common dialog function.
+          bHaveName = FALSE;
+          bHaveGame = FALSE;
+
+          if (GetOpenFileName(&WriteFileName)) {
+            bHaveName = TRUE;
+            lstrcpy(szFile,szWriteFileName);
+            write_binary_game(szFile,&curr_game);
+          }
 
           break;
 
