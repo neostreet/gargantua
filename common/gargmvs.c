@@ -200,23 +200,62 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
 
 int do_pawn_move2(struct game *gamept)
 {
+  int start_rank;
+  int start_file;
+  int end_rank;
+  int end_file;
+  int rank_diff;
+  int file_diff;
+
+  start_rank = RANK_OF(gamept->move_start_square);
+  start_file = FILE_OF(gamept->move_start_square);
+  end_rank = RANK_OF(gamept->move_end_square);
+  end_file = FILE_OF(gamept->move_end_square);
+
+  if (start_rank >= end_rank)
+    rank_diff = start_rank - end_rank;
+  else
+    rank_diff = end_rank - start_rank;
+
+  if (start_file >= end_file)
+    file_diff = start_file - end_file;
+  else
+    file_diff = end_file - start_file;
+
+  if (rank_diff == 0)
+    return 1; // failure
+
+  if (file_diff > 1)
+    return 2; // failure
+
+  if (rank_diff > 3)
+    return 3; // failure
+
+  if (file_diff == 1) {
+    if (rank_diff != 1)
+      return 4; // failure
+
+    if (!gamept->move_end_square_piece)
+      return 5; // failure
+  }
+
   if (gamept->move_start_square_piece > 0) {
     // white pawn move
 
     if (gamept->move_start_square > gamept->move_end_square)
-      return 1;
+      return 6; // failure
   }
   else {
     // black pawn move
 
     if (gamept->move_start_square < gamept->move_end_square)
-      return 2;
+      return 7; // failure
   }
 
   gamept->moves[gamept->curr_move].from = gamept->move_start_square;
   gamept->moves[gamept->curr_move].to = gamept->move_end_square;
 
-  return 0;  /* success */
+  return 0; // success
 }
 
 char piece_ids[] = "RNBQKG";
