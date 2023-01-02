@@ -74,11 +74,6 @@ static int garg_window_height;
 static int window_extra_width;
 static int window_extra_height;
 
-#define NUM_BIGBMP_COLUMNS 26
-#define NUM_BIGBMP_ROWS    1
-
-#define BIGBMP_COLUMN_OF(index) (index % NUM_BIGBMP_COLUMNS)
-
 // Makes it easier to determine appropriate code paths:
 #if defined (WIN32)
    #define IS_WIN32 TRUE
@@ -604,10 +599,14 @@ void do_paint(HWND hWnd)
       piece_offset = get_piece_offset(piece,m,n);
 
       if (piece_offset >= 0) {
-        bigbmp_column = BIGBMP_COLUMN_OF(piece_offset);
+        bigbmp_column = piece_offset;
 
         if ((m == curr_game.highlight_rank) && (n == curr_game.highlight_file))
           bigbmp_row = 1;
+        else if (piece == GARGANTUA_ID)
+          bigbmp_row = 2;
+        else if (piece == GARGANTUA_ID * -1)
+          bigbmp_row = 3;
         else
           bigbmp_row = 0;
 
