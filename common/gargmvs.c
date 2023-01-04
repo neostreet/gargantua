@@ -200,12 +200,28 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen)
 
 int do_pawn_move2(struct game *gamept)
 {
+  bool bWhiteMove;
   int start_rank;
   int start_file;
   int end_rank;
   int end_file;
   int rank_diff;
   int file_diff;
+
+  bWhiteMove = (gamept->move_start_square_piece > 0);
+
+  if (bWhiteMove) {
+    // white pawn move
+
+    if (gamept->move_start_square > gamept->move_end_square)
+      return 1; // failure
+  }
+  else {
+    // black pawn move
+
+    if (gamept->move_start_square < gamept->move_end_square)
+      return 2; // failure
+  }
 
   start_rank = RANK_OF(gamept->move_start_square);
   start_file = FILE_OF(gamept->move_start_square);
@@ -223,33 +239,31 @@ int do_pawn_move2(struct game *gamept)
     file_diff = end_file - start_file;
 
   if (rank_diff == 0)
-    return 1; // failure
+    return 3; // failure
 
   if (file_diff > 1)
-    return 2; // failure
+    return 4; // failure
 
   if (rank_diff > 3)
-    return 3; // failure
+    return 5; // failure
+
+  if (rank_diff > 1) {
+    if (bWhiteMove) {
+      if (start_rank != 1)
+        return 6; // failure
+    }
+    else {
+      if (start_rank != 8)
+        return 7; // failure
+    }
+  }
 
   if (file_diff == 1) {
     if (rank_diff != 1)
-      return 4; // failure
+      return 8; // failure
 
     if (!gamept->move_end_square_piece)
-      return 5; // failure
-  }
-
-  if (gamept->move_start_square_piece > 0) {
-    // white pawn move
-
-    if (gamept->move_start_square > gamept->move_end_square)
-      return 6; // failure
-  }
-  else {
-    // black pawn move
-
-    if (gamept->move_start_square < gamept->move_end_square)
-      return 7; // failure
+      return 9; // failure
   }
 
   gamept->moves[gamept->curr_move].from = gamept->move_start_square;
