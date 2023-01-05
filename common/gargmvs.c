@@ -238,32 +238,40 @@ int do_pawn_move2(struct game *gamept)
   else
     file_diff = end_file - start_file;
 
-  if (rank_diff == 0)
-    return 3; // failure
+  if (file_diff == 0) {
+    if (gamept->move_end_square_piece)
+      return 3; // failure
+  }
 
-  if (file_diff > 1)
+  if (rank_diff == 0)
     return 4; // failure
 
-  if (rank_diff > 3)
+  if (file_diff > 1)
     return 5; // failure
 
+  if (rank_diff > 3)
+    return 6; // failure
+
   if (rank_diff > 1) {
+    if (file_diff)
+      return 7; // failure
+
     if (bWhiteMove) {
       if (start_rank != 1)
-        return 6; // failure
+        return 8; // failure
     }
     else {
       if (start_rank != 8)
-        return 7; // failure
+        return 9; // failure
     }
   }
 
   if (file_diff == 1) {
     if (rank_diff != 1)
-      return 8; // failure
+      return 10; // failure
 
     if (!gamept->move_end_square_piece)
-      return 9; // failure
+      return 11; // failure
   }
 
   gamept->moves[gamept->curr_move].from = gamept->move_start_square;
