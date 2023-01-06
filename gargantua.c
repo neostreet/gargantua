@@ -1134,6 +1134,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           curr_game.num_moves = curr_game.curr_move;
           break;
 
+        case IDM_PRINT_BOARD:
+          if (debug_level == 2) {
+            if (debug_fptr)
+              fprint_bd2(&curr_game,debug_fptr);
+          }
+
+          break;
+
         case IDM_TOGGLE_ORIENTATION:
           toggle_orientation(hWnd);
 
