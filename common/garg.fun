@@ -45,6 +45,7 @@ void print_bd(struct game *gamept);
 void fprint_game_bin(struct game *gamept,char *filename);
 void fprint_game(struct game *gamept,char *filename);
 void fprint_bd(struct game *gamept,char *filename);
+void fprint_bd2(struct game *gamept,FILE *fptr);
 
 void print_game(struct game *gamept);
 void fprintf_move(FILE *fptr,struct game *gamept);
