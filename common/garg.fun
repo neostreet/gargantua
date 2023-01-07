@@ -42,11 +42,11 @@ void set_piece1(struct game *gamept,int board_offset,int piece);
 void set_piece2(struct game *gamept,int row,int column,int piece);
 
 void print_bd(struct game *gamept);
-void fprint_game_bin(struct game *gamept,char *filename);
 void fprint_game(struct game *gamept,char *filename);
+void fprint_game2(struct game *gamept,FILE *fptr);
 void fprint_bd(struct game *gamept,char *filename);
 void fprint_bd2(struct game *gamept,FILE *fptr);
 
 void print_game(struct game *gamept);
 void fprintf_move(FILE *fptr,struct game *gamept);
-void sprintf_move(struct game *gamept,char *buf,int buf_len);
+void sprintf_move(struct game *gamept,char *buf,int buf_len);s
