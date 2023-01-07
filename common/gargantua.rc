@@ -64,12 +64,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       IDM_EXIT
     END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "&Set last move",              IDM_SET_LAST_MOVE
-        MENUITEM "&Print board",                IDM_PRINT_BOARD
-        MENUITEM "&Write moves",                IDM_WRITE_MOVES
-    END
     POPUP "&View"
     BEGIN
         MENUITEM "&Toggle orientation (F2)",    IDM_TOGGLE_ORIENTATION
@@ -79,9 +73,9 @@ BEGIN
     BEGIN
         MENUITEM "Go to &start of game (Home)", IDM_START_OF_GAME
         MENUITEM "Go to &end of game (End)",    IDM_END_OF_GAME
-        MENUITEM "fprint_game_&bin",            IDM_FPRINT_GAME_BIN
-        MENUITEM "fprint_&game",                IDM_FPRINT_GAME
-        MENUITEM "fprint_b&d",                  IDM_FPRINT_BD
+        MENUITEM "Set &last move",              IDM_SET_LAST_MOVE
+        MENUITEM "Print &board",                IDM_PRINT_BOARD
+        MENUITEM "Print &game",                 IDM_PRINT_GAME
     END
     POPUP "&Help"
     BEGIN
