@@ -63,29 +63,6 @@ void print_bd(struct game *gamept)
   }
 }
 
-void fprint_game_bin(struct game *gamept,char *filename)
-{
-  FILE *fptr;
-
-  if ((fptr = fopen(filename,"w")) == NULL)
-    return;
-
-  fprintf(fptr,fmt_str,gamept->title);
-
-  set_initial_board(gamept);
-
-  for (gamept->curr_move = 0;
-       gamept->curr_move <= gamept->num_moves;
-       gamept->curr_move++) {
-
-    fprintf_move(fptr,gamept);
-
-    update_board(gamept);
-  }
-
-  fclose(fptr);
-}
-
 void fprint_game(struct game *gamept,char *filename)
 {
   FILE *fptr;
@@ -109,6 +86,25 @@ void fprint_game(struct game *gamept,char *filename)
   }
 
   fclose(fptr);
+}
+
+void fprint_game2(struct game *gamept,FILE *fptr)
+{
+  char buf[20];
+
+  fprintf(fptr,fmt_str,gamept->title);
+
+  set_initial_board(gamept);
+
+  for (gamept->curr_move = 0;
+       gamept->curr_move <= gamept->num_moves;
+       gamept->curr_move++) {
+
+    sprintf_move(gamept,buf,20);
+    fprintf(fptr,fmt_str,buf);
+
+    update_board(gamept);
+  }
 }
 
 void fprint_bd(struct game *gamept,char *filename)
