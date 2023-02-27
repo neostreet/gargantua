@@ -857,10 +857,10 @@ static void position_game(int move)
 
   for ( ; curr_game.curr_move < move; curr_game.curr_move++) {
     update_board(&curr_game);
-
-    sprintf(position_file_name,"position_%d",curr_game.curr_move+1);
-    fprint_bd(&curr_game,position_file_name);
   }
+
+  // sprintf(position_file_name,"position_%d",curr_game.curr_move);
+  // fprint_bd(&curr_game,position_file_name);
 }
 
 void do_new(HWND hWnd,struct game *gamept)
@@ -1142,6 +1142,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
+        case IDM_PRINT_GAME:
+          if (debug_level == 2) {
+            if (debug_fptr)
+              fprint_game2(&curr_game,debug_fptr);
+          }
+
+          break;
+
         case IDM_TOGGLE_ORIENTATION:
           toggle_orientation(hWnd);
 
@@ -1169,22 +1177,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case IDM_END_OF_GAME:
           end_of_game(hWnd);
-
-          break;
-
-        case IDM_FPRINT_GAME_BIN:
-          fprint_game_bin(&curr_game,"curr_game_bin");
-
-          break;
-
-        case IDM_FPRINT_GAME:
-          fprint_game(&curr_game,"curr_game");
-
-          break;
-
-        case IDM_FPRINT_BD:
-          sprintf(buf,"position_%d",curr_game.curr_move);
-          fprint_bd(&curr_game,buf);
 
           break;
 
