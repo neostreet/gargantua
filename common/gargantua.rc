@@ -76,6 +76,7 @@ BEGIN
         MENUITEM "Set &last move",              IDM_SET_LAST_MOVE
         MENUITEM "Print &board",                IDM_PRINT_BOARD
         MENUITEM "Print &game",                 IDM_PRINT_GAME
+        MENUITEM "Print &moves",                IDM_PRINT_MOVES
     END
     POPUP "&Help"
     BEGIN
