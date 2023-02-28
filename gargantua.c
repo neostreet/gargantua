@@ -750,6 +750,13 @@ static void do_move(HWND hWnd)
 
   update_board(&curr_game);
 
+  if (debug_level == 2) {
+    if (debug_fptr) {
+      fprintf(debug_fptr,"do_move\n");
+      fprint_bd2(&curr_game,debug_fptr);
+    }
+  }
+
   prev_invalidated_ix = 0;
 
   from = (int)curr_game.moves[curr_game.curr_move].from;
@@ -1146,6 +1153,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           if (debug_level == 2) {
             if (debug_fptr)
               fprint_game2(&curr_game,debug_fptr);
+          }
+
+          break;
+
+        case IDM_PRINT_MOVES:
+          if (debug_level == 2) {
+            if (debug_fptr)
+              fprint_moves2(&curr_game,debug_fptr);
           }
 
           break;
