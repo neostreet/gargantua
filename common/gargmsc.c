@@ -145,6 +145,30 @@ void fprint_bd2(struct game *gamept,FILE *fptr)
   }
 }
 
+void fprint_moves(struct game *gamept,char *filename)
+{
+  int n;
+  FILE *fptr;
+
+  if ((fptr = fopen(filename,"w")) == NULL)
+    return;
+
+  for (n = 0; n < gamept->num_moves; n++) {
+    fprintf(fptr,"%d %d\n",gamept->moves[n].from,gamept->moves[n].to);
+  }
+
+  fclose(fptr);
+}
+
+void fprint_moves2(struct game *gamept,FILE *fptr)
+{
+  int n;
+
+  for (n = 0; n < gamept->num_moves; n++) {
+    fprintf(fptr,"%d %d\n",gamept->moves[n].from,gamept->moves[n].to);
+  }
+}
+
 void set_initial_board(struct game *gamept)
 {
   int n;
