@@ -117,7 +117,7 @@ int write_binary_game(char *filename,struct game *gamept)
       S_IREAD | S_IWRITE)) == -1)
     return 1;
 
-  bytes_to_write = sizeof (struct game) - sizeof (struct move *);
+  bytes_to_write = sizeof (struct game) - sizeof gamept->moves;
 
   bytes_written = write(fhndl,(char *)gamept,bytes_to_write);
 
