@@ -6,7 +6,7 @@
 #include "bitfuns.h"
 
 static unsigned char initial_board[] = {
-  (unsigned char)0x72, (unsigned char)0x34, (unsigned char)0x56, (unsigned char)0x43, (unsigned char)0x27,
+  (unsigned char)0x23, (unsigned char)0x47, (unsigned char)0x56, (unsigned char)0x74, (unsigned char)0x32,
   (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
@@ -15,7 +15,7 @@ static unsigned char initial_board[] = {
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff,
-  (unsigned char)0x9e, (unsigned char)0xdc, (unsigned char)0xba, (unsigned char)0xcd, (unsigned char)0xe9
+  (unsigned char)0xed, (unsigned char)0xc9, (unsigned char)0xba, (unsigned char)0x9c, (unsigned char)0xde
 };
 
 extern char piece_ids[]; /* "RNBQK" */
