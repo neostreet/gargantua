@@ -154,7 +154,7 @@ void fprint_moves(struct game *gamept,char *filename)
     return;
 
   for (n = 0; n < gamept->num_moves; n++) {
-    fprintf(fptr,"%d %d\n",gamept->moves[n].from,gamept->moves[n].to);
+    fprintf(fptr,"%d %d\n",gamept->moves[n].from[0],gamept->moves[n].to[0]);
   }
 
   fclose(fptr);
@@ -165,7 +165,7 @@ void fprint_moves2(struct game *gamept,FILE *fptr)
   int n;
 
   for (n = 0; n < gamept->num_moves; n++) {
-    fprintf(fptr,"%d %d\n",gamept->moves[n].from,gamept->moves[n].to);
+    fprintf(fptr,"%d %d\n",gamept->moves[n].from[0],gamept->moves[n].to[0]);
   }
 }
 
@@ -179,48 +179,10 @@ void set_initial_board(struct game *gamept)
 
 void update_board(struct game *gamept)
 {
-  if (gamept->moves[gamept->curr_move].from == SPECIAL_MOVE_KINGSIDE_CASTLE) {
-    if (gamept->curr_move & 0x1) {
-      /* black's move */
+  set_piece1(gamept,gamept->moves[gamept->curr_move].to[0],
+    get_piece1(gamept,gamept->moves[gamept->curr_move].from[0]));
 
-      set_piece1(gamept,60,0);
-      set_piece1(gamept,61,ROOK_ID * -1);
-      set_piece1(gamept,62,KING_ID * -1);
-      set_piece1(gamept,63,0);
-    }
-    else {
-      /* white's move */
-
-      set_piece1(gamept,4,0);
-      set_piece1(gamept,5,ROOK_ID);
-      set_piece1(gamept,6,KING_ID);
-      set_piece1(gamept,7,0);
-    }
-  }
-  else if (gamept->moves[gamept->curr_move].from == SPECIAL_MOVE_QUEENSIDE_CASTLE) {
-    if (gamept->curr_move & 0x1) {
-      /* black's move */
-
-      set_piece1(gamept,56,0);
-      set_piece1(gamept,58,KING_ID * -1);
-      set_piece1(gamept,59,ROOK_ID * -1);
-      set_piece1(gamept,60,0);
-    }
-    else {
-      /* white's move */
-
-      set_piece1(gamept,0,0);
-      set_piece1(gamept,2,KING_ID);
-      set_piece1(gamept,3,ROOK_ID);
-      set_piece1(gamept,4,0);
-    }
-  }
-  else {
-    set_piece1(gamept,gamept->moves[gamept->curr_move].to,
-      get_piece1(gamept,gamept->moves[gamept->curr_move].from));
-
-    set_piece1(gamept,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
-  }
+  set_piece1(gamept,gamept->moves[gamept->curr_move].from[0],0);  /* vacate previous square */
 }
 
 int get_piece1(struct game *gamept,int board_offset)
