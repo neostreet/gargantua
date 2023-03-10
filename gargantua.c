@@ -759,13 +759,13 @@ static void do_move(HWND hWnd)
 
   prev_invalidated_ix = 0;
 
-  from = (int)curr_game.moves[curr_game.curr_move].from;
+  from = (int)curr_game.moves[curr_game.curr_move].from[0];
 
   if (!previously_invalidated(from,
     prev_invalidated,&prev_invalidated_ix))
       invalidate_square(hWnd,from);
 
-  to = (int)curr_game.moves[curr_game.curr_move].to;
+  to = (int)curr_game.moves[curr_game.curr_move].to[0];
 
   if (!previously_invalidated(to,
     prev_invalidated,&prev_invalidated_ix))
