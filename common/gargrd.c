@@ -24,10 +24,6 @@ static int force_values[] = {
   FORCE_VALUE_KING
 };
 
-static char corrupted_msg[] = "game corrupted\n";
-static char bad_castle[] = "bad castle";
-static char bad_pawn_move[] = "bad pawn move";
-
 extern char piece_ids[]; /* "RNBQK" */
 
 static char *bad_piece_move[] = {
