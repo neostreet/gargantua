@@ -11,16 +11,6 @@ extern char piece_ids[]; /* "RNBQK" */
 static char buf[20];
 char fmt_str[] = "%s\n";
 
-int kingside_castle(struct game *gamept)
-{
-  return (gamept->moves[gamept->curr_move-1].from == SPECIAL_MOVE_KINGSIDE_CASTLE);
-}
-
-int queenside_castle(struct game *gamept)
-{
-  return (gamept->moves[gamept->curr_move-1].from == SPECIAL_MOVE_QUEENSIDE_CASTLE);
-}
-
 char decode_piece(int piece,int bShowBlack)
 {
   int bBlack;
@@ -55,7 +45,7 @@ char get_decoded_piece(struct game *gamept)
   int piece;
 
   piece = get_piece1(gamept,
-    gamept->moves[gamept->curr_move-1].to);
+    gamept->moves[gamept->curr_move-1].to[0]);
   return decode_piece(piece,FALSE);
 }
 
@@ -82,8 +72,8 @@ void fprintf_move(FILE *fptr,struct game *gamept)
     return;
 
   fprintf(fptr,"%d %d\n",
-    gamept->moves[gamept->curr_move].from,
-    gamept->moves[gamept->curr_move].to);
+    gamept->moves[gamept->curr_move].from[0],
+    gamept->moves[gamept->curr_move].to[0]);
 }
 
 void sprintf_move(struct game *gamept,char *buf,int buf_len)
@@ -120,46 +110,20 @@ void sprintf_move(struct game *gamept,char *buf,int buf_len)
     put_count += 5;
   }
 
-  if (kingside_castle(gamept)) {
-    sprintf(&buf[put_count],"O-O");
-    put_count += 3;
+  decoded_piece = get_decoded_piece(gamept);
+  bDone = TRUE;
+
+  if (decoded_piece == 'P') {
+    buf[put_count++] = decoded_piece;
+    bDone = FALSE;
   }
-  else if (queenside_castle(gamept)) {
-    sprintf(&buf[put_count],"O-O-O");
-    put_count += 5;
-  }
-  else {
-    decoded_piece = get_decoded_piece(gamept);
 
-    if (decoded_piece == 'P') {
-      if (gamept->moves[gamept->curr_move-1].from == SPECIAL_MOVE_CAPTURE) {
-        from = gamept->moves[gamept->curr_move-1].from;
-        from_file = FILE_OF(from);
-        to = gamept->moves[gamept->curr_move-1].to;
-        to_file = FILE_OF(to);
-        buf[put_count++] = 'a' + from_file;
-        buf[put_count++] = 'x';
-        buf[put_count++] = 'a' + to_file;
-        bDone = TRUE;
-      }
-      else
-        bDone = FALSE;
-    }
-    else {
-      buf[put_count++] = decoded_piece;
-      bDone = FALSE;
-
-      if (gamept->moves[gamept->curr_move-1].from == SPECIAL_MOVE_CAPTURE)
-        buf[put_count++] = 'x';
-    }
-
-    if (!bDone) {
-      to = gamept->moves[gamept->curr_move-1].to;
-      to_file = FILE_OF(to);
-      to_rank = RANK_OF(to);
-      buf[put_count++] = 'a' + to_file;
-      buf[put_count++] = '1' + to_rank;
-    }
+  if (!bDone) {
+    to = gamept->moves[gamept->curr_move-1].to[0];
+    to_file = FILE_OF(to);
+    to_rank = RANK_OF(to);
+    buf[put_count++] = 'a' + to_file;
+    buf[put_count++] = '1' + to_rank;
   }
 
   for ( ; put_count < buf_len - 1; put_count++)
