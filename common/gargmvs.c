@@ -1,504 +1,227 @@
 #include <stdio.h>
-#include <string.h>
-
 #include "garg.h"
 #include "garg.glb"
-#include "garg.mac"
 #include "garg.fun"
+#include "garg.mac"
+#include "bitfuns.h"
 
-int do_castle(struct game *gamept,int direction,char *word,int wordlen)
-{
-  int rank;
-
-  if (direction == 1)  /* if white's move: */
-    rank = 0;
-  else
-    rank = 7;
-
-  /* make sure the king is on his original square: */
-  if (get_piece2(gamept,rank,4) != 6 * direction)
-    return 1;
-
-  if (wordlen == 3) {  /* kingside castle */
-    /* make sure there is a rook in the corner: */
-    if (get_piece2(gamept,rank,7) != 2 * direction)
-      return 2;
-
-    /* make sure there are empty squares between king and rook: */
-    if (get_piece2(gamept,rank,5) || get_piece2(gamept,rank,6))
-      return 3;
-
-    gamept->moves[gamept->curr_move].from = SPECIAL_MOVE_KINGSIDE_CASTLE;
-  }
-  else if (wordlen == 5) {  /* queenside castle */
-    /* make sure there is a rook in the corner: */
-    if (get_piece2(gamept,rank,0) != 2 * direction)
-      return 4;
-
-    /* make sure there are empty squares between king and rook: */
-    if (get_piece2(gamept,rank,1) || get_piece2(gamept,rank,2) || get_piece2(gamept,rank,3))
-      return 5;
-
-    gamept->moves[gamept->curr_move].from = SPECIAL_MOVE_QUEENSIDE_CASTLE;
-  }
-  else
-    return 6;
-
-  return 0;  /* success */
-}
-
-int do_pawn_move2(struct game *gamept)
-{
-  bool bWhiteMove;
-  int start_rank;
-  int start_file;
-  int end_rank;
-  int end_file;
-  int rank_diff;
-  int file_diff;
-
-  bWhiteMove = (gamept->move_start_square_piece > 0);
-
-  if (bWhiteMove) {
-    // white pawn move
-
-    if (gamept->move_start_square > gamept->move_end_square)
-      return 1; // failure
-  }
-  else {
-    // black pawn move
-
-    if (gamept->move_start_square < gamept->move_end_square)
-      return 2; // failure
-  }
-
-  start_rank = RANK_OF(gamept->move_start_square);
-  start_file = FILE_OF(gamept->move_start_square);
-  end_rank = RANK_OF(gamept->move_end_square);
-  end_file = FILE_OF(gamept->move_end_square);
-
-  if (start_rank >= end_rank)
-    rank_diff = start_rank - end_rank;
-  else
-    rank_diff = end_rank - start_rank;
-
-  if (start_file >= end_file)
-    file_diff = start_file - end_file;
-  else
-    file_diff = end_file - start_file;
-
-  if (file_diff == 0) {
-    if (gamept->move_end_square_piece)
-      return 3; // failure
-  }
-
-  if (rank_diff == 0)
-    return 4; // failure
-
-  if (file_diff > 1)
-    return 5; // failure
-
-  if (rank_diff > 3)
-    return 6; // failure
-
-  if (rank_diff > 1) {
-    if (file_diff)
-      return 7; // failure
-
-    if (bWhiteMove) {
-      if (start_rank != 1)
-        return 8; // failure
-    }
-    else {
-      if (start_rank != 8)
-        return 9; // failure
-    }
-  }
-
-  if (file_diff == 1) {
-    if (rank_diff != 1)
-      return 10; // failure
-
-    if (!gamept->move_end_square_piece)
-      return 11; // failure
-  }
-
-  gamept->moves[gamept->curr_move].from = gamept->move_start_square;
-  gamept->moves[gamept->curr_move].to = gamept->move_end_square;
-
-  return 0; // success
-}
-
-char piece_ids[] = "RNBQKG";
-
-int get_piece_id_ix(char piece)
-{
-  int which_piece;
-
-  /* calculate the id to search for: */
-  for (which_piece = 0; which_piece < NUM_PIECE_TYPES; which_piece++) {
-    if (piece_ids[which_piece] == piece)
-      break;
-  }
-
-  return which_piece;
-}
-
-int (*piece_functions[])(struct game *,int,int,int,int) = {
-  rook_move,
-  knight_move,
-  bishop_move,
-  queen_move,
-  king_move,
-  gargantua_move
+static unsigned char initial_board[] = {
+  (unsigned char)0x23, (unsigned char)0x47, (unsigned char)0x56, (unsigned char)0x74, (unsigned char)0x32,
+  (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff,
+  (unsigned char)0xed, (unsigned char)0xc9, (unsigned char)0xba, (unsigned char)0x9c, (unsigned char)0xde
 };
 
-int (*piece_functions2[])(struct game *) = {
-  rook_move2,
-  knight_move2,
-  bishop_move2,
-  queen_move2,
-  king_move2,
-  gargantua_move2
-};
+extern char piece_ids[]; /* "RNBQK" */
+extern char fmt_str[];
 
-int do_piece_move2(struct game *gamept)
+static int format_square(int square)
 {
-  int which_piece;
-  int retval;
+  int bBlack;
+  int return_char;
 
-  which_piece = gamept->move_start_square_piece;
+  if (!square)
+    return (int)'.';
 
-  if (which_piece < 0)
-    which_piece *= -1;
+  if (square < 0) {
+    bBlack = TRUE;
+    square *= -1;
+  }
+  else
+    bBlack = FALSE;
 
-  which_piece -= ROOK_ID;
+  if (square == 1)
+    return_char = 'P';
+  else
+    return_char = piece_ids[square - 2];
 
-  retval = (*piece_functions2[which_piece])(gamept);
+  if (!bBlack)
+    return_char += ('a' - 'A');
 
-  if (!retval) {
-    gamept->moves[gamept->curr_move].from = gamept->move_start_square;
-    gamept->moves[gamept->curr_move].to = gamept->move_end_square;
-    return 0;  /* success */
+  return return_char;
+}
+
+void print_bd(struct game *gamept)
+{
+  int m;
+  int n;
+  int square;
+
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      square = get_piece2(gamept,(NUM_RANKS - 1) - m,n);
+      printf("%c ",format_square(square));
+    }
+
+    putchar(0x0a);
+  }
+}
+
+void fprint_game(struct game *gamept,char *filename)
+{
+  FILE *fptr;
+  char buf[20];
+
+  if ((fptr = fopen(filename,"w")) == NULL)
+    return;
+
+  fprintf(fptr,fmt_str,gamept->title);
+
+  set_initial_board(gamept);
+
+  for (gamept->curr_move = 0;
+       gamept->curr_move <= gamept->num_moves;
+       gamept->curr_move++) {
+
+    sprintf_move(gamept,buf,20);
+    fprintf(fptr,fmt_str,buf);
+
+    update_board(gamept);
   }
 
-  return 1;
+  fclose(fptr);
 }
 
-int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt)
+void fprint_game2(struct game *gamept,FILE *fptr)
 {
-  *to_filept = word[wordlen - 2] - 'a';
+  char buf[20];
 
-  if ((*to_filept < 0) || (*to_filept > 7))
-    return FALSE;
+  fprintf(fptr,fmt_str,gamept->title);
 
-  *to_rankpt = word[wordlen - 1] - '1';
+  set_initial_board(gamept);
 
-  if ((*to_rankpt < 0) || (*to_rankpt > 7))
-    return FALSE;
+  for (gamept->curr_move = 0;
+       gamept->curr_move <= gamept->num_moves;
+       gamept->curr_move++) {
 
-  return TRUE;
+    sprintf_move(gamept,buf,20);
+    fprintf(fptr,fmt_str,buf);
+
+    update_board(gamept);
+  }
 }
 
-int rook_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
+void fprint_bd(struct game *gamept,char *filename)
+{
+  int m;
+  int n;
+  FILE *fptr;
+  int square;
+
+  if ((fptr = fopen(filename,"w")) == NULL)
+    return;
+
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      square = get_piece2(gamept,(NUM_RANKS - 1) - m,n);
+      fprintf(fptr,"%c ",format_square(square));
+    }
+
+    fputc(0x0a,fptr);
+  }
+
+  fclose(fptr);
+}
+
+void fprint_bd2(struct game *gamept,FILE *fptr)
+{
+  int m;
+  int n;
+  int square;
+
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      square = get_piece2(gamept,(NUM_RANKS - 1) - m,n);
+      fprintf(fptr,"%c ",format_square(square));
+    }
+
+    fputc(0x0a,fptr);
+  }
+}
+
+void fprint_moves(struct game *gamept,char *filename)
+{
+  int n;
+  FILE *fptr;
+
+  if ((fptr = fopen(filename,"w")) == NULL)
+    return;
+
+  for (n = 0; n < gamept->num_moves; n++) {
+    fprintf(fptr,"%d %d\n",gamept->moves[n].from[0],gamept->moves[n].to[0]);
+  }
+
+  fclose(fptr);
+}
+
+void fprint_moves2(struct game *gamept,FILE *fptr)
 {
   int n;
 
-  if (file1 == file2) {
-    if (rank1 > rank2) {
-      for (n = rank2 + 1; n < rank1; n++)
-        if (get_piece2(gamept,n,file1))
-          return 1;  /* failure */
-    }
-    else
-      for (n = rank1 + 1; n < rank2; n++)
-        if (get_piece2(gamept,n,file1))
-          return 2;  /* failure */
-
-    return 0;  /* success */
+  for (n = 0; n < gamept->num_moves; n++) {
+    fprintf(fptr,"%d %d\n",gamept->moves[n].from[0],gamept->moves[n].to[0]);
   }
-
-  if (rank1 == rank2) {
-    if (file1 > file2) {
-      for (n = file2 + 1; n < file1; n++)
-        if (get_piece2(gamept,rank1,n))
-          return 1;  /* failure */
-    }
-    else
-      for (n = file1 + 1; n < file2; n++)
-        if (get_piece2(gamept,rank1,n))
-          return 2;  /* failure */
-
-    return 0;  /* success */
-  }
-
-  return 3;  /* failure */
 }
 
-int rook_move2(
-  struct game *gamept
-)
+void set_initial_board(struct game *gamept)
 {
-  int retval;
+  int n;
 
-  retval = rook_move(
-    gamept,
-    FILE_OF(gamept->move_start_square),
-    RANK_OF(gamept->move_start_square),
-    FILE_OF(gamept->move_end_square),
-    RANK_OF(gamept->move_end_square)
-    );
-
-  return retval;
+  for (n = 0; n < CHARS_IN_BOARD; n++)
+    gamept->board[n] = initial_board[n];
 }
 
-int knight_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
+void update_board(struct game *gamept)
 {
-  int dist1;
-  int dist2;
+  set_piece1(gamept,gamept->moves[gamept->curr_move].to[0],
+    get_piece1(gamept,gamept->moves[gamept->curr_move].from[0]));
 
-  dist1 = (file1 - file2);
-
-  if (dist1 < 0)
-    dist1 *= -1;
-
-  dist2 = (rank1 - rank2);
-
-  if (dist2 < 0)
-    dist2 *= -1;
-
-  if ((dist1 == 1) && (dist2 == 2))
-    return 0;  /* success */
-
-  if ((dist1 == 2) && (dist2 == 1))
-    return 0;  /* success */
-
-  return 1;    /* failure */
+  set_piece1(gamept,gamept->moves[gamept->curr_move].from[0],0);  /* vacate previous square */
 }
 
-int knight_move2(
-  struct game *gamept
-)
+int get_piece1(struct game *gamept,int board_offset)
 {
-  int retval;
+  unsigned int bit_offset;
+  unsigned short piece;
+  int piece_int;
 
-  retval = knight_move(
-    gamept,
-    FILE_OF(gamept->move_start_square),
-    RANK_OF(gamept->move_start_square),
-    FILE_OF(gamept->move_end_square),
-    RANK_OF(gamept->move_end_square)
-    );
+  bit_offset = board_offset * BITS_PER_BOARD_SQUARE;
 
-  return retval;
+  piece = get_bits(BITS_PER_BOARD_SQUARE,gamept->board,bit_offset);
+  piece_int = piece;
+
+  if (piece & 0x8)
+    piece_int |= 0xfffffff0;
+
+  return piece_int;
 }
 
-int bishop_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
+int get_piece2(struct game *gamept,int row,int column)
 {
-  int dist1;
-  int dist2;
-  int file_dir;
-  int rank_dir;
+  int board_offset;
 
-  dist1 = (file1 - file2);
-
-  if (dist1 < 0) {
-    dist1 *= -1;
-    file_dir = 1;
-  }
-  else
-    file_dir = -1;
-
-  dist2 = (rank1 - rank2);
-
-  if (dist2 < 0) {
-    dist2 *= -1;
-    rank_dir = 1;
-  }
-  else
-    rank_dir = -1;
-
-  if (dist1 != dist2)
-    return 1;  /* failure */
-
-  /* make sure there are no intervening pieces */
-  for ( ; ; ) {
-    file1 += file_dir;
-
-    if (file1 == file2)
-      break;
-
-    rank1 += rank_dir;
-
-    if (get_piece2(gamept,rank1,file1))
-      return 2;  /* failure */
-  }
-
-  return 0;  /* success */
+  board_offset = row * NUM_RANKS + column;
+  return get_piece1(gamept,board_offset);
 }
 
-int bishop_move2(
-  struct game *gamept
-)
+void set_piece1(struct game *gamept,int board_offset,int piece)
 {
-  int retval;
+  unsigned int bit_offset;
 
-  retval = bishop_move(
-    gamept,
-    FILE_OF(gamept->move_start_square),
-    RANK_OF(gamept->move_start_square),
-    FILE_OF(gamept->move_end_square),
-    RANK_OF(gamept->move_end_square)
-    );
-
-  return retval;
+  bit_offset = board_offset * BITS_PER_BOARD_SQUARE;
+  set_bits(BITS_PER_BOARD_SQUARE,gamept->board,bit_offset,piece);
 }
 
-int queen_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
+void set_piece2(struct game *gamept,int row,int column,int piece)
 {
-  if (!rook_move(gamept,file1,rank1,file2,rank2))
-    return 0;  /* success */
+  int board_offset;
 
-  if (!bishop_move(gamept,file1,rank1,file2,rank2))
-    return 0;  /* success */
-
-  return 1;    /* failure */
-}
-
-int queen_move2(
-  struct game *gamept
-)
-{
-  int retval;
-
-  retval = queen_move(
-    gamept,
-    FILE_OF(gamept->move_start_square),
-    RANK_OF(gamept->move_start_square),
-    FILE_OF(gamept->move_end_square),
-    RANK_OF(gamept->move_end_square)
-    );
-
-  return retval;
-}
-
-int king_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
-{
-  int dist1;
-  int dist2;
-
-  dist1 = (file1 - file2);
-
-  if (dist1 < 0)
-    dist1 *= -1;
-
-  dist2 = (rank1 - rank2);
-
-  if (dist2 < 0)
-    dist2 *= -1;
-
-  if ((dist1 < 2) && (dist2 < 2))
-    return 0;  /* success */
-
-  return 1;  /* failure */
-}
-
-int king_move2(
-  struct game *gamept
-)
-{
-  int retval;
-
-  retval = king_move(
-    gamept,
-    FILE_OF(gamept->move_start_square),
-    RANK_OF(gamept->move_start_square),
-    FILE_OF(gamept->move_end_square),
-    RANK_OF(gamept->move_end_square)
-    );
-
-  return retval;
-}
-
-int gargantua_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
-{
-  int dist1;
-  int dist2;
-
-  dist1 = (file1 - file2);
-
-  if (dist1 < 0)
-    dist1 *= -1;
-
-  dist2 = (rank1 - rank2);
-
-  if (dist2 < 0)
-    dist2 *= -1;
-
-  if ((dist1 == 1) && (dist2 == 2))
-    return 0;  /* success */
-
-  if ((dist1 == 2) && (dist2 == 1))
-    return 0;  /* success */
-
-  if ((dist1 == 2) && (dist2 == 3))
-    return 0;  /* success */
-
-  if ((dist1 == 3) && (dist2 == 2))
-    return 0;  /* success */
-
-  return 1;    /* failure */
-}
-
-int gargantua_move2(
-  struct game *gamept
-)
-{
-  int retval;
-
-  retval = gargantua_move(
-    gamept,
-    FILE_OF(gamept->move_start_square),
-    RANK_OF(gamept->move_start_square),
-    FILE_OF(gamept->move_end_square),
-    RANK_OF(gamept->move_end_square)
-    );
-
-  return retval;
+  board_offset = row * NUM_RANKS + column;
+  set_piece1(gamept,board_offset,piece);
 }
