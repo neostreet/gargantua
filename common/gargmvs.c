@@ -376,6 +376,19 @@ int king_move(
   int dist1;
   int dist2;
 
+  // first, check if this is a castling move
+  if (!gamept->black_to_play) {
+    // it's White's move
+
+    // check for kingside castle
+    if ((file1 == 5) && (rank1 == 0) && (file2 == 7) && (rank2 == 0))
+      return 0;
+
+    // check for queenside castle
+    if ((file1 == 5) && (rank1 == 0) && (file2 == 3) && (rank2 == 0))
+      return 0;
+  }
+
   dist1 = (file1 - file2);
 
   if (dist1 < 0)
