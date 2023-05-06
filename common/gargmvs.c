@@ -82,8 +82,8 @@ int do_pawn_move2(struct game *gamept)
       return 11; // failure
   }
 
-  gamept->moves[gamept->curr_move].from[0] = gamept->move_start_square;
-  gamept->moves[gamept->curr_move].to[0] = gamept->move_end_square;
+  gamept->moves[gamept->curr_move].from = gamept->move_start_square;
+  gamept->moves[gamept->curr_move].to = gamept->move_end_square;
 
   return 0; // success
 }
@@ -136,8 +136,8 @@ int do_piece_move2(struct game *gamept)
   retval = (*piece_functions2[which_piece])(gamept);
 
   if (!retval) {
-    gamept->moves[gamept->curr_move].from[0] = gamept->move_start_square;
-    gamept->moves[gamept->curr_move].to[0] = gamept->move_end_square;
+    gamept->moves[gamept->curr_move].from = gamept->move_start_square;
+    gamept->moves[gamept->curr_move].to = gamept->move_end_square;
     return 0;  /* success */
   }
 
