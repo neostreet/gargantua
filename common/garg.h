@@ -46,8 +46,8 @@
 #define NUM_PIECE_TYPES 6
 
 struct move {
-  char from[2];
-  char to[2];
+  char from;
+  char to;
 };
 
 #define BITS_PER_BOARD_SQUARE 4
