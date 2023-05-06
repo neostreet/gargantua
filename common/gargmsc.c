@@ -225,4 +225,3 @@ void set_piece2(struct game *gamept,int row,int column,int piece)
   board_offset = row * NUM_RANKS + column;
   set_piece1(gamept,board_offset,piece);
 }
-
