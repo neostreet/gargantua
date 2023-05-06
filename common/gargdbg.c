@@ -45,7 +45,7 @@ char get_decoded_piece(struct game *gamept)
   int piece;
 
   piece = get_piece1(gamept,
-    gamept->moves[gamept->curr_move-1].to[0]);
+    gamept->moves[gamept->curr_move-1].to);
   return decode_piece(piece,FALSE);
 }
 
@@ -72,8 +72,8 @@ void fprintf_move(FILE *fptr,struct game *gamept)
     return;
 
   fprintf(fptr,"%d %d\n",
-    gamept->moves[gamept->curr_move].from[0],
-    gamept->moves[gamept->curr_move].to[0]);
+    gamept->moves[gamept->curr_move].from,
+    gamept->moves[gamept->curr_move].to);
 }
 
 void sprintf_move(struct game *gamept,char *buf,int buf_len)
@@ -119,7 +119,7 @@ void sprintf_move(struct game *gamept,char *buf,int buf_len)
   }
 
   if (!bDone) {
-    to = gamept->moves[gamept->curr_move-1].to[0];
+    to = gamept->moves[gamept->curr_move-1].to;
     to_file = FILE_OF(to);
     to_rank = RANK_OF(to);
     buf[put_count++] = 'a' + to_file;
