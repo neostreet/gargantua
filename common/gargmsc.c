@@ -154,7 +154,7 @@ void fprint_moves(struct game *gamept,char *filename)
     return;
 
   for (n = 0; n < gamept->num_moves; n++) {
-    fprintf(fptr,"%d %d\n",gamept->moves[n].from[0],gamept->moves[n].to[0]);
+    fprintf(fptr,"%d %d\n",gamept->moves[n].from,gamept->moves[n].to);
   }
 
   fclose(fptr);
@@ -165,7 +165,7 @@ void fprint_moves2(struct game *gamept,FILE *fptr)
   int n;
 
   for (n = 0; n < gamept->num_moves; n++) {
-    fprintf(fptr,"%d %d\n",gamept->moves[n].from[0],gamept->moves[n].to[0]);
+    fprintf(fptr,"%d %d\n",gamept->moves[n].from,gamept->moves[n].to);
   }
 }
 
@@ -179,10 +179,10 @@ void set_initial_board(struct game *gamept)
 
 void update_board(struct game *gamept)
 {
-  set_piece1(gamept,gamept->moves[gamept->curr_move].to[0],
-    get_piece1(gamept,gamept->moves[gamept->curr_move].from[0]));
+  set_piece1(gamept,gamept->moves[gamept->curr_move].to,
+    get_piece1(gamept,gamept->moves[gamept->curr_move].from));
 
-  set_piece1(gamept,gamept->moves[gamept->curr_move].from[0],0);  /* vacate previous square */
+  set_piece1(gamept,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
 }
 
 int get_piece1(struct game *gamept,int board_offset)
@@ -225,3 +225,4 @@ void set_piece2(struct game *gamept,int row,int column,int piece)
   board_offset = row * NUM_RANKS + column;
   set_piece1(gamept,board_offset,piece);
 }
+
