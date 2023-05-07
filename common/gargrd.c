@@ -15,34 +15,16 @@
 #include "garg.glb"
 #include "garg.mac"
 
-static int force_values[] = {
-  FORCE_VALUE_PAWN,
-  FORCE_VALUE_ROOK,
-  FORCE_VALUE_KNIGHT,
-  FORCE_VALUE_BISHOP,
-  FORCE_VALUE_QUEEN,
-  FORCE_VALUE_KING
-};
-
-extern char piece_ids[]; /* "RNBQK" */
+extern char piece_ids[]; /* "RNBQKG" */
 
 static char *bad_piece_move[] = {
   "bad rook move",
   "bad knight move",
   "bad bishop move",
   "bad queen move",
-  "bad king move"
+  "bad king move",
+  "bad gargantua move"
 };
-
-short force_value_of(short piece)
-{
-  if (piece < 0)
-    piece *= -1;
-
-  piece--;
-
-  return force_values[piece];
-}
 
 int line_number(char *word,int wordlen)
 {
