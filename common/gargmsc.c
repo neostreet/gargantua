@@ -18,7 +18,7 @@ static unsigned char initial_board[] = {
   (unsigned char)0x9e, (unsigned char)0xdc, (unsigned char)0xba, (unsigned char)0xcd, (unsigned char)0xe9
 };
 
-extern char piece_ids[]; /* "RNBQK" */
+extern char piece_ids[]; /* "RNBQKG" */
 extern char fmt_str[];
 
 static int format_square(int square)
