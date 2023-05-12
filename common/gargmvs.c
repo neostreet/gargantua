@@ -57,7 +57,7 @@ int do_pawn_move2(struct game *gamept)
   if (file_diff > 1)
     return 5; // failure
 
-  if (rank_diff > 3)
+  if (rank_diff > 2)
     return 6; // failure
 
   if (rank_diff > 1) {
@@ -65,11 +65,11 @@ int do_pawn_move2(struct game *gamept)
       return 7; // failure
 
     if (bWhiteMove) {
-      if (start_rank != 1)
+      if (start_rank != 2)
         return 8; // failure
     }
     else {
-      if (start_rank != 8)
+      if (start_rank != 7)
         return 9; // failure
     }
   }
