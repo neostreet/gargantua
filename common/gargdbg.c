@@ -100,12 +100,12 @@ void sprintf_move(struct game *gamept,char *buf,int buf_len)
     return;
   }
 
-  bWhite = !((gamept->black_to_play + gamept->curr_move-1) % 2);
+  bWhite = !((gamept->curr_move-1) % 2);
 
   sprintf(buf,"%2d. ",((gamept->curr_move-1) / 2) + 1);
   put_count = 4;
 
-  if (!bWhite) {\
+  if (!bWhite) {
     sprintf(&buf[put_count],"...  ");
     put_count += 5;
   }
