@@ -6,7 +6,7 @@
 #include "garg.mac"
 #include "garg.fun"
 
-int do_pawn_move2(struct game *gamept)
+int do_pawn_move(struct game *gamept)
 {
   bool bWhiteMove;
   int start_rank;
@@ -90,7 +90,7 @@ int do_pawn_move2(struct game *gamept)
 
 char piece_ids[] = "RNBQKG";
 
-int (*piece_functions2[])(struct game *) = {
+int (*piece_functions[])(struct game *) = {
   rook_move2,
   knight_move2,
   bishop_move2,
@@ -99,7 +99,7 @@ int (*piece_functions2[])(struct game *) = {
   gargantua_move2
 };
 
-int do_piece_move2(struct game *gamept)
+int do_piece_move(struct game *gamept)
 {
   int which_piece;
   int retval;
@@ -111,7 +111,7 @@ int do_piece_move2(struct game *gamept)
 
   which_piece -= ROOK_ID;
 
-  retval = (*piece_functions2[which_piece])(gamept);
+  retval = (*piece_functions[which_piece])(gamept);
 
   if (!retval) {
     gamept->moves[gamept->curr_move].from = gamept->move_start_square;
