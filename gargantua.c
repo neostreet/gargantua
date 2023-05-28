@@ -1377,8 +1377,8 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   }
 
   if (curr_game.highlight_rank == -1) {
-    if ( ((curr_game.move_start_square_piece > 0) && !((curr_game.black_to_play + curr_game.curr_move) % 2)) ||
-         ((curr_game.move_start_square_piece < 0) &&  ((curr_game.black_to_play + curr_game.curr_move) % 2)) ) {
+    if ( ((curr_game.move_start_square_piece > 0) && !((curr_game.curr_move) % 2)) ||
+         ((curr_game.move_start_square_piece < 0) &&  ((curr_game.curr_move) % 2)) ) {
       curr_game.highlight_file = file;
       curr_game.highlight_rank = rank;
 
