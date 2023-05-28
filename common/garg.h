@@ -69,7 +69,6 @@ struct move {
 struct game {
   char gargfilename[MAX_FILE_NAME_LEN];
   char title[80];
-  int black_to_play;
   int orientation;
   int num_moves;
   int curr_move;
