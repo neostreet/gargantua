@@ -377,15 +377,26 @@ int king_move(
   int dist2;
 
   // first, check if this is a castling move
-  if (!gamept->black_to_play) {
+  if (!(gamept->curr_move % 2)) {
     // it's White's move
 
     // check for kingside castle
-    if ((file1 == 5) && (rank1 == 0) && (file2 == 7) && (rank2 == 0))
+    if ((file1 == 5) && (rank1 == 1) && (file2 == 7) && (rank2 == 1))
       return 0;
 
     // check for queenside castle
-    if ((file1 == 5) && (rank1 == 0) && (file2 == 3) && (rank2 == 0))
+    if ((file1 == 5) && (rank1 == 1) && (file2 == 3) && (rank2 == 1))
+      return 0;
+  }
+  else {
+    // it's Black's move
+
+    // check for kingside castle
+    if ((file1 == 5) && (rank1 == 8) && (file2 == 7) && (rank2 == 8))
+      return 0;
+
+    // check for queenside castle
+    if ((file1 == 5) && (rank1 == 8) && (file2 == 3) && (rank2 == 8))
       return 0;
   }
 
