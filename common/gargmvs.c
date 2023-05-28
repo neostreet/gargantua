@@ -359,23 +359,31 @@ int king_move(
     // it's White's move
 
     // check for kingside castle
-    if ((file1 == 5) && (rank1 == 1) && (file2 == 7) && (rank2 == 1))
+    if ((file1 == 5) && (rank1 == 1) && (file2 == 7) && (rank2 == 1)) {
+      gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
       return 0;
+    }
 
     // check for queenside castle
-    if ((file1 == 5) && (rank1 == 1) && (file2 == 3) && (rank2 == 1))
+    if ((file1 == 5) && (rank1 == 1) && (file2 == 3) && (rank2 == 1)) {
+      gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
       return 0;
+    }
   }
   else {
     // it's Black's move
 
     // check for kingside castle
-    if ((file1 == 5) && (rank1 == 8) && (file2 == 7) && (rank2 == 8))
+    if ((file1 == 5) && (rank1 == 8) && (file2 == 7) && (rank2 == 8)) {
+      gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
       return 0;
+    }
 
     // check for queenside castle
-    if ((file1 == 5) && (rank1 == 8) && (file2 == 3) && (rank2 == 8))
+    if ((file1 == 5) && (rank1 == 8) && (file2 == 3) && (rank2 == 8)) {
+      gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
       return 0;
+    }
   }
 
   dist1 = (file1 - file2);
