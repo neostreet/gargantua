@@ -11,9 +11,9 @@ int get_color(int);
 void put_square(struct game *gamept,int what,int where);
 void update_move_number(struct game *gamept);
 
-int do_pawn_move2(struct game *gamept);
+int do_pawn_move(struct game *gamept);
 int get_piece_id_ix(char piece);
-int do_piece_move2(struct game *gamept);
+int do_piece_move(struct game *gamept);
 int allow_user_moves(struct game *gamept);
 
 int rook_move(struct game *,int,int,int,int);
