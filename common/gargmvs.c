@@ -90,28 +90,6 @@ int do_pawn_move2(struct game *gamept)
 
 char piece_ids[] = "RNBQKG";
 
-int get_piece_id_ix(char piece)
-{
-  int which_piece;
-
-  /* calculate the id to search for: */
-  for (which_piece = 0; which_piece < NUM_PIECE_TYPES; which_piece++) {
-    if (piece_ids[which_piece] == piece)
-      break;
-  }
-
-  return which_piece;
-}
-
-int (*piece_functions[])(struct game *,int,int,int,int) = {
-  rook_move,
-  knight_move,
-  bishop_move,
-  queen_move,
-  king_move,
-  gargantua_move
-};
-
 int (*piece_functions2[])(struct game *) = {
   rook_move2,
   knight_move2,
