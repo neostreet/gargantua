@@ -1393,10 +1393,10 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
 
   if ((curr_game.move_start_square_piece == PAWN_ID) ||
       (curr_game.move_start_square_piece == PAWN_ID * -1)) {
-    retval = do_pawn_move2(&curr_game);
+    retval = do_pawn_move(&curr_game);
   }
   else
-    retval = do_piece_move2(&curr_game);
+    retval = do_piece_move(&curr_game);
 
   if (!retval) {
     update_board(&curr_game);
