@@ -179,10 +179,23 @@ void set_initial_board(struct game *gamept)
 
 void update_board(struct game *gamept)
 {
+  bool bKingsideCastle;
+
   set_piece1(gamept,gamept->moves[gamept->curr_move].to,
     get_piece1(gamept,gamept->moves[gamept->curr_move].from));
 
   set_piece1(gamept,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
+
+  bKingsideCastle = (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_KINGSIDE_CASTLE);
+
+  if (bKingsideCastle) {
+    if (!(gamept->curr_move % 2)) {
+      // it's White's move
+      set_piece1(gamept,16,
+        get_piece1(gamept,18));
+      set_piece1(gamept,18,0);
+    }
+  }
 }
 
 int get_piece1(struct game *gamept,int board_offset)
