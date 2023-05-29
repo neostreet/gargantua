@@ -48,7 +48,7 @@
 struct move {
   char from;
   char to;
-  char special_move_info;
+  int special_move_info;
 };
 
 #define BITS_PER_BOARD_SQUARE 4
