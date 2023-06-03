@@ -62,7 +62,7 @@ void print_game(struct game *gamept)
     sprintf_move(gamept,buf,20);
     printf(fmt_str,buf);
 
-    update_board(gamept);
+    update_board(gamept,NULL,NULL);
   }
 }
 
