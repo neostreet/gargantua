@@ -442,9 +442,10 @@ void invalidate_rect(HWND hWnd,int rank,int file)
   rect.right = rect.left + width_in_pixels;
   rect.bottom = rect.top + height_in_pixels;
 
-  if (debug_fptr)
-    fprintf(debug_fptr,"invalidate_rect(): left = %d, top = %d\n",
-      rect.left,rect.top);
+  if (debug_fptr) {
+    fprintf(debug_fptr,"invalidate_rect(): left = %d, top = %d, right = %d, bottom = %d\n",
+      rect.left,rect.top,rect.right,rect.bottom);
+  }
 
   InvalidateRect(hWnd,&rect,FALSE);
 }
@@ -721,7 +722,7 @@ static void do_move(HWND hWnd)
   if (curr_game.curr_move == curr_game.num_moves)
     return;
 
-  update_board(&curr_game);
+  update_board(&curr_game,NULL,NULL);
 
   if (debug_level == 2) {
     if (debug_fptr) {
@@ -828,7 +829,7 @@ static void position_game(int move)
   set_initial_board(&curr_game);
 
   for ( ; curr_game.curr_move < move; curr_game.curr_move++) {
-    update_board(&curr_game);
+    update_board(&curr_game,NULL,NULL);
   }
 
   // sprintf(position_file_name,"position_%d",curr_game.curr_move);
@@ -1399,14 +1400,15 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     retval = do_piece_move(&curr_game);
 
   if (!retval) {
-    update_board(&curr_game);
-    curr_game.curr_move++;
-    curr_game.num_moves = curr_game.curr_move;
+    update_board(&curr_game,NULL,NULL);
 
     invalidate_rect(hWnd,curr_game.highlight_rank,curr_game.highlight_file);
     invalidate_rect(hWnd,rank,file);
 
     curr_game.highlight_rank = -1;
     curr_game.highlight_file = -1;
+
+    curr_game.curr_move++;
+    curr_game.num_moves = curr_game.curr_move;
   }
 }
