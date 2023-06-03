@@ -180,6 +180,7 @@ void set_initial_board(struct game *gamept)
 void update_board(struct game *gamept)
 {
   bool bKingsideCastle;
+  bool bQueensideCastle;
 
   set_piece1(gamept,gamept->moves[gamept->curr_move].to,
     get_piece1(gamept,gamept->moves[gamept->curr_move].from));
@@ -187,6 +188,7 @@ void update_board(struct game *gamept)
   set_piece1(gamept,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
 
   bKingsideCastle = (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_KINGSIDE_CASTLE);
+  bQueensideCastle = (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_QUEENSIDE_CASTLE);
 
   if (bKingsideCastle) {
     if (!(gamept->curr_move % 2)) {
@@ -194,6 +196,26 @@ void update_board(struct game *gamept)
       set_piece1(gamept,16,
         get_piece1(gamept,18));
       set_piece1(gamept,18,0);
+    }
+    else {
+      // it's Blacks's move
+      set_piece1(gamept,86,
+        get_piece1(gamept,88));
+      set_piece1(gamept,88,0);
+    }
+  }
+  else if (bQueensideCastle) {
+    if (!(gamept->curr_move % 2)) {
+      // it's White's move
+      set_piece1(gamept,14,
+        get_piece1(gamept,11));
+      set_piece1(gamept,11,0);
+    }
+    else {
+      // it's Blacks's move
+      set_piece1(gamept,84,
+        get_piece1(gamept,81));
+      set_piece1(gamept,81,0);
     }
   }
 }
