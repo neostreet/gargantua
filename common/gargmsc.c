@@ -82,7 +82,7 @@ void fprint_game(struct game *gamept,char *filename)
     sprintf_move(gamept,buf,20);
     fprintf(fptr,fmt_str,buf);
 
-    update_board(gamept);
+    update_board(gamept,NULL,NULL);
   }
 
   fclose(fptr);
@@ -103,7 +103,7 @@ void fprint_game2(struct game *gamept,FILE *fptr)
     sprintf_move(gamept,buf,20);
     fprintf(fptr,fmt_str,buf);
 
-    update_board(gamept);
+    update_board(gamept,NULL,NULL);
   }
 }
 
@@ -177,7 +177,7 @@ void set_initial_board(struct game *gamept)
     gamept->board[n] = initial_board[n];
 }
 
-void update_board(struct game *gamept)
+void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares)
 {
   bool bKingsideCastle;
   bool bQueensideCastle;
