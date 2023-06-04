@@ -716,13 +716,17 @@ void do_paint(HWND hWnd)
 
 static void do_move(HWND hWnd)
 {
-  int from;
-  int to;
+  int n;
+  int invalid_squares[4];
+  int num_invalid_squares;
 
   if (curr_game.curr_move == curr_game.num_moves)
     return;
 
-  update_board(&curr_game,NULL,NULL);
+  update_board(&curr_game,invalid_squares,&num_invalid_squares);
+
+  for (n = 0; n < num_invalid_squares; n++)
+    invalidate_square(hWnd,invalid_squares[n]);
 
   if (debug_level == 2) {
     if (debug_fptr) {
@@ -730,12 +734,6 @@ static void do_move(HWND hWnd)
       fprint_bd2(&curr_game,debug_fptr);
     }
   }
-
-  from = (int)curr_game.moves[curr_game.curr_move].from;
-  invalidate_square(hWnd,from);
-
-  to = (int)curr_game.moves[curr_game.curr_move].to;
-  invalidate_square(hWnd,to);
 
   curr_game.curr_move++;
   redisplay_counts(hWnd,NULL);
@@ -1334,7 +1332,10 @@ BOOL CenterWindow (HWND hwndChild, HWND hwndParent)
 
 void do_lbuttondown(HWND hWnd,int file,int rank)
 {
+  int n;
   int retval;
+  int invalid_squares[4];
+  int num_invalid_squares;
 
   if ((file >= 0) && (file < NUM_FILES) &&
       (rank >= 0) && (rank < NUM_RANKS))
@@ -1400,10 +1401,10 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     retval = do_piece_move(&curr_game);
 
   if (!retval) {
-    update_board(&curr_game,NULL,NULL);
+    update_board(&curr_game,invalid_squares,&num_invalid_squares);
 
-    invalidate_rect(hWnd,curr_game.highlight_rank,curr_game.highlight_file);
-    invalidate_rect(hWnd,rank,file);
+    for (n = 0; n < num_invalid_squares; n++)
+      invalidate_square(hWnd,invalid_squares[n]);
 
     curr_game.highlight_rank = -1;
     curr_game.highlight_file = -1;
