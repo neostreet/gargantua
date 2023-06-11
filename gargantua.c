@@ -1054,7 +1054,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
-        case IDM_OPEN_BINARY_GAME:
+        case IDM_OPEN:
 	  // Call the common dialog function.
           bHaveGame = FALSE;
 
