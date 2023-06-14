@@ -177,20 +177,29 @@ void set_initial_board(struct game *gamept)
     gamept->board[n] = initial_board[n];
 }
 
+static int update_board_calls;
+static int dbg_update_board_call;
+static int dbg;
+
 void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares)
 {
   bool bKingsideCastle;
   bool bQueensideCastle;
+
+  update_board_calls++;
+
+  if (dbg_update_board_call == update_board_calls)
+    dbg = 0;
 
   if (invalid_squares) {
     invalid_squares[(*num_invalid_squares)++] = gamept->moves[gamept->curr_move].from;
     invalid_squares[(*num_invalid_squares)++] = gamept->moves[gamept->curr_move].to;
   }
 
-  set_piece1(gamept,gamept->moves[gamept->curr_move].to,
+  set_piece(gamept,gamept->moves[gamept->curr_move].to,
     get_piece1(gamept,gamept->moves[gamept->curr_move].from));
 
-  set_piece1(gamept,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
+  set_piece(gamept,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
 
   bKingsideCastle = (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_KINGSIDE_CASTLE);
   bQueensideCastle = (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_QUEENSIDE_CASTLE);
@@ -198,9 +207,9 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   if (bKingsideCastle) {
     if (!(gamept->curr_move % 2)) {
       // it's White's move
-      set_piece1(gamept,16,
+      set_piece(gamept,16,
         get_piece1(gamept,18));
-      set_piece1(gamept,18,0);
+      set_piece(gamept,18,0);
 
       if (invalid_squares) {
         invalid_squares[(*num_invalid_squares)++] = 16;
@@ -209,9 +218,9 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
     }
     else {
       // it's Blacks's move
-      set_piece1(gamept,86,
+      set_piece(gamept,86,
         get_piece1(gamept,88));
-      set_piece1(gamept,88,0);
+      set_piece(gamept,88,0);
 
       if (invalid_squares) {
         invalid_squares[(*num_invalid_squares)++] = 86;
@@ -222,9 +231,9 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   else if (bQueensideCastle) {
     if (!(gamept->curr_move % 2)) {
       // it's White's move
-      set_piece1(gamept,14,
+      set_piece(gamept,14,
         get_piece1(gamept,11));
-      set_piece1(gamept,11,0);
+      set_piece(gamept,11,0);
 
       if (invalid_squares) {
         invalid_squares[(*num_invalid_squares)++] = 14;
@@ -233,9 +242,9 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
     }
     else {
       // it's Blacks's move
-      set_piece1(gamept,84,
+      set_piece(gamept,84,
         get_piece1(gamept,81));
-      set_piece1(gamept,81,0);
+      set_piece(gamept,81,0);
 
       if (invalid_squares) {
         invalid_squares[(*num_invalid_squares)++] = 84;
@@ -270,18 +279,23 @@ int get_piece2(struct game *gamept,int row,int column)
   return get_piece1(gamept,board_offset);
 }
 
-void set_piece1(struct game *gamept,int board_offset,int piece)
+static int set_piece_calls;
+static int dbg_set_piece_call;
+
+void set_piece(struct game *gamept,int board_offset,int piece)
 {
   unsigned int bit_offset;
 
+  set_piece_calls++;
+
+  if (dbg_set_piece_call == set_piece_calls)
+    dbg = 0;
+
+  if (gamept->debug_level == 2) {
+    if (gamept->debug_fptr != NULL)
+      fprintf(gamept->debug_fptr,"set_piece: board_offset = %d, piece %d\n",board_offset,piece);
+  }
+
   bit_offset = board_offset * BITS_PER_BOARD_SQUARE;
   set_bits(BITS_PER_BOARD_SQUARE,gamept->board,bit_offset,piece);
-}
-
-void set_piece2(struct game *gamept,int row,int column,int piece)
-{
-  int board_offset;
-
-  board_offset = row * NUM_RANKS + column;
-  set_piece1(gamept,board_offset,piece);
 }
