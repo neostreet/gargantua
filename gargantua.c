@@ -1373,19 +1373,38 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   }
 
   if (curr_game.highlight_rank == -1) {
+    if (curr_game.debug_fptr) {
+      fprintf(curr_game.debug_fptr,"do_lbuttondown:   start_square_piece = %d, curr_move = %d\n",
+        curr_game.move_start_square_piece,curr_game.curr_move);
+    }
+
     if ( ((curr_game.move_start_square_piece > 0) && !((curr_game.curr_move) % 2)) ||
          ((curr_game.move_start_square_piece < 0) &&  ((curr_game.curr_move) % 2)) ) {
+      if (curr_game.debug_fptr) {
+        fprintf(curr_game.debug_fptr,"do_lbuttondown:   setting highlight: rank = %d, file = %d\n",rank,file);
+      }
+
       curr_game.highlight_file = file;
       curr_game.highlight_rank = rank;
 
       invalidate_rect(hWnd,rank,file);
-      return;
     }
+    else {
+      if (curr_game.debug_fptr) {
+        fprintf(curr_game.debug_fptr,"do_lbuttondown:   not setting highlight: rank = %d, file = %d\n",rank,file);
+      }
+    }
+
+    return;
   }
 
   // exit early if the square to be moved to contains a piece of the same color as the piece to be moved
   if ((curr_game.move_start_square_piece * curr_game.move_end_square_piece) > 0)
     return;
+
+  if (curr_game.debug_fptr) {
+    fprintf(curr_game.debug_fptr,"do_lbuttondown:   attempting move: rank = %d,file = %d\n",rank,file);
+  }
 
   if ((curr_game.move_start_square_piece == PAWN_ID) ||
       (curr_game.move_start_square_piece == PAWN_ID * -1)) {
