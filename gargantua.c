@@ -710,8 +710,15 @@ static void do_move(HWND hWnd)
   int invalid_squares[4];
   int num_invalid_squares;
 
-  if (curr_game.curr_move == curr_game.num_moves)
+  if (curr_game.debug_fptr != NULL)
+    fprintf(curr_game.debug_fptr,"do_move(): curr_move = %d\n",curr_game.curr_move);
+
+  if (curr_game.curr_move == curr_game.num_moves) {
+    if (curr_game.debug_fptr != NULL)
+      fprintf(curr_game.debug_fptr,"do_move(): early exit\n");
+
     return;
+  }
 
   update_board(&curr_game,invalid_squares,&num_invalid_squares);
 
@@ -720,7 +727,6 @@ static void do_move(HWND hWnd)
 
   if (curr_game.debug_level == 2) {
     if (curr_game.debug_fptr) {
-      fprintf(curr_game.debug_fptr,"do_move\n");
       fprint_bd2(&curr_game,curr_game.debug_fptr);
     }
   }
@@ -811,7 +817,10 @@ static void toggle_board_size(HWND hWnd)
 
 static void position_game(int move)
 {
-  char position_file_name[80];
+  //char position_file_name[80];
+
+  if (curr_game.debug_fptr != NULL)
+    fprintf(curr_game.debug_fptr,"position_game(): curr_move = %d\n",curr_game.curr_move);
 
   curr_game.curr_move = 0;
   set_initial_board(&curr_game);
@@ -1423,6 +1432,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     curr_game.highlight_file = -1;
 
     curr_game.curr_move++;
+    curr_game.moves[curr_game.curr_move].special_move_info = 0;
     curr_game.num_moves = curr_game.curr_move;
   }
 }
