@@ -359,13 +359,15 @@ int king_move(
     // it's White's move
 
     // check for kingside castle
-    if ((file1 == 5) && (rank1 == 1) && (file2 == 7) && (rank2 == 1) && !get_piece1(gamept,16)) {
+    if ((file1 == 5) && (rank1 == 1) && (file2 == 7) && (rank2 == 1) &&
+      !get_piece1(gamept,16) && !get_piece1(gamept,17) && (get_piece1(gamept,18) == ROOK_ID)) {
       gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
       return 0;
     }
 
     // check for queenside castle
-    if ((file1 == 5) && (rank1 == 1) && (file2 == 3) && (rank2 == 1)) {
+    if ((file1 == 5) && (rank1 == 1) && (file2 == 3) && (rank2 == 1) &&
+      !get_piece1(gamept,12) && !get_piece1(gamept,13) && !get_piece1(gamept,14) && (get_piece1(gamept,11) == ROOK_ID)) {
       gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
       return 0;
     }
