@@ -154,7 +154,7 @@ void fprint_moves(struct game *gamept,char *filename)
     return;
 
   for (n = 0; n < gamept->num_moves; n++) {
-    fprintf(fptr,"%d %d\n",gamept->moves[n].from,gamept->moves[n].to);
+    fprintf(fptr,"%d %d %d\n",gamept->moves[n].from,gamept->moves[n].to,gamept->moves[n].special_move_info);
   }
 
   fclose(fptr);
@@ -165,7 +165,7 @@ void fprint_moves2(struct game *gamept,FILE *fptr)
   int n;
 
   for (n = 0; n < gamept->num_moves; n++) {
-    fprintf(fptr,"%d %d\n",gamept->moves[n].from,gamept->moves[n].to);
+    fprintf(fptr,"%d %d %d\n",gamept->moves[n].from,gamept->moves[n].to,gamept->moves[n].special_move_info);
   }
 }
 
@@ -281,6 +281,8 @@ int get_piece2(struct game *gamept,int row,int column)
 
 static int set_piece_calls;
 static int dbg_set_piece_call;
+static int dbg_board_offset;
+static int dbg_piece;
 
 void set_piece(struct game *gamept,int board_offset,int piece)
 {
@@ -288,8 +290,11 @@ void set_piece(struct game *gamept,int board_offset,int piece)
 
   set_piece_calls++;
 
-  if (dbg_set_piece_call == set_piece_calls)
-    dbg = 0;
+  if (set_piece_calls == dbg_set_piece_call)
+    dbg = 1;
+
+  if ((board_offset == dbg_board_offset) && (piece == dbg_piece))
+    dbg = 1;
 
   if (gamept->debug_level == 2) {
     if (gamept->debug_fptr != NULL)
