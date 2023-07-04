@@ -126,6 +126,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 char *trim_name(char *name);
 
 LRESULT CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK Promotion(HWND, UINT, WPARAM, LPARAM);
 BOOL CenterWindow (HWND, HWND);
 void do_lbuttondown(HWND hWnd,int file,int rank);
 
@@ -837,7 +838,6 @@ void do_new(HWND hWnd,struct game *gamept)
 {
   char *cpt;
 
-  gamept->gargfilename[0] = 0;
   gamept->title[0] = 0;
 
   if ((cpt = getenv("DEBUG_ORIENTATION")) != NULL)
@@ -1096,6 +1096,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
            break;
 
+        case IDM_PROMOTION:
+           DialogBox(hInst,"PromotionBox",hWnd,(DLGPROC)Promotion);
+
+           break;
+
         case IDM_EXIT:
           DestroyWindow (hWnd);
           break;
@@ -1258,6 +1263,49 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
          if (LOWORD(wParam) == IDOK) {
             EndDialog(hDlg, TRUE);
             return (TRUE);
+         }
+         else if (LOWORD(wParam) == IDCANCEL) {
+            EndDialog(hDlg, FALSE);
+            return (FALSE);
+         }
+
+         break;
+   }
+
+    return FALSE;
+}
+
+//
+//  FUNCTION: Promotion(HWND, unsigned, WORD, LONG)
+//
+//  PURPOSE:  Processes messages for "Promotion" dialog box
+//
+//  MESSAGES:
+//
+// WM_INITDIALOG - initialize dialog box
+// WM_COMMAND    - Input received
+//
+//
+LRESULT CALLBACK Promotion(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+   switch (message) {
+        case WM_INITDIALOG:
+         ShowWindow (hDlg, SW_HIDE);
+
+         CenterWindow (hDlg, GetWindow (hDlg, GW_OWNER));
+
+         ShowWindow (hDlg, SW_SHOW);
+
+         return (TRUE);
+
+      case WM_COMMAND:
+         if (LOWORD(wParam) == IDOK) {
+            EndDialog(hDlg, TRUE);
+            return (TRUE);
+         }
+         else if (LOWORD(wParam) == IDCANCEL) {
+            EndDialog(hDlg, FALSE);
+            return (FALSE);
          }
 
          break;
