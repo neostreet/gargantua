@@ -26,6 +26,7 @@
 #define IDM_END_OF_GAME        209
 
 #define IDM_ABOUT              210
+#define IDM_PROMOTION          211
 
 #define IDC_STATIC -1
 
