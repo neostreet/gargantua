@@ -67,7 +67,6 @@ struct move {
 #define MAX_FILE_NAME_LEN 256
 
 struct game {
-  char gargfilename[MAX_FILE_NAME_LEN];
   char title[80];
   int orientation;
   int num_moves;
