@@ -11,6 +11,7 @@
 #include "garg.fun"
 #include "garg.mac"
 #include "gargantua.h"
+#include "resource.h"
 
 static char appname[] = "Gargantua";
 #define ID_TOOLBAR         1
@@ -117,6 +118,8 @@ static TBBUTTON tbButtons[] = {
 };
 
 static int bHome;
+
+static int promotion_piece;
 
 // Forward declarations of functions included in this code module:
 
@@ -1299,13 +1302,28 @@ LRESULT CALLBACK Promotion(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
          return (TRUE);
 
       case WM_COMMAND:
-         if (LOWORD(wParam) == IDOK) {
-            EndDialog(hDlg, TRUE);
-            return (TRUE);
-         }
-         else if (LOWORD(wParam) == IDCANCEL) {
-            EndDialog(hDlg, FALSE);
-            return (FALSE);
+        switch (LOWORD(wParam)) {
+            case IDC_QUEEN:
+                promotion_piece = QUEEN_ID;
+                break;
+            case IDC_ROOK:
+                promotion_piece = ROOK_ID;
+                break;
+            case IDC_BISHOP:
+                promotion_piece = BISHOP_ID;
+                break;
+            case IDC_KNIGHT:
+                promotion_piece = KNIGHT_ID;
+                break;
+            case IDC_GARGANTUA:
+                promotion_piece = GARGANTUA_ID;
+                break;
+            case IDOK:
+                EndDialog(hDlg, TRUE);
+                return (TRUE);
+            case IDCANCEL:
+                EndDialog(hDlg, FALSE);
+                return (FALSE);
          }
 
          break;
