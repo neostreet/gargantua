@@ -1399,6 +1399,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
 {
   int n;
   int retval;
+  bool bPromotion;
   int invalid_squares[4];
   int num_invalid_squares;
 
@@ -1484,6 +1485,37 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   if ((curr_game.move_start_square_piece == PAWN_ID) ||
       (curr_game.move_start_square_piece == PAWN_ID * -1)) {
     retval = do_pawn_move(&curr_game);
+
+    if (!retval) {
+        // check if this was a pawn promotion
+
+        bPromotion = false;
+
+        if (!((curr_game.curr_move) % 2)) {
+          // White
+
+          if (!curr_game.orientation) {
+            if (!rank)
+              bPromotion = true;
+          }
+          else {
+            if (rank == NUM_RANKS - 1)
+              bPromotion = true;
+          }
+        }
+        else {
+          // Black
+
+          if (!curr_game.orientation) {
+            if (rank == NUM_RANKS - 1)
+              bPromotion = true;
+          }
+          else {
+            if (!rank)
+              bPromotion = true;
+          }
+        }
+    }
   }
   else
     retval = do_piece_move(&curr_game);
