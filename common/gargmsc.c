@@ -183,6 +183,7 @@ static int dbg;
 
 void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares)
 {
+  bool bBlack;
   int from_piece;
   bool bKingsideCastle = false;
   bool bQueensideCastle = false;;
@@ -191,6 +192,8 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
 
   if (dbg_update_board_call == update_board_calls)
     dbg = 0;
+
+  bBlack = (gamept->curr_move % 2);
 
   from_piece = get_piece1(gamept,gamept->moves[gamept->curr_move].from);
 
@@ -201,6 +204,26 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
       break;
     case SPECIAL_MOVE_QUEENSIDE_CASTLE:
       bQueensideCastle = true;
+
+      break;
+    case SPECIAL_MOVE_PROMOTION_QUEEN:
+      from_piece = (bBlack ? QUEEN_ID * -1 : QUEEN_ID);
+
+      break;
+    case SPECIAL_MOVE_PROMOTION_ROOK:
+      from_piece = (bBlack ? ROOK_ID * -1 : ROOK_ID);
+
+      break;
+    case SPECIAL_MOVE_PROMOTION_BISHOP:
+      from_piece = (bBlack ? BISHOP_ID * -1 : BISHOP_ID);
+
+      break;
+    case SPECIAL_MOVE_PROMOTION_KNIGHT:
+      from_piece = (bBlack ? KNIGHT_ID * -1 : KNIGHT_ID);
+
+      break;
+    case SPECIAL_MOVE_PROMOTION_GARGANTUA:
+      from_piece = (bBlack ? GARGANTUA_ID * -1 : GARGANTUA_ID);
 
       break;
   }
