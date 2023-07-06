@@ -183,26 +183,37 @@ static int dbg;
 
 void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares)
 {
-  bool bKingsideCastle;
-  bool bQueensideCastle;
+  int from_piece;
+  bool bKingsideCastle = false;
+  bool bQueensideCastle = false;;
 
   update_board_calls++;
 
   if (dbg_update_board_call == update_board_calls)
     dbg = 0;
 
+  from_piece = get_piece1(gamept,gamept->moves[gamept->curr_move].from);
+
+  switch (gamept->moves[gamept->curr_move].special_move_info) {
+    case SPECIAL_MOVE_KINGSIDE_CASTLE:
+      bKingsideCastle = true;
+
+      break;
+    case SPECIAL_MOVE_QUEENSIDE_CASTLE:
+      bQueensideCastle = true;
+
+      break;
+  }
+
   if (invalid_squares) {
+    *num_invalid_squares = 0;
     invalid_squares[(*num_invalid_squares)++] = gamept->moves[gamept->curr_move].from;
     invalid_squares[(*num_invalid_squares)++] = gamept->moves[gamept->curr_move].to;
   }
 
-  set_piece(gamept,gamept->moves[gamept->curr_move].to,
-    get_piece1(gamept,gamept->moves[gamept->curr_move].from));
+  set_piece(gamept,gamept->moves[gamept->curr_move].to,from_piece);
 
   set_piece(gamept,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
-
-  bKingsideCastle = (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_KINGSIDE_CASTLE);
-  bQueensideCastle = (gamept->moves[gamept->curr_move].special_move_info == SPECIAL_MOVE_QUEENSIDE_CASTLE);
 
   if (bKingsideCastle) {
     if (!(gamept->curr_move % 2)) {
