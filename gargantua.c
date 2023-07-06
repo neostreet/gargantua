@@ -119,7 +119,7 @@ static TBBUTTON tbButtons[] = {
 
 static int bHome;
 
-static int promotion_piece;
+static int special_move_info;
 
 // Forward declarations of functions included in this code module:
 
@@ -1023,22 +1023,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           break;
 
         case VK_HOME:
-          start_of_game(hWnd);
+          if (curr_game.highlight_rank == -1)
+            start_of_game(hWnd);
 
           break;
 
         case VK_END:
-          end_of_game(hWnd);
+          if (curr_game.highlight_rank == -1)
+            end_of_game(hWnd);
 
           break;
 
         case VK_UP:
-          prev_move(hWnd);
+          if (curr_game.highlight_rank == -1)
+            prev_move(hWnd);
 
           break;
 
         case VK_DOWN:
-          next_move(hWnd);
+          if (curr_game.highlight_rank == -1)
+            next_move(hWnd);
 
           break;
       }
@@ -1096,11 +1100,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case IDM_ABOUT:
            DialogBox(hInst,"AboutBox",hWnd,(DLGPROC)About);
-
-           break;
-
-        case IDM_PROMOTION:
-           DialogBox(hInst,"PromotionBox",hWnd,(DLGPROC)Promotion);
 
            break;
 
@@ -1304,19 +1303,19 @@ LRESULT CALLBACK Promotion(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
       case WM_COMMAND:
         switch (LOWORD(wParam)) {
             case IDC_QUEEN:
-                promotion_piece = QUEEN_ID;
+                special_move_info = SPECIAL_MOVE_PROMOTION_QUEEN;
                 break;
             case IDC_ROOK:
-                promotion_piece = ROOK_ID;
+                special_move_info = SPECIAL_MOVE_PROMOTION_ROOK;
                 break;
             case IDC_BISHOP:
-                promotion_piece = BISHOP_ID;
+                special_move_info = SPECIAL_MOVE_PROMOTION_BISHOP;
                 break;
             case IDC_KNIGHT:
-                promotion_piece = KNIGHT_ID;
+                special_move_info = SPECIAL_MOVE_PROMOTION_KNIGHT;
                 break;
             case IDC_GARGANTUA:
-                promotion_piece = GARGANTUA_ID;
+                special_move_info = SPECIAL_MOVE_PROMOTION_GARGANTUA;
                 break;
             case IDOK:
                 EndDialog(hDlg, TRUE);
@@ -1482,39 +1481,49 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     fprintf(curr_game.debug_fptr,"do_lbuttondown:   attempting move: rank = %d,file = %d\n",rank,file);
   }
 
+  bPromotion = false;
+
   if ((curr_game.move_start_square_piece == PAWN_ID) ||
       (curr_game.move_start_square_piece == PAWN_ID * -1)) {
     retval = do_pawn_move(&curr_game);
 
     if (!retval) {
-        // check if this was a pawn promotion
+      // check if this was a pawn promotion
 
-        bPromotion = false;
+      if (!((curr_game.curr_move) % 2)) {
+        // White
 
-        if (!((curr_game.curr_move) % 2)) {
-          // White
-
-          if (!curr_game.orientation) {
-            if (!rank)
-              bPromotion = true;
-          }
-          else {
-            if (rank == NUM_RANKS - 1)
-              bPromotion = true;
-          }
+        if (!curr_game.orientation) {
+          if (!rank)
+            bPromotion = true;
         }
         else {
-          // Black
-
-          if (!curr_game.orientation) {
-            if (rank == NUM_RANKS - 1)
-              bPromotion = true;
-          }
-          else {
-            if (!rank)
-              bPromotion = true;
-          }
+          if (rank == NUM_RANKS - 1)
+            bPromotion = true;
         }
+      }
+      else {
+        // Black
+
+        if (!curr_game.orientation) {
+          if (rank == NUM_RANKS - 1)
+            bPromotion = true;
+        }
+        else {
+          if (!rank)
+            bPromotion = true;
+        }
+      }
+
+      if (bPromotion) {
+        special_move_info = 0;
+
+        if (!DialogBox(hInst,"PromotionBox",hWnd,(DLGPROC)Promotion))
+          retval = 1;
+        else {
+          curr_game.moves[curr_game.curr_move].special_move_info = special_move_info;
+        }
+      }
     }
   }
   else
