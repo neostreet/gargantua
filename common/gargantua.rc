@@ -80,7 +80,6 @@ BEGIN
     POPUP "&Help"
     BEGIN
         MENUITEM "&About",                      IDM_ABOUT
-        MENUITEM "&Promotion",                  IDM_PROMOTION
     END
 END
 
