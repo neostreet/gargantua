@@ -46,13 +46,13 @@ static TCHAR szWriteFileName[MAX_PATH];
 
 static char garg_filter[] = "\
 Gargantua files\0\
-*.ch\0\
+*.garg\0\
 All files (*.*)\0\
 *.*\0\
 \0\
 \0\
 ";
-static char ch_ext[] = "ch";
+static char garg_ext[] = "garg";
 
 static int board_x_offset;
 static int board_y_offset;
@@ -116,8 +116,6 @@ static TBBUTTON tbButtons[] = {
     { 1, IDM_OPEN,                     TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
     { 2, IDM_SAVE,                     TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
 };
-
-static int bHome;
 
 static int special_move_info;
 
@@ -210,27 +208,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   // Initialize global strings
   lstrcpy (szAppName, appname);
 
-  for (n = 0; lpCmdLine[n]; n++) {
-    if (lpCmdLine[n] != ' ') {
-      if (lpCmdLine[n] == '-') {
-        if ((lpCmdLine[n+1] = 'h') &&
-            (lpCmdLine[n+2] = 'o') &&
-            (lpCmdLine[n+3] = 'm') &&
-            (lpCmdLine[n+4] = 'e'))
-          bHome = TRUE;
-
-        for ( ; lpCmdLine[n]; n++) {
-          if (lpCmdLine[n] == ' ')
-            break;
-        }
-      }
-      else
-        break;
-    }
-  }
-
   // save name of Gargantua game
-  lstrcpy(szFile,&lpCmdLine[n]);
+  lstrcpy(szFile,lpCmdLine);
 
   if (szFile[0])
     wsprintf(szTitle,"%s - %s",szAppName,
@@ -950,7 +929,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         OFN_EXTENSIONDIFFERENT;
       OpenFileName.nFileOffset       = 0;
       OpenFileName.nFileExtension    = 0;
-      OpenFileName.lpstrDefExt       = ch_ext;
+      OpenFileName.lpstrDefExt       = garg_ext;
       OpenFileName.lCustData         = 0;
       OpenFileName.lpfnHook          = NULL;
       OpenFileName.lpTemplateName    = NULL;
@@ -972,7 +951,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         OFN_EXTENSIONDIFFERENT;
       WriteFileName.nFileOffset = 0;
       WriteFileName.nFileExtension = 0;
-      WriteFileName.lpstrDefExt = ch_ext;
+      WriteFileName.lpstrDefExt = garg_ext;
       WriteFileName.lCustData = 0;
       WriteFileName.lpfnHook = NULL;
       WriteFileName.lpTemplateName = NULL;
@@ -1071,9 +1050,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             if (!retval) {
               bHaveGame = TRUE;
-
-              if (bHome)
-                position_game(FALSE);
 
               wsprintf(szTitle,"%s - %s",szAppName,
                 trim_name(name));
