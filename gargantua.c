@@ -1059,16 +1059,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
               InvalidateRect(hWnd,NULL,TRUE);
             }
             else {
-              hdc = GetDC(hWnd);
-              rect.left = 0;
-              rect.top = 0;
-              rect.right = garg_window_width;
-              rect.bottom = 16;
-              wsprintf(buf,"read_game() of %s: %d",
-                name,retval);
               wsprintf(buf,read_game_failure,
                 name,retval,curr_game.curr_move);
-              TextOut(hdc,rect.left,rect.top,buf,lstrlen(buf));
+              MessageBox(hWnd,buf,NULL,MB_OK);
             }
           }
 
