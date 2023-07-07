@@ -993,7 +993,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           16,16,                  // width & height of the bitmaps
           sizeof(TBBUTTON));      // structure size
 
-      do_new(hWnd,&curr_game);
+      if (szFile)
+        do_read(hWnd,szFile,&curr_game);
+      else
+        do_new(hWnd,&curr_game);
 
       curr_game.highlight_rank = -1;
       curr_game.highlight_file = -1;
