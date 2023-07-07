@@ -866,6 +866,30 @@ void end_of_game(HWND hWnd)
   redisplay_counts(hWnd,NULL);
 }
 
+void do_read(HWND hWnd,LPSTR name,struct game *gamept)
+{
+  int retval;
+  char buf[256];
+
+  retval = read_binary_game(name,gamept);
+
+  if (!retval) {
+    bHaveGame = TRUE;
+
+    wsprintf(szTitle,"%s - %s",szAppName,
+      trim_name(name));
+    SetWindowText(hWnd,szTitle);
+    gamept->highlight_rank = -1;
+    gamept->highlight_file = -1;
+    InvalidateRect(hWnd,NULL,TRUE);
+  }
+  else {
+    wsprintf(buf,read_game_failure,
+      name,retval,gamept->curr_move);
+    MessageBox(hWnd,buf,NULL,MB_OK);
+  }
+}
+
 //
 //  FUNCTION: WndProc(HWND, unsigned, WORD, LONG)
 //
@@ -890,12 +914,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   int wmId, wmEvent;
   int file;
   int rank;
-  int retval;
   LPSTR name;
   int bHaveName;
   HDC hdc;
   RECT rect;
-  char buf[80];
 
   switch (message) {
     case WM_CREATE:
@@ -1045,24 +1067,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           if (GetOpenFileName(&OpenFileName)) {
             name = OpenFileName.lpstrFile;
-
-            retval = read_binary_game(name,&curr_game);
-
-            if (!retval) {
-              bHaveGame = TRUE;
-
-              wsprintf(szTitle,"%s - %s",szAppName,
-                trim_name(name));
-              SetWindowText(hWnd,szTitle);
-              curr_game.highlight_rank = -1;
-              curr_game.highlight_file = -1;
-              InvalidateRect(hWnd,NULL,TRUE);
-            }
-            else {
-              wsprintf(buf,read_game_failure,
-                name,retval,curr_game.curr_move);
-              MessageBox(hWnd,buf,NULL,MB_OK);
-            }
+            do_read(hWnd,name,&curr_game);
           }
 
           break;
