@@ -15,6 +15,7 @@ int do_pawn_move(struct game *gamept)
   int end_file;
   int rank_diff;
   int file_diff;
+  int retval;
 
   bWhiteMove = (gamept->move_start_square_piece > 0);
 
@@ -84,8 +85,12 @@ int do_pawn_move(struct game *gamept)
 
   gamept->moves[gamept->curr_move].from = gamept->move_start_square;
   gamept->moves[gamept->curr_move].to = gamept->move_end_square;
+  retval = 0;
 
-  return 0; // success
+  if (rank_diff > 1)
+    gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE;
+
+  return retval; // success
 }
 
 char piece_ids[] = "RNBQKG";
