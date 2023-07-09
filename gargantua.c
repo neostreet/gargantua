@@ -40,9 +40,10 @@ static HANDLE garg_piece_bitmap_handles[2];
 static HDC hdc_compatible[2];
 
 static OPENFILENAME OpenFileName;
-static TCHAR szFile[MAX_PATH];
+static TCHAR szGargFile[MAX_PATH];
 static OPENFILENAME WriteFileName;
-static TCHAR szWriteFileName[MAX_PATH];
+static TCHAR szGargWriteFile[MAX_PATH];
+static TCHAR szGargMovesFile[MAX_PATH];
 
 static char garg_filter[] = "\
 Gargantua files\0\
@@ -209,11 +210,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   lstrcpy (szAppName, appname);
 
   // save name of Gargantua game
-  lstrcpy(szFile,lpCmdLine);
+  lstrcpy(szGargFile,lpCmdLine);
 
-  if (szFile[0])
+  if (szGargFile[0])
     wsprintf(szTitle,"%s - %s",szAppName,
-      trim_name(szFile));
+      trim_name(szGargFile));
   else
     lstrcpy(szTitle,szAppName);
 
@@ -890,6 +891,31 @@ void do_read(HWND hWnd,LPSTR name,struct game *gamept)
   }
 }
 
+void replace_extension(LPSTR name,LPSTR ext)
+{
+  int m;
+  int n;
+  int name_len;
+  int ext_len;
+
+  name_len = lstrlen(name);
+  ext_len = lstrlen(ext);
+
+  for (n = 0; n < name_len; n++) {
+    if (name[n] == '.')
+      break;
+  }
+
+  if (n < name_len) {
+    n++;
+
+    for (m = 0; m < ext_len; m++)
+      name[n+m] = ext[m];
+
+    name[n+m] = 0;
+  }
+}
+
 //
 //  FUNCTION: WndProc(HWND, unsigned, WORD, LONG)
 //
@@ -941,8 +967,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       OpenFileName.lpstrCustomFilter = NULL;
       OpenFileName.nMaxCustFilter    = 0;
       OpenFileName.nFilterIndex      = 1;
-      OpenFileName.lpstrFile         = szFile;
-      OpenFileName.nMaxFile          = sizeof(szFile);
+      OpenFileName.lpstrFile         = szGargFile;
+      OpenFileName.nMaxFile          = sizeof(szGargFile);
       OpenFileName.lpstrFileTitle    = NULL;
       OpenFileName.nMaxFileTitle     = 0;
       OpenFileName.lpstrInitialDir   = NULL;
@@ -963,8 +989,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       WriteFileName.lpstrCustomFilter = NULL;
       WriteFileName.nMaxCustFilter = 0;
       WriteFileName.nFilterIndex = 1;
-      WriteFileName.lpstrFile = szWriteFileName;
-      WriteFileName.nMaxFile = sizeof szWriteFileName;
+      WriteFileName.lpstrFile = szGargWriteFile;
+      WriteFileName.nMaxFile = sizeof szGargWriteFile;
       WriteFileName.lpstrFileTitle = NULL;
       WriteFileName.nMaxFileTitle = 0;
       WriteFileName.lpstrInitialDir = NULL;
@@ -993,8 +1019,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           16,16,                  // width & height of the bitmaps
           sizeof(TBBUTTON));      // structure size
 
-      if (szFile)
-        do_read(hWnd,szFile,&curr_game);
+      if (szGargFile[0])
+        do_read(hWnd,szGargFile,&curr_game);
       else
         do_new(hWnd,&curr_game);
 
@@ -1105,10 +1131,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           break;
 
         case IDM_PRINT_MOVES:
-          if (curr_game.debug_level == 2) {
-            if (curr_game.debug_fptr)
-              fprint_moves2(&curr_game,curr_game.debug_fptr);
-          }
+          lstrcpy(szGargMovesFile,szGargFile);
+          replace_extension(szGargMovesFile,"moves");
+          fprint_moves(&curr_game,szGargMovesFile);
 
           break;
 
@@ -1143,7 +1168,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           break;
 
         case IDM_SAVE:
-          write_binary_game(szFile,&curr_game);
+          write_binary_game(szGargFile,&curr_game);
 
           break;
 
@@ -1154,8 +1179,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           if (GetOpenFileName(&WriteFileName)) {
             bHaveName = TRUE;
-            lstrcpy(szFile,szWriteFileName);
-            write_binary_game(szFile,&curr_game);
+            lstrcpy(szGargFile,szGargWriteFile);
+            write_binary_game(szGargFile,&curr_game);
           }
 
           break;
