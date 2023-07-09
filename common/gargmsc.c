@@ -154,7 +154,8 @@ void fprint_moves(struct game *gamept,char *filename)
     return;
 
   for (n = 0; n < gamept->num_moves; n++) {
-    fprintf(fptr,"%d %d %d\n",gamept->moves[n].from,gamept->moves[n].to,gamept->moves[n].special_move_info);
+    fprintf(fptr,"%d %d %s\n",gamept->moves[n].from,gamept->moves[n].to,
+      (gamept->moves[n].special_move_info ? special_move_strings[gamept->moves[n].special_move_info] : ""));
   }
 
   fclose(fptr);
@@ -165,7 +166,8 @@ void fprint_moves2(struct game *gamept,FILE *fptr)
   int n;
 
   for (n = 0; n < gamept->num_moves; n++) {
-    fprintf(fptr,"%d %d %d\n",gamept->moves[n].from,gamept->moves[n].to,gamept->moves[n].special_move_info);
+    fprintf(fptr,"%d %d %s\n",gamept->moves[n].from,gamept->moves[n].to,
+      (gamept->moves[n].special_move_info ? special_move_strings[gamept->moves[n].special_move_info] : ""));
   }
 }
 
