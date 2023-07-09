@@ -43,6 +43,8 @@ static OPENFILENAME OpenFileName;
 static TCHAR szGargFile[MAX_PATH];
 static OPENFILENAME WriteFileName;
 static TCHAR szGargWriteFile[MAX_PATH];
+static TCHAR szGargBoardFile[MAX_PATH];
+static TCHAR szGargGameFile[MAX_PATH];
 static TCHAR szGargMovesFile[MAX_PATH];
 
 static char garg_filter[] = "\
@@ -1115,18 +1117,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           break;
 
         case IDM_PRINT_BOARD:
-          if (curr_game.debug_level == 2) {
-            if (curr_game.debug_fptr)
-              fprint_bd2(&curr_game,curr_game.debug_fptr);
-          }
+          lstrcpy(szGargBoardFile,szGargFile);
+          replace_extension(szGargBoardFile,"board");
+          fprint_bd(&curr_game,szGargBoardFile);
 
           break;
 
         case IDM_PRINT_GAME:
-          if (curr_game.debug_level == 2) {
-            if (curr_game.debug_fptr)
-              fprint_game2(&curr_game,curr_game.debug_fptr);
-          }
+          lstrcpy(szGargGameFile,szGargFile);
+          replace_extension(szGargGameFile,"game");
+          fprint_game(&curr_game,szGargGameFile);
 
           break;
 
