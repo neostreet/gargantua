@@ -26,6 +26,9 @@ static char *bad_piece_move[] = {
   "bad gargantua move"
 };
 
+extern int bHaveGame;
+extern int afl_dbg;
+
 int line_number(char *word,int wordlen)
 {
   int n;
@@ -59,14 +62,33 @@ int read_binary_game(char *filename,struct game *gamept)
   unsigned int bytes_to_read;
   unsigned int bytes_read;
 
-  if ((fhndl = open(filename,O_RDONLY | O_BINARY)) == -1)
+  if (bHaveGame)
+    afl_dbg = 1;
+
+  if (debug_level == 2) {
+    if (debug_fptr != NULL)
+      fprintf(debug_fptr,"read_binary_game: %s\n",filename);
+  }
+
+  if ((fhndl = open(filename,O_RDONLY | O_BINARY)) == -1) {
+    if (debug_level == 2) {
+      if (debug_fptr != NULL)
+        fprintf(debug_fptr,"read_binary_game: open failed\n");
+    }
+
     return 1;
+  }
 
   bytes_to_read = sizeof (struct game) - sizeof gamept->moves;
 
   bytes_read = read(fhndl,(char *)gamept,bytes_to_read);
 
   if (bytes_read != bytes_to_read) {
+    if (debug_level == 2) {
+      if (debug_fptr != NULL)
+        fprintf(debug_fptr,"read_binary_game: bytes_to_read = %d, bytes_read = %d\n",bytes_to_read,bytes_read);
+    }
+
     close(fhndl);
     return 2;
   }
@@ -76,6 +98,11 @@ int read_binary_game(char *filename,struct game *gamept)
   bytes_read = read(fhndl,(char *)gamept->moves,bytes_to_read);
 
   if (bytes_read != bytes_to_read) {
+    if (debug_level == 2) {
+      if (debug_fptr != NULL)
+        fprintf(debug_fptr,"read_binary_game: bytes_to_read = %d, bytes_read = %d\n",bytes_to_read,bytes_read);
+    }
+
     close(fhndl);
     return 3;
   }
