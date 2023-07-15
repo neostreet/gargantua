@@ -111,7 +111,9 @@ static HWND hWndToolBar;
 static char szAppName[100];  // Name of the app
 static char szTitle[100];    // The title bar text
 
-static int bHaveGame;
+int bHaveGame;
+int afl_dbg;
+
 static struct game curr_game;
 
 static TBBUTTON tbButtons[] = {
@@ -164,12 +166,12 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   cpt = getenv("DEBUG_GARGANTUA");
 
   if (cpt != NULL) {
-    curr_game.debug_level = atoi(cpt);
-    curr_game.debug_fptr = fopen("gargantua.dbg","w");
+    debug_level = atoi(cpt);
+    debug_fptr = fopen("gargantua.dbg","w");
   }
   else {
-    curr_game.debug_level = 0;
-    curr_game.debug_fptr = NULL;
+    debug_level = 0;
+    debug_fptr = NULL;
   }
 
   if ((cpt = getenv("TOP_MARGIN")) != NULL)
@@ -214,6 +216,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   // save name of Gargantua game
   lstrcpy(szGargFile,lpCmdLine);
 
+  if (debug_level == 2) {
+    if (debug_fptr != NULL)
+      fprintf(debug_fptr,"WinMain: lpCmdLine = %s\n",lpCmdLine);
+  }
+
   if (szGargFile[0])
     wsprintf(szTitle,"%s - %s",szAppName,
       trim_name(szGargFile));
@@ -238,8 +245,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     DispatchMessage(&msg);
   }
 
-  if (curr_game.debug_fptr)
-    fclose(curr_game.debug_fptr);
+  if (debug_fptr)
+    fclose(debug_fptr);
 
   return (msg.wParam);
 }
@@ -356,9 +363,9 @@ int get_piece_offset(int piece,int rank,int file)
   int offset;
   int retval;
 
-  if (curr_game.debug_level == 2) {
-    if (curr_game.debug_fptr != NULL) {
-      fprintf(curr_game.debug_fptr,"dbg1 rank = %d, file = %d, piece = %2d, ",
+  if (debug_level == 2) {
+    if (debug_fptr != NULL) {
+      fprintf(debug_fptr,"dbg1 rank = %d, file = %d, piece = %2d, ",
         rank,file,piece);
     }
   }
@@ -401,9 +408,9 @@ int get_piece_offset(int piece,int rank,int file)
       retval = -1;
   }
 
-  if (curr_game.debug_level == 2) {
-    if (curr_game.debug_fptr != NULL)
-      fprintf(curr_game.debug_fptr,"retval = %2d\n",retval);
+  if (debug_level == 2) {
+    if (debug_fptr != NULL)
+      fprintf(debug_fptr,"retval = %2d\n",retval);
   }
 
   return retval;
@@ -418,8 +425,8 @@ void invalidate_rect(HWND hWnd,int rank,int file)
   rect.right = rect.left + width_in_pixels;
   rect.bottom = rect.top + height_in_pixels;
 
-  if (curr_game.debug_fptr) {
-    fprintf(curr_game.debug_fptr,"invalidate_rect(): left = %d, top = %d, right = %d, bottom = %d\n",
+  if (debug_fptr) {
+    fprintf(debug_fptr,"invalidate_rect(): left = %d, top = %d, right = %d, bottom = %d\n",
       rect.left,rect.top,rect.right,rect.bottom);
   }
 
@@ -439,8 +446,8 @@ void invalidate_square(HWND hWnd,int square)
   else
     file = (NUM_FILES - 1) - file;
 
-  if (curr_game.debug_fptr) {
-    fprintf(curr_game.debug_fptr,"invalidate_square(): rank = %d, file = %d\n",
+  if (debug_fptr) {
+    fprintf(debug_fptr,"invalidate_square(): rank = %d, file = %d\n",
       rank,file);
   }
 
@@ -512,15 +519,20 @@ void do_paint(HWND hWnd)
   int bSelectedFont;
   char buf[80];
 
+  if (bHaveGame)
+    afl_dbg = 1;
+
   hdc = BeginPaint(hWnd,&ps);
 
-  if (curr_game.debug_level == 2) {
-    if (curr_game.debug_fptr) {
-      fprintf(curr_game.debug_fptr,"do_paint():\n");
-      fprintf(curr_game.debug_fptr,"  highlight_rank = %d\n",curr_game.highlight_rank);
-      fprintf(curr_game.debug_fptr,"  highlight_file = %d\n",curr_game.highlight_file);
+#ifdef UNDEF
+  if (bHaveGame && (debug_level == 2)) {
+    if (debug_fptr) {
+      fprintf(debug_fptr,"do_paint():\n");
+      fprintf(debug_fptr,"  highlight_rank = %d\n",curr_game.highlight_rank);
+      fprintf(debug_fptr,"  highlight_file = %d\n",curr_game.highlight_file);
     }
   }
+#endif
 
   for (m = 0; m < NUM_RANKS; m++) {
     for (n = 0; n < NUM_FILES; n++) {
@@ -532,25 +544,29 @@ void do_paint(HWND hWnd)
       if (!RectVisible(hdc,&rect))
         continue;
 
-      if (curr_game.debug_level == 2) {
-        if (curr_game.debug_fptr) {
-          fprintf(curr_game.debug_fptr,"  rank = %d, file = %d\n",m,n);
-          fprintf(curr_game.debug_fptr,"  rect.left = %d, rect.top = %d\n",
+#ifdef UNDEF
+      if (bHaveGame && (debug_level == 2)) {
+        if (debug_fptr) {
+          fprintf(debug_fptr,"  rank = %d, file = %d\n",m,n);
+          fprintf(debug_fptr,"  rect.left = %d, rect.top = %d\n",
             rect.left,rect.top);
-          fprintf(curr_game.debug_fptr,"  rect.right = %d, rect.bottom = %d\n",
+          fprintf(debug_fptr,"  rect.right = %d, rect.bottom = %d\n",
             rect.right,rect.bottom);
         }
       }
+#endif
 
       if (!curr_game.orientation)
         piece = get_piece2(&curr_game,(NUM_RANKS - 1) - m,n);
       else
         piece = get_piece2(&curr_game,m,(NUM_FILES - 1) - n);
 
-      if (curr_game.debug_level == 2) {
-        if (curr_game.debug_fptr)
-          fprintf(curr_game.debug_fptr,"  piece = %d\n",piece);
+#ifdef UNDEF
+      if (bHaveGame && (debug_level == 2)) {
+        if (debug_fptr)
+          fprintf(debug_fptr,"  piece = %d\n",piece);
       }
+#endif
 
       piece_offset = get_piece_offset(piece,m,n);
 
@@ -572,6 +588,13 @@ void do_paint(HWND hWnd)
           bigbmp_column * width_in_pixels,
           bigbmp_row * height_in_pixels,
           SRCCOPY);
+
+        if (bHaveGame && (debug_level == 2)) {
+          if (debug_fptr) {
+            fprintf(debug_fptr,"BitBlt() %d %d %d %d\n",
+              rect.left,rect.top,width_in_pixels,height_in_pixels);
+          }
+        }
       }
     }
   }
@@ -585,9 +608,9 @@ void do_paint(HWND hWnd)
   rect.bottom = TOOLBAR_HEIGHT + 16;
 
   if (RectVisible(hdc,&rect)) {
-    if (curr_game.debug_level == 2) {
-      if (curr_game.debug_fptr)
-        fprintf(curr_game.debug_fptr,"  printing the title\n");
+    if (bHaveGame && (debug_level == 2)) {
+      if (debug_fptr)
+        fprintf(debug_fptr,"  printing the title\n");
     }
 
     if (!bSetBkColor && (bk_color != COLOR_WHITE)) {
@@ -696,12 +719,12 @@ static void do_move(HWND hWnd)
   int invalid_squares[4];
   int num_invalid_squares;
 
-  if (curr_game.debug_fptr != NULL)
-    fprintf(curr_game.debug_fptr,"do_move(): curr_move = %d\n",curr_game.curr_move);
+  if (debug_fptr != NULL)
+    fprintf(debug_fptr,"do_move(): curr_move = %d\n",curr_game.curr_move);
 
   if (curr_game.curr_move == curr_game.num_moves) {
-    if (curr_game.debug_fptr != NULL)
-      fprintf(curr_game.debug_fptr,"do_move(): early exit\n");
+    if (debug_fptr != NULL)
+      fprintf(debug_fptr,"do_move(): early exit\n");
 
     return;
   }
@@ -711,9 +734,9 @@ static void do_move(HWND hWnd)
   for (n = 0; n < num_invalid_squares; n++)
     invalidate_square(hWnd,invalid_squares[n]);
 
-  if (curr_game.debug_level == 2) {
-    if (curr_game.debug_fptr) {
-      fprint_bd2(&curr_game,curr_game.debug_fptr);
+  if (debug_level == 2) {
+    if (debug_fptr) {
+      fprint_bd2(&curr_game,debug_fptr);
     }
   }
 
@@ -766,11 +789,11 @@ static void toggle_board_size(HWND hWnd)
 {
   RECT rect;
 
-  if (curr_game.debug_fptr) {
-    fprintf(curr_game.debug_fptr,"toggle_board_size()\n");
-    fprintf(curr_game.debug_fptr,"  bBig = %d\n",curr_game.bBig);
-    fprintf(curr_game.debug_fptr,"  highlight_rank = %d\n",curr_game.highlight_rank);
-    fprintf(curr_game.debug_fptr,"  highlight_file = %d\n",curr_game.highlight_file);
+  if (debug_fptr) {
+    fprintf(debug_fptr,"toggle_board_size()\n");
+    fprintf(debug_fptr,"  bBig = %d\n",curr_game.bBig);
+    fprintf(debug_fptr,"  highlight_rank = %d\n",curr_game.highlight_rank);
+    fprintf(debug_fptr,"  highlight_file = %d\n",curr_game.highlight_file);
   }
 
   if (!curr_game.bBig) {
@@ -791,10 +814,10 @@ static void toggle_board_size(HWND hWnd)
   rect.left = ((spi_rect.right - spi_rect.left) - garg_window_width) / 2;
   rect.top = ((spi_rect.bottom - spi_rect.top) - garg_window_height) / 2;
 
-  if (curr_game.debug_fptr) {
-    fprintf(curr_game.debug_fptr,"  width_in_pixels = %d\n",width_in_pixels);
-    fprintf(curr_game.debug_fptr,"  height_in_pixels = %d\n",height_in_pixels);
-    fprintf(curr_game.debug_fptr,"  bBig = %d\n",curr_game.bBig);
+  if (debug_fptr) {
+    fprintf(debug_fptr,"  width_in_pixels = %d\n",width_in_pixels);
+    fprintf(debug_fptr,"  height_in_pixels = %d\n",height_in_pixels);
+    fprintf(debug_fptr,"  bBig = %d\n",curr_game.bBig);
   }
 
   MoveWindow(hWnd,rect.left,rect.top,
@@ -805,8 +828,8 @@ static void position_game(int move)
 {
   //char position_file_name[80];
 
-  if (curr_game.debug_fptr != NULL)
-    fprintf(curr_game.debug_fptr,"position_game(): curr_move = %d\n",curr_game.curr_move);
+  if (debug_fptr != NULL)
+    fprintf(debug_fptr,"position_game(): curr_move = %d\n",curr_game.curr_move);
 
   curr_game.curr_move = 0;
   set_initial_board(&curr_game);
@@ -1404,8 +1427,8 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   int invalid_squares[4];
   int num_invalid_squares;
 
-  if (curr_game.debug_fptr != NULL) {
-    fprintf(curr_game.debug_fptr,"do_lbuttondown: rank = %d, file = %d\n",rank,file);
+  if (debug_fptr != NULL) {
+    fprintf(debug_fptr,"do_lbuttondown: rank = %d, file = %d\n",rank,file);
   }
 
   if ((file >= 0) && (file < NUM_FILES) &&
@@ -1450,15 +1473,15 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   }
 
   if (curr_game.highlight_rank == -1) {
-    if (curr_game.debug_fptr) {
-      fprintf(curr_game.debug_fptr,"do_lbuttondown:   start_square_piece = %d, curr_move = %d\n",
+    if (debug_fptr) {
+      fprintf(debug_fptr,"do_lbuttondown:   start_square_piece = %d, curr_move = %d\n",
         curr_game.move_start_square_piece,curr_game.curr_move);
     }
 
     if ( ((curr_game.move_start_square_piece > 0) && !((curr_game.curr_move) % 2)) ||
          ((curr_game.move_start_square_piece < 0) &&  ((curr_game.curr_move) % 2)) ) {
-      if (curr_game.debug_fptr) {
-        fprintf(curr_game.debug_fptr,"do_lbuttondown:   setting highlight: rank = %d, file = %d\n",rank,file);
+      if (debug_fptr) {
+        fprintf(debug_fptr,"do_lbuttondown:   setting highlight: rank = %d, file = %d\n",rank,file);
       }
 
       curr_game.highlight_file = file;
@@ -1467,8 +1490,8 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
       invalidate_rect(hWnd,rank,file);
     }
     else {
-      if (curr_game.debug_fptr) {
-        fprintf(curr_game.debug_fptr,"do_lbuttondown:   not setting highlight: rank = %d, file = %d\n",rank,file);
+      if (debug_fptr) {
+        fprintf(debug_fptr,"do_lbuttondown:   not setting highlight: rank = %d, file = %d\n",rank,file);
       }
     }
 
@@ -1479,8 +1502,8 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   if ((curr_game.move_start_square_piece * curr_game.move_end_square_piece) > 0)
     return;
 
-  if (curr_game.debug_fptr) {
-    fprintf(curr_game.debug_fptr,"do_lbuttondown:   attempting move: rank = %d,file = %d\n",rank,file);
+  if (debug_fptr) {
+    fprintf(debug_fptr,"do_lbuttondown:   attempting move: rank = %d,file = %d\n",rank,file);
   }
 
   bPromotion = false;
