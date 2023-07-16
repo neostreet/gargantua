@@ -79,8 +79,23 @@ int do_pawn_move(struct game *gamept)
     if (rank_diff != 1)
       return 10; // failure
 
-    if (!gamept->move_end_square_piece)
-      return 11; // failure
+    if (!gamept->move_end_square_piece) {
+      // check for en passant capture
+      if (bWhiteMove && (start_rank == 5) &&
+        (get_piece2(gamept,5,end_file) == PAWN_ID * -1) &&
+        (gamept->moves[gamept->curr_move-1].special_move_info == SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE)) {
+
+        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_EN_PASSANT_CAPTURE;
+      }
+      else if (!bWhiteMove && (start_rank == 4) &&
+        (get_piece2(gamept,4,end_file) == PAWN_ID) &&
+        (gamept->moves[gamept->curr_move-1].special_move_info == SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE)) {
+
+        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_EN_PASSANT_CAPTURE;
+      }
+      else
+        return 11; // failure
+    }
   }
 
   gamept->moves[gamept->curr_move].from = gamept->move_start_square;
