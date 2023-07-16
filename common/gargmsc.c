@@ -188,7 +188,9 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   bool bBlack;
   int from_piece;
   bool bKingsideCastle = false;
-  bool bQueensideCastle = false;;
+  bool bQueensideCastle = false;
+  bool bEnPassantCapture = false;
+  int square_to_clear;
 
   update_board_calls++;
 
@@ -206,6 +208,10 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
       break;
     case SPECIAL_MOVE_QUEENSIDE_CASTLE:
       bQueensideCastle = true;
+
+      break;
+    case SPECIAL_MOVE_EN_PASSANT_CAPTURE:
+      bEnPassantCapture = true;
 
       break;
     case SPECIAL_MOVE_PROMOTION_QUEEN:
@@ -287,6 +293,21 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
         invalid_squares[(*num_invalid_squares)++] = 81;
       }
     }
+  }
+  else if (bEnPassantCapture) {
+    if (!(gamept->curr_move % 2)) {
+      // it's White's move
+      square_to_clear = gamept->moves[gamept->curr_move].to - NUM_FILES;
+    }
+    else {
+      // it's Blacks's move
+      square_to_clear = gamept->moves[gamept->curr_move].to + NUM_FILES;
+    }
+
+    set_piece(gamept,square_to_clear,0);
+
+    if (invalid_squares)
+      invalid_squares[(*num_invalid_squares)++] = square_to_clear;
   }
 }
 
