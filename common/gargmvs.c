@@ -474,6 +474,12 @@ int gargantua_move(
   if ((dist1 == 3) && (dist2 == 2))
     return 0;  /* success */
 
+  if ((dist1 == 3) && (dist2 == 4))
+    return 0;  /* success */
+
+  if ((dist1 == 4) && (dist2 == 3))
+    return 0;  /* success */
+
   return 1;    /* failure */
 }
 
