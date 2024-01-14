@@ -449,13 +449,18 @@ int gargantua_move(
   int rank2
 )
 {
+  // don't allow gargantuas to capture each other
+
+  if (!(get_piece2(gamept,rank1,file1) + get_piece2(gamept,rank2,file2)))
+    return 1;  /* failure */
+
   if (!queen_move(gamept,file1,rank1,file2,rank2))
     return 0;  /* success */
 
   if (!knight_move(gamept,file1,rank1,file2,rank2))
     return 0;  /* success */
 
-  return 1;    /* failure */
+  return 2;    /* failure */
 }
 
 int gargantua_move2(
