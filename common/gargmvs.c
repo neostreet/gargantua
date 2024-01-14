@@ -449,35 +449,10 @@ int gargantua_move(
   int rank2
 )
 {
-  int dist1;
-  int dist2;
-
-  dist1 = (file1 - file2);
-
-  if (dist1 < 0)
-    dist1 *= -1;
-
-  dist2 = (rank1 - rank2);
-
-  if (dist2 < 0)
-    dist2 *= -1;
-
-  if ((dist1 == 1) && (dist2 == 2))
+  if (!queen_move(gamept,file1,rank1,file2,rank2))
     return 0;  /* success */
 
-  if ((dist1 == 2) && (dist2 == 1))
-    return 0;  /* success */
-
-  if ((dist1 == 2) && (dist2 == 3))
-    return 0;  /* success */
-
-  if ((dist1 == 3) && (dist2 == 2))
-    return 0;  /* success */
-
-  if ((dist1 == 3) && (dist2 == 4))
-    return 0;  /* success */
-
-  if ((dist1 == 4) && (dist2 == 3))
+  if (!knight_move(gamept,file1,rank1,file2,rank2))
     return 0;  /* success */
 
   return 1;    /* failure */
