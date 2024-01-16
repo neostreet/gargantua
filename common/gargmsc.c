@@ -6,16 +6,14 @@
 #include "bitfuns.h"
 
 static unsigned char initial_board[] = {
-  (unsigned char)0x70, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x07,
-  (unsigned char)0x02, (unsigned char)0x34, (unsigned char)0x56, (unsigned char)0x43, (unsigned char)0x20,
-  (unsigned char)0x01, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x10,
+  (unsigned char)0x52, (unsigned char)0x34, (unsigned char)0x76, (unsigned char)0x43, (unsigned char)0x25,
+  (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
-  (unsigned char)0x0f, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xf0,
-  (unsigned char)0x0e, (unsigned char)0xdc, (unsigned char)0xba, (unsigned char)0xcd, (unsigned char)0xe0,
-  (unsigned char)0x90, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x09,
+  (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff,
+  (unsigned char)0xbe, (unsigned char)0xdc, (unsigned char)0x9a, (unsigned char)0xcd, (unsigned char)0xeb,
 };
 
 extern char piece_ids[]; /* "RNBQKG" */
@@ -328,11 +326,11 @@ int get_piece1(struct game *gamept,int board_offset)
   return piece_int;
 }
 
-int get_piece2(struct game *gamept,int row,int column)
+int get_piece2(struct game *gamept,int rank,int file)
 {
   int board_offset;
 
-  board_offset = row * NUM_RANKS + column;
+  board_offset = rank * NUM_FILES + file;
   return get_piece1(gamept,board_offset);
 }
 
