@@ -5,7 +5,7 @@
 #define BLACK 1
 #define NUM_PLAYERS 2
 
-#define NUM_RANKS 10
+#define NUM_RANKS  8
 #define NUM_FILES 10
 
 #define NUM_BOARD_SQUARES (NUM_RANKS * NUM_FILES)
