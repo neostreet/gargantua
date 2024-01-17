@@ -373,38 +373,66 @@ int king_move(
 {
   int dist1;
   int dist2;
+  int should_be_empty1;
+  int should_be_empty2;
+  int should_be_empty3;
+  int should_be_rook;
 
   // first, check if this is a castling move
   if (!(gamept->curr_move % 2)) {
     // it's White's move
 
     // check for kingside castle
-    if ((file1 == 5) && (rank1 == 1) && (file2 == 7) && (rank2 == 1) &&
-      !get_piece1(gamept,16) && !get_piece1(gamept,17) && (get_piece1(gamept,18) == ROOK_ID)) {
-      gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
-      return 0;
+    if ((file1 == 5) && (rank1 == 0) && (file2 == 8) && (rank2 == 0)) {
+      should_be_empty1 = get_piece1(gamept,6);
+      should_be_empty2 = get_piece1(gamept,7);
+      should_be_rook = get_piece1(gamept,8);
+
+      if (!should_be_empty1 && !should_be_empty2 && (should_be_rook == ROOK_ID)) {
+        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
+        return 0;
+      }
     }
 
     // check for queenside castle
-    if ((file1 == 5) && (rank1 == 1) && (file2 == 3) && (rank2 == 1) &&
-      !get_piece1(gamept,12) && !get_piece1(gamept,13) && !get_piece1(gamept,14) && (get_piece1(gamept,11) == ROOK_ID)) {
-      gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
-      return 0;
+    if ((file1 == 5) && (rank1 == 0) && (file2 == 1) && (rank2 == 0)) {
+      should_be_empty1 = get_piece1(gamept,2);
+      should_be_empty2 = get_piece1(gamept,3);
+      should_be_empty3 = get_piece1(gamept,4);
+      should_be_rook = get_piece1(gamept,1);
+
+      if (!should_be_empty1 && !should_be_empty2 && !should_be_empty3 && (should_be_rook == ROOK_ID)) {
+        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
+        return 0;
+      }
     }
   }
   else {
     // it's Black's move
 
     // check for kingside castle
-    if ((file1 == 5) && (rank1 == 8) && (file2 == 7) && (rank2 == 8)) {
-      gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
-      return 0;
+    if ((file1 == 5) && (rank1 == 7) && (file2 == 8) && (rank2 == 7)) {
+      should_be_empty1 = get_piece1(gamept,76);
+      should_be_empty2 = get_piece1(gamept,77);
+      should_be_rook = get_piece1(gamept,78);
+
+      if (!should_be_empty1 && !should_be_empty2 && (should_be_rook == ROOK_ID * -1)) {
+        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
+        return 0;
+      }
     }
 
     // check for queenside castle
-    if ((file1 == 5) && (rank1 == 8) && (file2 == 3) && (rank2 == 8)) {
-      gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
-      return 0;
+    if ((file1 == 5) && (rank1 == 7) && (file2 == 1) && (rank2 == 7)) {
+      should_be_empty1 = get_piece1(gamept,72);
+      should_be_empty2 = get_piece1(gamept,73);
+      should_be_empty3 = get_piece1(gamept,74);
+      should_be_rook = get_piece1(gamept,71);
+
+      if (!should_be_empty1 && !should_be_empty2 && !should_be_empty3 && (should_be_rook == ROOK_ID * -1)) {
+        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
+        return 0;
+      }
     }
   }
 
