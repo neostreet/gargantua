@@ -247,49 +247,33 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   if (bKingsideCastle) {
     if (!(gamept->curr_move % 2)) {
       // it's White's move
-      set_piece(gamept,16,
-        get_piece1(gamept,18));
-      set_piece(gamept,18,0);
+      set_piece(gamept,7,ROOK_ID);
 
-      if (invalid_squares) {
-        invalid_squares[(*num_invalid_squares)++] = 16;
-        invalid_squares[(*num_invalid_squares)++] = 18;
-      }
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 7;
     }
     else {
       // it's Blacks's move
-      set_piece(gamept,86,
-        get_piece1(gamept,88));
-      set_piece(gamept,88,0);
+      set_piece(gamept,77,ROOK_ID * -1);
 
-      if (invalid_squares) {
-        invalid_squares[(*num_invalid_squares)++] = 86;
-        invalid_squares[(*num_invalid_squares)++] = 88;
-      }
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 77;
     }
   }
   else if (bQueensideCastle) {
     if (!(gamept->curr_move % 2)) {
       // it's White's move
-      set_piece(gamept,14,
-        get_piece1(gamept,11));
-      set_piece(gamept,11,0);
+      set_piece(gamept,2,ROOK_ID);
 
-      if (invalid_squares) {
-        invalid_squares[(*num_invalid_squares)++] = 14;
-        invalid_squares[(*num_invalid_squares)++] = 11;
-      }
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 2;
     }
     else {
       // it's Blacks's move
-      set_piece(gamept,84,
-        get_piece1(gamept,81));
-      set_piece(gamept,81,0);
+      set_piece(gamept,72,ROOK_ID * -1);
 
-      if (invalid_squares) {
-        invalid_squares[(*num_invalid_squares)++] = 84;
-        invalid_squares[(*num_invalid_squares)++] = 81;
-      }
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 72;
     }
   }
   else if (bEnPassantCapture) {
