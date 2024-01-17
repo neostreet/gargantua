@@ -95,7 +95,7 @@ CAPTION "About Gargantua"
 FONT 8, "System"
 BEGIN
     CTEXT           "Gargantua 1.0",IDC_COMPANY,6,6,100,8
-    CTEXT           "c 2023 Ambergris Software",IDC_COMPANY2,3,20,100,8
+    CTEXT           "c 2024 Ambergris Software",IDC_COMPANY2,3,20,100,8
     DEFPUSHBUTTON   "OK",IDOK,36,35,32,14,WS_GROUP
 END
 
