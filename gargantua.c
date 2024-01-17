@@ -664,18 +664,10 @@ void do_paint(HWND hWnd)
         bSelectedFont = TRUE;
       }
 
-      if (!curr_game.orientation) {
-        if (!m)
-          buf[0] = 'T';
-        else
-          buf[0] = '1' + (NUM_FILES - 1) - m;
-      }
-      else {
-        if (m < NUM_FILES - 1)
-          buf[0] = '1' + m;
-        else
-          buf[0] = 'T';
-      }
+      if (!curr_game.orientation)
+        buf[0] = '1' + (NUM_RANKS - 1) - m;
+      else
+        buf[0] = '1' + m;
 
       TextOut(hdc,rect.left,rect.top,buf,1);
     }
