@@ -73,13 +73,6 @@ struct game {
   int orientation;
   int num_moves;
   int curr_move;
-  int bBig;
-  int highlight_rank;
-  int highlight_file;
-  int move_start_square;
-  int move_start_square_piece;
-  int move_end_square;
-  int move_end_square_piece;
   struct move moves[MAX_MOVES];
 };
 
