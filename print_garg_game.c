@@ -29,7 +29,7 @@ int main(int argc,char **argv)
     return 2;
   }
 
-  printf("curr_game.num_moves = %d\n",curr_game.num_moves);
+  print_game(&curr_game);
   print_bd(&curr_game);
 
   return 0;
