@@ -185,6 +185,7 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
 {
   bool bBlack;
   int from_piece;
+  int to_piece;
   bool bKingsideCastle = false;
   bool bQueensideCastle = false;
   bool bEnPassantCapture = false;
@@ -198,6 +199,10 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   bBlack = (gamept->curr_move % 2);
 
   from_piece = get_piece1(gamept,gamept->moves[gamept->curr_move].from);
+  to_piece = get_piece1(gamept,gamept->moves[gamept->curr_move].to);
+
+  if (from_piece * to_piece < 0)
+    gamept->moves[gamept->curr_move].special_move_info |= SPECIAL_MOVE_CAPTURE;
 
   switch (gamept->moves[gamept->curr_move].special_move_info) {
     case SPECIAL_MOVE_KINGSIDE_CASTLE:
