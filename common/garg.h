@@ -11,7 +11,7 @@
 #define NUM_BOARD_SQUARES (NUM_RANKS * NUM_FILES)
 
 #define CHARS_IN_BOARD \
-(NUM_BOARD_SQUARES / 2)  // 100 squares / 2 (nibbles per char)
+(NUM_BOARD_SQUARES / 2)  // 80 squares / 2 (nibbles per char)
 
 #define PAWN_ID       1
 #define ROOK_ID       2
