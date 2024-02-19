@@ -10,6 +10,7 @@ int get_ystart(struct game *gamept,int board_offset);
 int get_color(int);
 void put_square(struct game *gamept,int what,int where);
 void update_move_number(struct game *gamept);
+void copy_game(struct game *gamept_to,struct game *gamept_from);
 
 int do_pawn_move(struct game *gamept);
 int get_piece_id_ix(char piece);
@@ -34,9 +35,10 @@ int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt);
 void set_initial_board(struct game *gamept);
 void position_game(struct game *gamept,int move);
 void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares);
-int get_piece1(struct game *gamept,int board_offset);
-int get_piece2(struct game *gamept,int rank,int file);
-void set_piece(struct game *gamept,int board_offset,int piece);
+int get_piece1(unsigned char *board,int board_offset);
+int get_piece2(unsigned char *board,int rank,int file);
+void set_piece1(unsigned char *board,int board_offset,int piece);
+void set_piece2(unsigned char *board,int rank,int file,int piece);
 
 void print_bd(struct game *gamept);
 void fprint_game(struct game *gamept,char *filename);
@@ -49,3 +51,14 @@ void fprint_moves2(struct game *gamept,FILE *fptr);
 void print_game(struct game *gamept);
 void fprintf_move(FILE *fptr,struct game *gamept);
 void sprintf_move(struct game *gamept,char *buf,int buf_len,bool bInline);
+
+int square_attacks_square(unsigned char *board,int square1,int square2);
+int pawn_attacks_square(unsigned char *board,int square1,int color,int square2);
+int rook_attacks_square(unsigned char *board,int square1,int square2);
+int knight_attacks_square(unsigned char *board,int square1,int square2);
+int bishop_attacks_square(unsigned char *board,int square1,int square2);
+int queen_attacks_square(unsigned char *board,int square1,int square2);
+int king_attacks_square(unsigned char *board,int square1,int square2);
+int gargantua_attacks_square(unsigned char *board,int square1,int square2);
+bool player_is_in_check(bool bBlack,unsigned char *board);
+int calc_square(char *algebraic_notation);
