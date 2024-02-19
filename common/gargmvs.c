@@ -82,13 +82,13 @@ int do_pawn_move(struct game *gamept)
     if (!move_end_square_piece) {
       // check for en passant capture
       if (bWhiteMove && (start_rank == 4) &&
-        (get_piece2(gamept,4,end_file) == PAWN_ID * -1) &&
+        (get_piece2(gamept->board,4,end_file) == PAWN_ID * -1) &&
         (gamept->moves[gamept->curr_move-1].special_move_info == SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE)) {
 
         gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_EN_PASSANT_CAPTURE;
       }
       else if (!bWhiteMove && (start_rank == 3) &&
-        (get_piece2(gamept,3,end_file) == PAWN_ID) &&
+        (get_piece2(gamept->board,3,end_file) == PAWN_ID) &&
         (gamept->moves[gamept->curr_move-1].special_move_info == SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE)) {
 
         gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_EN_PASSANT_CAPTURE;
@@ -170,12 +170,12 @@ int rook_move(
   if (file1 == file2) {
     if (rank1 > rank2) {
       for (n = rank2 + 1; n < rank1; n++)
-        if (get_piece2(gamept,n,file1))
+        if (get_piece2(gamept->board,n,file1))
           return 1;  /* failure */
     }
     else
       for (n = rank1 + 1; n < rank2; n++)
-        if (get_piece2(gamept,n,file1))
+        if (get_piece2(gamept->board,n,file1))
           return 2;  /* failure */
 
     return 0;  /* success */
@@ -184,12 +184,12 @@ int rook_move(
   if (rank1 == rank2) {
     if (file1 > file2) {
       for (n = file2 + 1; n < file1; n++)
-        if (get_piece2(gamept,rank1,n))
+        if (get_piece2(gamept->board,rank1,n))
           return 1;  /* failure */
     }
     else
       for (n = file1 + 1; n < file2; n++)
-        if (get_piece2(gamept,rank1,n))
+        if (get_piece2(gamept->board,rank1,n))
           return 2;  /* failure */
 
     return 0;  /* success */
@@ -305,7 +305,7 @@ int bishop_move(
 
     rank1 += rank_dir;
 
-    if (get_piece2(gamept,rank1,file1))
+    if (get_piece2(gamept->board,rank1,file1))
       return 2;  /* failure */
   }
 
@@ -384,9 +384,9 @@ int king_move(
 
     // check for kingside castle
     if ((file1 == 5) && (rank1 == 0) && (file2 == 8) && (rank2 == 0)) {
-      should_be_empty1 = get_piece1(gamept,6);
-      should_be_empty2 = get_piece1(gamept,7);
-      should_be_rook = get_piece1(gamept,8);
+      should_be_empty1 = get_piece1(gamept->board,6);
+      should_be_empty2 = get_piece1(gamept->board,7);
+      should_be_rook = get_piece1(gamept->board,8);
 
       if (!should_be_empty1 && !should_be_empty2 && (should_be_rook == ROOK_ID)) {
         gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
@@ -396,10 +396,10 @@ int king_move(
 
     // check for queenside castle
     if ((file1 == 5) && (rank1 == 0) && (file2 == 1) && (rank2 == 0)) {
-      should_be_empty1 = get_piece1(gamept,2);
-      should_be_empty2 = get_piece1(gamept,3);
-      should_be_empty3 = get_piece1(gamept,4);
-      should_be_rook = get_piece1(gamept,1);
+      should_be_empty1 = get_piece1(gamept->board,2);
+      should_be_empty2 = get_piece1(gamept->board,3);
+      should_be_empty3 = get_piece1(gamept->board,4);
+      should_be_rook = get_piece1(gamept->board,1);
 
       if (!should_be_empty1 && !should_be_empty2 && !should_be_empty3 && (should_be_rook == ROOK_ID)) {
         gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
@@ -412,9 +412,9 @@ int king_move(
 
     // check for kingside castle
     if ((file1 == 5) && (rank1 == 7) && (file2 == 8) && (rank2 == 7)) {
-      should_be_empty1 = get_piece1(gamept,76);
-      should_be_empty2 = get_piece1(gamept,77);
-      should_be_rook = get_piece1(gamept,78);
+      should_be_empty1 = get_piece1(gamept->board,76);
+      should_be_empty2 = get_piece1(gamept->board,77);
+      should_be_rook = get_piece1(gamept->board,78);
 
       if (!should_be_empty1 && !should_be_empty2 && (should_be_rook == ROOK_ID * -1)) {
         gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
@@ -424,10 +424,10 @@ int king_move(
 
     // check for queenside castle
     if ((file1 == 5) && (rank1 == 7) && (file2 == 1) && (rank2 == 7)) {
-      should_be_empty1 = get_piece1(gamept,72);
-      should_be_empty2 = get_piece1(gamept,73);
-      should_be_empty3 = get_piece1(gamept,74);
-      should_be_rook = get_piece1(gamept,71);
+      should_be_empty1 = get_piece1(gamept->board,72);
+      should_be_empty2 = get_piece1(gamept->board,73);
+      should_be_empty3 = get_piece1(gamept->board,74);
+      should_be_rook = get_piece1(gamept->board,71);
 
       if (!should_be_empty1 && !should_be_empty2 && !should_be_empty3 && (should_be_rook == ROOK_ID * -1)) {
         gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
@@ -479,7 +479,7 @@ int gargantua_move(
 {
   // don't allow gargantuas to capture each other
 
-  if (!(get_piece2(gamept,rank1,file1) + get_piece2(gamept,rank2,file2)))
+  if (!(get_piece2(gamept->board,rank1,file1) + get_piece2(gamept->board,rank2,file2)))
     return 1;  /* failure */
 
   if (!queen_move(gamept,file1,rank1,file2,rank2))
