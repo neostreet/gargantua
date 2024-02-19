@@ -53,7 +53,7 @@ void print_bd(struct game *gamept)
 
   for (m = 0; m < NUM_RANKS; m++) {
     for (n = 0; n < NUM_FILES; n++) {
-      square = get_piece2(gamept,(NUM_RANKS - 1) - m,n);
+      square = get_piece2(gamept->board,(NUM_RANKS - 1) - m,n);
       printf("%c ",format_square(square));
     }
 
@@ -117,7 +117,7 @@ void fprint_bd(struct game *gamept,char *filename)
 
   for (m = 0; m < NUM_RANKS; m++) {
     for (n = 0; n < NUM_FILES; n++) {
-      square = get_piece2(gamept,(NUM_RANKS - 1) - m,n);
+      square = get_piece2(gamept->board,(NUM_RANKS - 1) - m,n);
       fprintf(fptr,"%c ",format_square(square));
     }
 
@@ -135,7 +135,7 @@ void fprint_bd2(struct game *gamept,FILE *fptr)
 
   for (m = 0; m < NUM_RANKS; m++) {
     for (n = 0; n < NUM_FILES; n++) {
-      square = get_piece2(gamept,(NUM_RANKS - 1) - m,n);
+      square = get_piece2(gamept->board,(NUM_RANKS - 1) - m,n);
       fprintf(fptr,"%c ",format_square(square));
     }
 
@@ -207,8 +207,8 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
 
   bBlack = (gamept->curr_move % 2);
 
-  from_piece = get_piece1(gamept,gamept->moves[gamept->curr_move].from);
-  to_piece = get_piece1(gamept,gamept->moves[gamept->curr_move].to);
+  from_piece = get_piece1(gamept->board,gamept->moves[gamept->curr_move].from);
+  to_piece = get_piece1(gamept->board,gamept->moves[gamept->curr_move].to);
 
   if (from_piece * to_piece < 0)
     gamept->moves[gamept->curr_move].special_move_info |= SPECIAL_MOVE_CAPTURE;
@@ -254,21 +254,21 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
     invalid_squares[(*num_invalid_squares)++] = gamept->moves[gamept->curr_move].to;
   }
 
-  set_piece(gamept,gamept->moves[gamept->curr_move].to,from_piece);
+  set_piece1(gamept->board,gamept->moves[gamept->curr_move].to,from_piece);
 
-  set_piece(gamept,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
+  set_piece1(gamept->board,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
 
   if (bKingsideCastle) {
     if (!(gamept->curr_move % 2)) {
       // it's White's move
-      set_piece(gamept,7,ROOK_ID);
+      set_piece1(gamept->board,7,ROOK_ID);
 
       if (invalid_squares)
         invalid_squares[(*num_invalid_squares)++] = 7;
     }
     else {
       // it's Blacks's move
-      set_piece(gamept,77,ROOK_ID * -1);
+      set_piece1(gamept->board,77,ROOK_ID * -1);
 
       if (invalid_squares)
         invalid_squares[(*num_invalid_squares)++] = 77;
@@ -277,14 +277,14 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   else if (bQueensideCastle) {
     if (!(gamept->curr_move % 2)) {
       // it's White's move
-      set_piece(gamept,2,ROOK_ID);
+      set_piece1(gamept->board,2,ROOK_ID);
 
       if (invalid_squares)
         invalid_squares[(*num_invalid_squares)++] = 2;
     }
     else {
       // it's Blacks's move
-      set_piece(gamept,72,ROOK_ID * -1);
+      set_piece1(gamept->board,72,ROOK_ID * -1);
 
       if (invalid_squares)
         invalid_squares[(*num_invalid_squares)++] = 72;
@@ -300,14 +300,14 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
       square_to_clear = gamept->moves[gamept->curr_move].to + NUM_FILES;
     }
 
-    set_piece(gamept,square_to_clear,0);
+    set_piece1(gamept->board,square_to_clear,0);
 
     if (invalid_squares)
       invalid_squares[(*num_invalid_squares)++] = square_to_clear;
   }
 }
 
-int get_piece1(struct game *gamept,int board_offset)
+int get_piece1(unsigned char *board,int board_offset)
 {
   unsigned int bit_offset;
   unsigned short piece;
@@ -315,7 +315,7 @@ int get_piece1(struct game *gamept,int board_offset)
 
   bit_offset = board_offset * BITS_PER_BOARD_SQUARE;
 
-  piece = get_bits(BITS_PER_BOARD_SQUARE,gamept->board,bit_offset);
+  piece = get_bits(BITS_PER_BOARD_SQUARE,board,bit_offset);
   piece_int = piece;
 
   if (piece & 0x8)
@@ -324,12 +324,12 @@ int get_piece1(struct game *gamept,int board_offset)
   return piece_int;
 }
 
-int get_piece2(struct game *gamept,int rank,int file)
+int get_piece2(unsigned char *board,int rank,int file)
 {
   int board_offset;
 
   board_offset = rank * NUM_FILES + file;
-  return get_piece1(gamept,board_offset);
+  return get_piece1(board,board_offset);
 }
 
 static int set_piece_calls;
@@ -337,17 +337,14 @@ static int dbg_set_piece_call;
 static int dbg_board_offset;
 static int dbg_piece;
 
-void set_piece(struct game *gamept,int board_offset,int piece)
+void set_piece1(unsigned char *board,int board_offset,int piece)
 {
   unsigned int bit_offset;
 
   set_piece_calls++;
 
-  if (set_piece_calls == dbg_set_piece_call)
-    dbg = 1;
-
-  if ((board_offset == dbg_board_offset) && (piece == dbg_piece))
-    dbg = 1;
+  if (dbg_set_piece_call == set_piece_calls)
+    dbg = 0;
 
   if (debug_level == 2) {
     if (debug_fptr != NULL)
@@ -355,5 +352,13 @@ void set_piece(struct game *gamept,int board_offset,int piece)
   }
 
   bit_offset = board_offset * BITS_PER_BOARD_SQUARE;
-  set_bits(BITS_PER_BOARD_SQUARE,gamept->board,bit_offset,piece);
+  set_bits(BITS_PER_BOARD_SQUARE,board,bit_offset,piece);
+}
+
+void set_piece2(unsigned char *board,int rank,int file,int piece)
+{
+  int board_offset;
+
+  board_offset = rank * NUM_FILES + file;
+  set_piece1(board,board_offset,piece);
 }
