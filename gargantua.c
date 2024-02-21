@@ -41,6 +41,8 @@ static HDC hdc_compatible[2];
 
 static OPENFILENAME OpenFileName;
 static TCHAR szGargFile[MAX_PATH];
+static OPENFILENAME ReadBoardName;
+static TCHAR szReadBoardName[MAX_PATH];
 static OPENFILENAME WriteFileName;
 static TCHAR szGargWriteFile[MAX_PATH];
 static TCHAR szGargBoardFile[MAX_PATH];
@@ -56,6 +58,15 @@ All files (*.*)\0\
 \0\
 ";
 static char garg_ext[] = "garg";
+static char board_filter[] = "\
+Chessboard files\0\
+*.bd\0\
+All files (*.*)\0\
+*.*\0\
+\0\
+\0\
+";
+static char bd_ext[] = "bd";
 
 static int board_x_offset;
 static int board_y_offset;
@@ -940,6 +951,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   int wmId, wmEvent;
   int file;
   int rank;
+  int retval;
   LPSTR name;
   int bHaveName;
   HDC hdc;
@@ -981,6 +993,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       OpenFileName.lCustData         = 0;
       OpenFileName.lpfnHook          = NULL;
       OpenFileName.lpTemplateName    = NULL;
+
+      ReadBoardName.lStructSize       = sizeof(OPENFILENAME);
+      ReadBoardName.hwndOwner         = hWnd;
+      ReadBoardName.hInstance         = hInst;
+      ReadBoardName.lpstrFilter       = board_filter;
+      ReadBoardName.lpstrCustomFilter = NULL;
+      ReadBoardName.nMaxCustFilter    = 0;
+      ReadBoardName.nFilterIndex      = 1;
+      ReadBoardName.lpstrFile         = szReadBoardName;
+      ReadBoardName.nMaxFile          = sizeof(szReadBoardName);
+      ReadBoardName.lpstrFileTitle    = NULL;
+      ReadBoardName.nMaxFileTitle     = 0;
+      ReadBoardName.lpstrInitialDir   = NULL;
+      ReadBoardName.lpstrTitle        = "Open a chessboard file";
+      ReadBoardName.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY |
+        OFN_EXTENSIONDIFFERENT;
+      ReadBoardName.nFileOffset       = 0;
+      ReadBoardName.nFileExtension    = 0;
+      ReadBoardName.lpstrDefExt       = bd_ext;
+      ReadBoardName.lCustData         = 0;
+      ReadBoardName.lpfnHook          = NULL;
+      ReadBoardName.lpTemplateName    = NULL;
 
       WriteFileName.lStructSize = sizeof(OPENFILENAME);
       WriteFileName.hwndOwner = hWnd;
@@ -1097,6 +1131,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           if (GetOpenFileName(&OpenFileName)) {
             name = OpenFileName.lpstrFile;
             do_read(hWnd,name,&curr_game);
+          }
+
+          break;
+
+        case IDM_READ_BOARD:
+	  // Call the common dialog function.
+
+          if (GetOpenFileName(&ReadBoardName)) {
+            name = ReadBoardName.lpstrFile;
+            retval = populate_board_from_board_file(curr_game.board,name);
+            invalidate_board(hWnd);
           }
 
           break;
