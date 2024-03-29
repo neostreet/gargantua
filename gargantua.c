@@ -1519,16 +1519,9 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     return;
   }
 
-  // exit early if the square to be moved to contains a piece of the same color as the piece to be moved,
-  // unless this is castling
-  if ((move_start_square_piece * move_end_square_piece) > 0) {
-    if ((move_start_square_piece == KING_ID) && (move_end_square_piece == ROOK_ID))
-      ;
-    else if ((move_start_square_piece == KING_ID * -1) && (move_end_square_piece == ROOK_ID * -1))
-      ;
-    else
-      return;
-  }
+  // exit early if the square to be moved to contains a piece of the same color as the piece to be moved
+  if ((move_start_square_piece * move_end_square_piece) > 0)
+    return;
 
   if (debug_fptr) {
     fprintf(debug_fptr,"do_lbuttondown:   attempting move: rank = %d,file = %d\n",rank,file);
