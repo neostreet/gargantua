@@ -30,6 +30,7 @@ int main(int argc,char **argv)
   }
 
   print_game(&curr_game);
+  putchar(0x0a);
   print_bd(&curr_game);
 
   return 0;
