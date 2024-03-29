@@ -1,5 +1,5 @@
-print_garg_game: print_garg_game.o gargdbg.o gargmsc.o gargmvs.o gargrd.o bitfuns.o
-	g++ -o print_garg_game print_garg_game.o gargmsc.o gargdbg.o gargmvs.o gargrd.o bitfuns.o
+print_garg_game: print_garg_game.o gargdbg.o gargmsc.o gargmvs.o gargrd.o gargatk.o bitfuns.o
+	g++ -o print_garg_game print_garg_game.o gargmsc.o gargdbg.o gargmvs.o gargrd.o gargatk.o bitfuns.o
 
 print_garg_game.o: print_garg_game.c
 	g++ -g -O0 -c -I./common print_garg_game.c
@@ -15,6 +15,9 @@ gargmvs.o: ./common/gargmvs.c
 
 gargrd.o: ./common/gargrd.c
 	g++ -g -O0 -c -I./common ./common/gargrd.c
+
+gargatk.o: ./common/gargatk.c
+	g++ -g -O0 -c -I./common ./common/gargatk.c
 
 bitfuns.o: ./common/bitfuns.c
 	g++ -g -O0 -c -I./common ./common/bitfuns.c
