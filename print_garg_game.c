@@ -18,7 +18,7 @@ int main(int argc,char **argv)
   struct game curr_game;
 
   if (argc != 2) {
-    printf("usage: prgame filename\n");
+    printf("usage: print_garg_game filename\n");
     return 1;
   }
 
