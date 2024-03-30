@@ -410,7 +410,7 @@ int king_move(
     // it's White's move
 
     // check for kingside castle
-    if ((file1 == 5) && (rank1 == 0) && (file2 == 8) && (rank2 == 0)) {
+    if ((file1 == 5) && (rank1 == 0) && (file2 == 7) && (rank2 == 0)) {
       should_be_empty1 = get_piece1(gamept->board,6);
       should_be_empty2 = get_piece1(gamept->board,7);
       should_be_rook = get_piece1(gamept->board,8);
@@ -422,7 +422,7 @@ int king_move(
     }
 
     // check for queenside castle
-    if ((file1 == 5) && (rank1 == 0) && (file2 == 1) && (rank2 == 0)) {
+    if ((file1 == 5) && (rank1 == 0) && (file2 == 3) && (rank2 == 0)) {
       should_be_empty1 = get_piece1(gamept->board,2);
       should_be_empty2 = get_piece1(gamept->board,3);
       should_be_empty3 = get_piece1(gamept->board,4);
@@ -438,7 +438,7 @@ int king_move(
     // it's Black's move
 
     // check for kingside castle
-    if ((file1 == 5) && (rank1 == 7) && (file2 == 8) && (rank2 == 7)) {
+    if ((file1 == 5) && (rank1 == 7) && (file2 == 7) && (rank2 == 7)) {
       should_be_empty1 = get_piece1(gamept->board,76);
       should_be_empty2 = get_piece1(gamept->board,77);
       should_be_rook = get_piece1(gamept->board,78);
@@ -450,7 +450,7 @@ int king_move(
     }
 
     // check for queenside castle
-    if ((file1 == 5) && (rank1 == 7) && (file2 == 1) && (rank2 == 7)) {
+    if ((file1 == 5) && (rank1 == 7) && (file2 == 3) && (rank2 == 7)) {
       should_be_empty1 = get_piece1(gamept->board,72);
       should_be_empty2 = get_piece1(gamept->board,73);
       should_be_empty3 = get_piece1(gamept->board,74);
