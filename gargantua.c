@@ -31,13 +31,10 @@ static char read_game_failure[] =
 
 static int bChangesMade;
 
-static char *garg_piece_bitmap_names[] = {
-  "BIGBMP2",
-  "BIGBMP"
-};
+static char garg_piece_bitmap_name[] = "BIGBMP";
 
-static HANDLE garg_piece_bitmap_handles[2];
-static HDC hdc_compatible[2];
+static HANDLE garg_piece_bitmap_handle;
+static HDC hdc_compatible;
 
 static OPENFILENAME OpenFileName;
 static TCHAR szGargFile[MAX_PATH];
@@ -595,7 +592,7 @@ void do_paint(HWND hWnd)
 
         BitBlt(hdc,rect.left,rect.top,
           width_in_pixels,height_in_pixels,
-          hdc_compatible[bBig],
+          hdc_compatible,
           bigbmp_column * width_in_pixels,
           bigbmp_row * height_in_pixels,
           SRCCOPY);
@@ -660,8 +657,7 @@ void do_paint(HWND hWnd)
   rect.right = rect.left + CHARACTER_WIDTH;
 
   for (m = 0; m < NUM_RANKS; m++) {
-    rect.top = board_y_offset + m * height_in_pixels +
-      (bBig ? 19 : 6);
+    rect.top = board_y_offset + m * height_in_pixels + 19;
     rect.bottom = rect.top + CHARACTER_HEIGHT;
 
     if (RectVisible(hdc,&rect)) {
@@ -689,8 +685,7 @@ void do_paint(HWND hWnd)
   rect.bottom = rect.top + CHARACTER_HEIGHT;
 
   for (m = 0; m < NUM_FILES; m++) {
-    rect.left = board_x_offset + m * width_in_pixels +
-      (bBig ? 21 : 8);
+    rect.left = board_x_offset + m * width_in_pixels + 21;
     rect.right = rect.left + CHARACTER_WIDTH;
 
     if (RectVisible(hdc,&rect)) {
@@ -787,45 +782,6 @@ static void toggle_orientation(HWND hWnd)
   }
 
   invalidate_board_and_coords(hWnd);
-}
-
-static void toggle_board_size(HWND hWnd)
-{
-  RECT rect;
-
-  if (debug_fptr) {
-    fprintf(debug_fptr,"toggle_board_size()\n");
-    fprintf(debug_fptr,"  bBig = %d\n",bBig);
-    fprintf(debug_fptr,"  highlight_rank = %d\n",highlight_rank);
-    fprintf(debug_fptr,"  highlight_file = %d\n",highlight_file);
-  }
-
-  if (!bBig) {
-    width_in_pixels = WIDTH_IN_PIXELS;
-    height_in_pixels = HEIGHT_IN_PIXELS;
-    bBig = TRUE;
-  }
-  else {
-    width_in_pixels = SHRUNK_WIDTH_IN_PIXELS;
-    height_in_pixels = SHRUNK_HEIGHT_IN_PIXELS;
-    bBig = FALSE;
-  }
-
-  garg_window_width = board_x_offset + BOARD_WIDTH + window_extra_width;
-  garg_window_height = board_y_offset + BOARD_HEIGHT + window_extra_height +
-    bottom_margin;
-
-  rect.left = ((spi_rect.right - spi_rect.left) - garg_window_width) / 2;
-  rect.top = ((spi_rect.bottom - spi_rect.top) - garg_window_height) / 2;
-
-  if (debug_fptr) {
-    fprintf(debug_fptr,"  width_in_pixels = %d\n",width_in_pixels);
-    fprintf(debug_fptr,"  height_in_pixels = %d\n",height_in_pixels);
-    fprintf(debug_fptr,"  bBig = %d\n",bBig);
-  }
-
-  MoveWindow(hWnd,rect.left,rect.top,
-    garg_window_width,garg_window_height,TRUE);
 }
 
 void do_new(HWND hWnd,struct game *gamept)
@@ -959,16 +915,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
   switch (message) {
     case WM_CREATE:
-      // load the Gargantua piece bitmaps
-      for (n = 0; n < 2; n++) {
-        garg_piece_bitmap_handles[n] = LoadBitmap(
-          hInst,
-          garg_piece_bitmap_names[n]);
+      // load the Gargantua piece bitmap
+      garg_piece_bitmap_handle = LoadBitmap(
+        hInst,garg_piece_bitmap_name);
 
-        if (garg_piece_bitmap_handles[n] != NULL) {
-          hdc_compatible[n] = CreateCompatibleDC(GetDC(hWnd));
-          SelectObject(hdc_compatible[n],garg_piece_bitmap_handles[n]);
-        }
+      if (garg_piece_bitmap_handle != NULL) {
+        hdc_compatible = CreateCompatibleDC(GetDC(hWnd));
+        SelectObject(hdc_compatible,garg_piece_bitmap_handle);
       }
 
       // initialize the structure used for opening a file
@@ -1081,11 +1034,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
-        case VK_F3:
-          toggle_board_size(hWnd);
-
-          break;
-
         case VK_HOME:
           if (highlight_rank == -1)
             start_of_game(hWnd);
@@ -1186,11 +1134,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
-        case IDM_TOGGLE_BOARD_SIZE:
-          toggle_board_size(hWnd);
-
-          break;
-
         case IDM_PREV_MOVE:
           prev_move(hWnd);
 
@@ -1255,10 +1198,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       break;
 
     case WM_DESTROY:
-      for (n = 0; n < 2; n++) {
-        if (garg_piece_bitmap_handles[n] != NULL)
-          DeleteDC(hdc_compatible[n]);
-      }
+      if (garg_piece_bitmap_handle != NULL)
+        DeleteDC(hdc_compatible);
 
       PostQuitMessage(0);
 
