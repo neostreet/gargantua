@@ -41,7 +41,6 @@ IDI_SMALL               ICON    DISCARDABLE     "small.ico"
 //
 
 BIGBMP                  BITMAP  DISCARDABLE     "bigbmp.bmp"
-BIGBMP2                 BITMAP  DISCARDABLE     "bigbmp2.bmp"
 IDB_TOOLBAR             BITMAP  DISCARDABLE     "toolbar.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
