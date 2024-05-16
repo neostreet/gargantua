@@ -581,8 +581,12 @@ void do_paint(HWND hWnd)
       if (piece_offset >= 0) {
         bigbmp_column = piece_offset;
 
-        if ((m == highlight_rank) && (n == highlight_file))
-          bigbmp_row = 1;
+        if ((m == highlight_rank) && (n == highlight_file)) {
+          if ((piece == GARGANTUA_ID) || (piece == GARGANTUA_ID * -1))
+            bigbmp_row = 3;
+          else
+            bigbmp_row = 1;
+        }
         else if ((piece == GARGANTUA_ID) || (piece == GARGANTUA_ID * -1))
           bigbmp_row = 2;
         else
