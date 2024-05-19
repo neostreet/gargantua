@@ -79,7 +79,8 @@ int read_binary_game(char *filename,struct game *gamept)
     return 1;
   }
 
-  bytes_to_read = sizeof (struct game) - sizeof gamept->moves - sizeof gamept->board;
+  bytes_to_read = sizeof (struct game) - (sizeof gamept->moves + sizeof gamept->board +
+    sizeof gamept->white_pieces + sizeof gamept->black_pieces);
 
   bytes_read = read(fhndl,(char *)gamept,bytes_to_read);
 
@@ -124,7 +125,8 @@ int write_binary_game(char *filename,struct game *gamept)
       S_IREAD | S_IWRITE)) == -1)
     return 1;
 
-  bytes_to_write = sizeof (struct game) - sizeof gamept->moves - sizeof gamept->board;
+  bytes_to_write = sizeof (struct game) - (sizeof gamept->moves + sizeof gamept->board +
+    sizeof gamept->white_pieces + sizeof gamept->black_pieces);
 
   bytes_written = write(fhndl,(char *)gamept,bytes_to_write);
 
