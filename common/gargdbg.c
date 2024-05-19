@@ -16,11 +16,11 @@ char decode_piece(int piece,int bShowBlack)
   int bBlack;
 
   if (piece < 0) {
-    bBlack = TRUE;
+    bBlack = true;
     piece *= -1;
   }
   else
-    bBlack = FALSE;
+    bBlack = false;
 
   if (!piece)
     return '.';
@@ -46,7 +46,7 @@ char get_decoded_piece(struct game *gamept)
 
   piece = get_piece1(gamept->board,
     gamept->moves[gamept->curr_move].from);
-  return decode_piece(piece,FALSE);
+  return decode_piece(piece,false);
 }
 
 char get_from_file(struct game *gamept)
