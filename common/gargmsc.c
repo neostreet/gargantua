@@ -28,11 +28,11 @@ static int format_square(int square)
     return (int)'.';
 
   if (square < 0) {
-    bBlack = TRUE;
+    bBlack = true;
     square *= -1;
   }
   else
-    bBlack = FALSE;
+    bBlack = false;
 
   if (square == 1)
     return_char = 'P';
