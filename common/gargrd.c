@@ -38,11 +38,11 @@ int line_number(char *word,int wordlen)
       if ((word[n] == '.') && (n == wordlen - 1))
         break;
 
-      return FALSE;
+      return false;
     }
   }
 
-  return TRUE;
+  return true;
 }
 
 int get_piece_type_ix(int chara)
@@ -155,9 +155,9 @@ int ignore_character(int chara)
     (chara == 'x') ||
     (chara == '=') ||
     (chara == '+'))
-    return TRUE;
+    return true;
 
-  return FALSE;
+  return false;
 }
 
 int get_word(FILE *fptr,char *word,int maxlen,int *wordlenpt)
