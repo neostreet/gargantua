@@ -174,14 +174,14 @@ int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt)
   *to_filept = word[wordlen - 2] - 'a';
 
   if ((*to_filept < 0) || (*to_filept > 7))
-    return FALSE;
+    return false;
 
   *to_rankpt = word[wordlen - 1] - '1';
 
   if ((*to_rankpt < 0) || (*to_rankpt > 7))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 int rook_move(
