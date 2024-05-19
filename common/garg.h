@@ -10,14 +10,17 @@
 #define CHARS_IN_BOARD \
 (NUM_BOARD_SQUARES / 2)  // 80 squares / 2 (nibbles per char)
 
-#define PAWN_ID       1
-#define ROOK_ID       2
-#define KNIGHT_ID     3
-#define BISHOP_ID     4
-#define QUEEN_ID      5
-#define KING_ID       6
-#define GARGANTUA_ID  7
-#define EMPTY_ID      8
+#define PAWN_ID           1
+#define ROOK_ID           2
+#define KNIGHT_ID         3
+#define BISHOP_ID         4
+#define QUEEN_ID          5
+#define KING_ID           6
+#define GARGANTUA_ID      7
+#define NUM_PIECE_TYPES_0 7
+#define EMPTY_ID          8
+
+#define NUM_PIECES_PER_PLAYER 20
 
 #define SPECIAL_MOVE_NONE                      0x0000
 #define SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE   0x0001
@@ -31,6 +34,7 @@
 #define SPECIAL_MOVE_PROMOTION_KNIGHT          0x0100
 #define SPECIAL_MOVE_PROMOTION_BISHOP          0x0200
 #define SPECIAL_MOVE_PROMOTION_GARGANTUA       0X0400
+#define SPECIAL_MOVE_MATE                      0x0800
 
 #define WORDLEN 80
 #define MAX_MOVES 400
@@ -52,6 +56,12 @@ struct move {
   int special_move_info;
 };
 
+struct piece_info {
+  char piece_ix;
+  char piece_id;
+  char current_board_position;
+};
+
 #define BITS_PER_BOARD_SQUARE 4
 
 #define FONT_HEIGHT 12
@@ -65,7 +75,7 @@ struct move {
 #define ANNOTATION_X (8 * XLEN + 2 + FONT_WIDTH)
 #define ANNOTATION_Y 5
 
-#define MAX_FILE_NAME_LEN 128
+#define MAX_FILE_NAME_LEN 32
 #define MAX_TITLE_LEN 128
 
 struct game {
@@ -75,6 +85,8 @@ struct game {
   int curr_move;
   struct move moves[MAX_MOVES];
   unsigned char board[CHARS_IN_BOARD];  /* 10 columns * 8 rows / 2 (nibbles per char) */
+  struct piece_info white_pieces[NUM_PIECES_PER_PLAYER];
+  struct piece_info black_pieces[NUM_PIECES_PER_PLAYER];
 };
 
 typedef char (*GARG_FILE_LIST)[MAX_FILE_NAME_LEN];
