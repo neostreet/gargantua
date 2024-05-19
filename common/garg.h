@@ -1,6 +1,3 @@
-#define FALSE 0
-#define TRUE  1
-
 #define WHITE 0
 #define BLACK 1
 #define NUM_PLAYERS 2
