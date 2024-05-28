@@ -1,19 +1,23 @@
 #ifdef MAKE_GLOBALS_HERE
-char *special_move_strings[] = {
-  "SPECIAL_MOVE_NONE",
+char *special_moves[] = {
   "SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE",
   "SPECIAL_MOVE_KINGSIDE_CASTLE",
   "SPECIAL_MOVE_QUEENSIDE_CASTLE",
+  "SPECIAL_MOVE_CHECK",
+  "SPECIAL_MOVE_CAPTURE",
   "SPECIAL_MOVE_EN_PASSANT_CAPTURE",
   "SPECIAL_MOVE_PROMOTION_QUEEN",
   "SPECIAL_MOVE_PROMOTION_ROOK",
   "SPECIAL_MOVE_PROMOTION_KNIGHT",
   "SPECIAL_MOVE_PROMOTION_BISHOP",
-  "SPECIAL_MOVE_PROMOTION_GARGANTUA",
+  "SPECIAL_MOVE_MATE",
+  "SPECIAL_MOVE_PROMOTION_GARGANTUA"
 };
+int num_special_moves = (sizeof special_moves / sizeof (char *));
 #define GLOBAL /* nothing = real object declaration */
 #else
-extern char *special_move_strings[];
+extern char *special_moves[];
+extern int num_special_moves;
 #define GLOBAL extern
 #endif
 
