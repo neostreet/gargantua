@@ -11,7 +11,6 @@ static struct game scratch;
 int do_pawn_move(struct game *gamept)
 {
   bool bWhiteMove;
-  bool bBlack;
   int start_rank;
   int start_file;
   int end_rank;
@@ -101,16 +100,7 @@ int do_pawn_move(struct game *gamept)
     }
   }
 
-  // don't allow moves which would put the mover in check; use a scratch game
-  // to achieve this
-
-  copy_game(&scratch,gamept);
-  scratch.moves[scratch.curr_move].from = move_start_square;
-  scratch.moves[scratch.curr_move].to = move_end_square;
-  update_board(&scratch,NULL,NULL);
-  bBlack = scratch.curr_move & 0x1;
-
-  if (player_is_in_check(bBlack,scratch.board))
+  if (!move_is_legal(gamept))
     return 12;
 
   gamept->moves[gamept->curr_move].from = move_start_square;
@@ -138,7 +128,6 @@ int do_piece_move(struct game *gamept)
 {
   int which_piece;
   int retval;
-  bool bBlack;
 
   which_piece = move_start_square_piece;
 
@@ -152,16 +141,7 @@ int do_piece_move(struct game *gamept)
   if (retval)
     return 1;
 
-  // don't allow moves which would put the mover in check; use a scratch game
-  // to achieve this
-
-  copy_game(&scratch,gamept);
-  scratch.moves[scratch.curr_move].from = move_start_square;
-  scratch.moves[scratch.curr_move].to = move_end_square;
-  update_board(&scratch,NULL,NULL);
-  bBlack = scratch.curr_move & 0x1;
-
-  if (player_is_in_check(bBlack,scratch.board))
+  if (!move_is_legal(gamept))
     return 1;
 
   gamept->moves[gamept->curr_move].from = move_start_square;
@@ -528,4 +508,40 @@ int gargantua_move2(
     );
 
   return retval;
+}
+
+bool move_is_legal(struct game *gamept)
+{
+  // don't allow moves which would put the mover in check; use a scratch game
+  // to achieve this
+
+  bool bBlack;
+
+  if (debug_fptr && (gamept->curr_move == dbg_move)) {
+    fprintf(debug_fptr,"move_is_legal: curr_move = %d, special_move_info = %x, before update_board\n",
+      gamept->curr_move,gamept->moves[gamept->curr_move].special_move_info);
+    fprint_bd2(gamept->board,debug_fptr);
+  }
+
+  bBlack = gamept->curr_move & 0x1;
+  copy_game(&scratch,gamept);
+  update_board(&scratch,NULL,NULL);
+
+  if (debug_fptr && (gamept->curr_move == dbg_move)) {
+    fprintf(debug_fptr,"move_is_legal: curr_move = %d, special_move_info = %x, after update_board\n",
+      gamept->curr_move,gamept->moves[gamept->curr_move].special_move_info);
+    fprint_bd2(scratch.board,debug_fptr);
+  }
+
+  if (player_is_in_check(bBlack,scratch.board)) {
+    if (debug_fptr) {
+      fprintf(debug_fptr,"move_is_legal: about to return false, curr_move = %d\n",
+        scratch.curr_move);
+      fprint_bd2(scratch.board,debug_fptr);
+    }
+
+    return false;
+  }
+
+  return true;
 }
