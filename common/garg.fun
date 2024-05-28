@@ -33,6 +33,8 @@ int king_move2(struct game *);
 int gargantua_move(struct game *,int,int,int,int);
 int gargantua_move2(struct game *);
 
+bool move_is_legal(struct game *gamept);
+
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt);
 
 void set_initial_board(struct game *gamept);
@@ -47,7 +49,7 @@ void print_bd(struct game *gamept);
 void fprint_game(struct game *gamept,char *filename);
 void fprint_game2(struct game *gamept,FILE *fptr);
 void fprint_bd(struct game *gamept,char *filename);
-void fprint_bd2(struct game *gamept,FILE *fptr);
+void fprint_bd2(unsigned char *board,FILE *fptr);
 void print_moves(struct game *gamept);
 void fprint_moves(struct game *gamept,char *filename);
 void fprint_moves2(struct game *gamept,FILE *fptr);
