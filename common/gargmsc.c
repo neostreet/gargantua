@@ -218,6 +218,34 @@ void fprint_moves2(struct game *gamept,FILE *fptr)
   }
 }
 
+void print_special_moves(struct game *gamept)
+{
+  int n;
+  int and_val;
+  int hit;
+
+  and_val = 0x1;
+  hit = 0;
+
+  for (n = 0; n < num_special_moves; n++) {
+    if (gamept->moves[gamept->curr_move].special_move_info & and_val) {
+      if (hit)
+        putchar(' ' );
+
+      printf("%s",special_moves[n]);
+
+      hit++;
+    }
+
+    and_val <<= 1;
+  }
+
+  if (hit)
+    putchar(0x0a);
+  else
+    printf("SPECIAL_MOVE_NONE\n");
+}
+
 void set_initial_board(struct game *gamept)
 {
   int n;
