@@ -83,8 +83,8 @@ static int initial_y_pos;
 static int garg_window_width;
 static int garg_window_height;
 
-#define WINDOW_EXTRA_WIDTH   8
-#define WINDOW_EXTRA_HEIGHT 56
+#define WINDOW_EXTRA_WIDTH  16
+#define WINDOW_EXTRA_HEIGHT 61
 
 static int window_extra_width;
 static int window_extra_height;
@@ -633,7 +633,7 @@ void do_paint(HWND hWnd)
       bSelectedFont = TRUE;
     }
 
-    TextOut(hdc,rect.left,rect.top,curr_game.title,lstrlen(curr_game.title));
+    // TextOut(hdc,rect.left,rect.top,curr_game.title,lstrlen(curr_game.title));
   }
 
   rect.top = TOOLBAR_HEIGHT + 16;
