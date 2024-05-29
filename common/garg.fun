@@ -33,7 +33,7 @@ int king_move2(struct game *);
 int gargantua_move(struct game *,int,int,int,int);
 int gargantua_move2(struct game *);
 
-bool move_is_legal(struct game *gamept);
+bool move_is_legal(struct game *gamept,char from,char to);
 
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt);
 
