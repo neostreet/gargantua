@@ -68,6 +68,29 @@ void print_bd(struct game *gamept)
   }
 }
 
+void print_bd_cropped(struct game *gamept)
+{
+  int m;
+  int n;
+  int square;
+
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 1; n < NUM_FILES - 1; n++) {
+      if (!gamept->orientation)
+        square = get_piece2(gamept->board,(NUM_RANKS - 1) - m,n);
+      else
+        square = get_piece2(gamept->board,m,(NUM_FILES - 1) - n);
+
+      printf("%c",format_square(square));
+
+      if (n < (NUM_FILES - 2))
+        putchar(' ');
+    }
+
+    putchar(0x0a);
+  }
+}
+
 void fprint_game(struct game *gamept,char *filename)
 {
   FILE *fptr;
