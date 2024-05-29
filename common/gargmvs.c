@@ -100,7 +100,7 @@ int do_pawn_move(struct game *gamept)
     }
   }
 
-  if (!move_is_legal(gamept))
+  if (!move_is_legal(gamept,move_start_square,move_end_square))
     return 12;
 
   gamept->moves[gamept->curr_move].from = move_start_square;
@@ -141,7 +141,7 @@ int do_piece_move(struct game *gamept)
   if (retval)
     return 1;
 
-  if (!move_is_legal(gamept))
+  if (!move_is_legal(gamept,move_start_square,move_end_square))
     return 1;
 
   gamept->moves[gamept->curr_move].from = move_start_square;
@@ -510,12 +510,13 @@ int gargantua_move2(
   return retval;
 }
 
-bool move_is_legal(struct game *gamept)
+bool move_is_legal(struct game *gamept,char from,char to)
 {
   // don't allow moves which would put the mover in check; use a scratch game
   // to achieve this
 
   bool bBlack;
+  int dbg;
 
   if (debug_fptr && (gamept->curr_move == dbg_move)) {
     fprintf(debug_fptr,"move_is_legal: curr_move = %d, special_move_info = %x, before update_board\n",
@@ -525,6 +526,12 @@ bool move_is_legal(struct game *gamept)
 
   bBlack = gamept->curr_move & 0x1;
   copy_game(&scratch,gamept);
+
+  if ((scratch.moves[scratch.curr_move].from != from) || (scratch.moves[scratch.curr_move].to != to))
+    dbg = 1;
+
+  scratch.moves[scratch.curr_move].from = from;
+  scratch.moves[scratch.curr_move].to = to;
   update_board(&scratch,NULL,NULL);
 
   if (debug_fptr && (gamept->curr_move == dbg_move)) {
