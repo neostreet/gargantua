@@ -45,6 +45,29 @@ static int format_square(int square)
   return return_char;
 }
 
+void print_bd0(unsigned char *board,int orientation)
+{
+  int m;
+  int n;
+  int square;
+
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      if (!orientation)
+        square = get_piece2(board,(NUM_RANKS - 1) - m,n);
+      else
+        square = get_piece2(board,m,(NUM_FILES - 1) - n);
+
+      printf("%c",format_square(square));
+
+      if (n < (NUM_FILES - 1))
+        putchar(' ');
+    }
+
+    putchar(0x0a);
+  }
+}
+
 void print_bd(struct game *gamept)
 {
   int m;
