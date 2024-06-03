@@ -96,16 +96,18 @@ int read_binary_game(char *filename,struct game *gamept)
 
   bytes_to_read = gamept->num_moves * sizeof (struct move);
 
-  bytes_read = read(fhndl,(char *)gamept->moves,bytes_to_read);
+  if (bytes_to_read) {
+    bytes_read = read(fhndl,(char *)gamept->moves,bytes_to_read);
 
-  if (bytes_read != bytes_to_read) {
-    if (debug_level == 2) {
-      if (debug_fptr != NULL)
-        fprintf(debug_fptr,"read_binary_game: bytes_to_read = %d, bytes_read = %d\n",bytes_to_read,bytes_read);
+    if (bytes_read != bytes_to_read) {
+      if (debug_level == 2) {
+        if (debug_fptr != NULL)
+          fprintf(debug_fptr,"read_binary_game: bytes_to_read = %d, bytes_read = %d\n",bytes_to_read,bytes_read);
+      }
+
+      close(fhndl);
+      return 3;
     }
-
-    close(fhndl);
-    return 3;
   }
 
   close(fhndl);
