@@ -5,6 +5,8 @@
 #include <string.h>
 #include <malloc.h>
 #include <memory.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "garg.h"
 #define MAKE_GLOBALS_HERE
 #include "garg.glb"
@@ -789,7 +791,7 @@ static void toggle_orientation(HWND hWnd)
   invalidate_board_and_coords(hWnd);
 }
 
-void do_new(HWND hWnd,struct game *gamept)
+void do_new(HWND hWnd,struct game *gamept,char *name)
 {
   char *cpt;
 
@@ -806,7 +808,13 @@ void do_new(HWND hWnd,struct game *gamept)
   set_initial_board(gamept);
   invalidate_board(hWnd);
 
-  wsprintf(szTitle,"%s - new game",szAppName);
+  if (name == NULL)
+    wsprintf(szTitle,"%s - new game",szAppName);
+  else {
+    wsprintf(szTitle,"%s - %s",szAppName,
+      trim_name(name));
+  }
+
   SetWindowText(hWnd,szTitle);
 }
 
@@ -839,10 +847,20 @@ void end_of_game(HWND hWnd)
   redisplay_counts(hWnd,NULL);
 }
 
-void do_read(HWND hWnd,LPSTR name,struct game *gamept)
+void do_read(HWND hWnd,LPSTR name,struct game *gamept,bool bStartingUp)
 {
   int retval;
   char buf[256];
+  struct stat statbuf;
+
+  if (bStartingUp) {
+    // first, see if the file exists
+    if (stat(name,&statbuf) == -1) {
+      do_new(hWnd,&curr_game,name);
+
+      return;
+    }
+  }
 
   retval = read_binary_game(name,gamept);
 
@@ -1012,9 +1030,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           sizeof(TBBUTTON));      // structure size
 
       if (szGargFile[0])
-        do_read(hWnd,szGargFile,&curr_game);
+        do_read(hWnd,szGargFile,&curr_game,true);
       else
-        do_new(hWnd,&curr_game);
+        do_new(hWnd,&curr_game,NULL);
 
       highlight_rank = -1;
       highlight_file = -1;
@@ -1073,7 +1091,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       //Parse the menu selections:
       switch (wmId) {
         case IDM_NEW:
-          do_new(hWnd,&curr_game);
+          do_new(hWnd,&curr_game,NULL);
 
           break;
 
@@ -1083,7 +1101,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           if (GetOpenFileName(&OpenFileName)) {
             name = OpenFileName.lpstrFile;
-            do_read(hWnd,name,&curr_game);
+            do_read(hWnd,name,&curr_game,false);
           }
 
           break;
