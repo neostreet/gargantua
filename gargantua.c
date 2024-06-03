@@ -29,6 +29,9 @@ char couldnt_open[] = "couldn't open %s\n";
 static char read_game_failure[] =
   "read_game() of %s failed: %d, curr_move = %d";
 
+static char read_binary_game_failure[] =
+  "read_binary_game() of %s failed: %d, curr_move = %d";
+
 static int bChangesMade;
 
 static char garg_piece_bitmap_name[] = "BIGBMP";
@@ -854,7 +857,7 @@ void do_read(HWND hWnd,LPSTR name,struct game *gamept)
     InvalidateRect(hWnd,NULL,TRUE);
   }
   else {
-    wsprintf(buf,read_game_failure,
+    wsprintf(buf,read_binary_game_failure,
       name,retval,gamept->curr_move);
     MessageBox(hWnd,buf,NULL,MB_OK);
   }
