@@ -1048,13 +1048,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
-        case VK_UP:
+        case VK_LEFT:
           if (highlight_rank == -1)
             prev_move(hWnd);
 
           break;
 
-        case VK_DOWN:
+        case VK_RIGHT:
           if (highlight_rank == -1)
             next_move(hWnd);
 
