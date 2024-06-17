@@ -33,3 +33,5 @@ GLOBAL int move_start_square;
 GLOBAL int move_start_square_piece;
 GLOBAL int move_end_square;
 GLOBAL int move_end_square_piece;
+
+GLOBAL bool bAutoSave;
