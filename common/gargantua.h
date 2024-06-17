@@ -18,7 +18,7 @@
 #define IDM_PRINT_MOVES        203
 
 #define IDM_TOGGLE_ORIENTATION 204
-#define IDM_TOGGLE_BOARD_SIZE  205
+#define IDM_TOGGLE_AUTO_SAVE   205
 
 #define IDM_PREV_MOVE          206
 #define IDM_NEXT_MOVE          207
