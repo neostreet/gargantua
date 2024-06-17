@@ -800,6 +800,11 @@ static void toggle_orientation(HWND hWnd)
   invalidate_board_and_coords(hWnd);
 }
 
+static void toggle_auto_save(HWND hWnd)
+{
+  bAutoSave ^= 1;
+}
+
 void do_new(HWND hWnd,struct game *gamept,char *name)
 {
   char *cpt;
@@ -1089,6 +1094,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case VK_F6:
         case VK_F7:
           if (bHaveListFile) {
+            if (bAutoSave) {
+              // toggle the orientation, and save
+              curr_game.orientation ^= 1;
+              write_binary_game(garg_file_list[curr_garg_file],&curr_game);
+            }
+
             if (wParam == VK_F6) {
               curr_garg_file++;
 
@@ -1204,6 +1215,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case IDM_TOGGLE_ORIENTATION:
           toggle_orientation(hWnd);
+
+          break;
+
+        case IDM_TOGGLE_AUTO_SAVE:
+          toggle_auto_save(hWnd);
 
           break;
 
