@@ -66,7 +66,6 @@ BEGIN
     POPUP "&View"
     BEGIN
         MENUITEM "&Toggle orientation (F2)",    IDM_TOGGLE_ORIENTATION
-        MENUITEM "T&oggle board size (F3)",     IDM_TOGGLE_BOARD_SIZE
     END
     POPUP "&Options"
     BEGIN
@@ -76,6 +75,7 @@ BEGIN
         MENUITEM "Print &board",                IDM_PRINT_BOARD
         MENUITEM "Print &game",                 IDM_PRINT_GAME
         MENUITEM "Print &moves",                IDM_PRINT_MOVES
+        MENUITEM "&Toggle auto save",           IDM_TOGGLE_AUTO_SAVE
     END
     POPUP "&Help"
     BEGIN
