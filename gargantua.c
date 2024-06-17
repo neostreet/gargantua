@@ -124,6 +124,12 @@ static HWND hWndToolBar;
 static char szAppName[100];  // Name of the app
 static char szTitle[100];    // The title bar text
 
+static int bHaveListFile;
+static int num_files_in_list;
+static int curr_garg_file;
+
+static GARG_FILE_LIST garg_file_list;
+
 int bHaveGame;
 int afl_dbg;
 
@@ -143,6 +149,9 @@ BOOL InitApplication(HINSTANCE);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 char *trim_name(char *name);
+
+int is_list_file(LPSTR file_name);
+int read_list_file(LPSTR file_name,GARG_FILE_LIST *cfl_ptr,int *num_files);
 
 LRESULT CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK Promotion(HWND, UINT, WPARAM, LPARAM);
@@ -1029,8 +1038,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           16,16,                  // width & height of the bitmaps
           sizeof(TBBUTTON));      // structure size
 
-      if (szGargFile[0])
-        do_read(hWnd,szGargFile,&curr_game,true);
+      // read the game passed on the command line, if there is one
+      if (szGargFile[0]) {
+        bHaveName = FALSE;
+        retval = is_list_file(szGargFile);
+
+        if (retval) {
+          if (!read_list_file(szGargFile,
+            &garg_file_list,&num_files_in_list)) {
+            name = garg_file_list[curr_garg_file];
+            bHaveName = TRUE;
+          }
+        }
+        else {
+          name = szGargFile;
+          bHaveName = TRUE;
+        }
+
+        if (bHaveName)
+          do_read(hWnd,name,&curr_game,true);
+        else
+          do_new(hWnd,&curr_game,NULL);
+      }
       else
         do_new(hWnd,&curr_game,NULL);
 
@@ -1054,6 +1083,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       switch (wParam) {
         case VK_F2:
           toggle_orientation(hWnd);
+
+          break;
+
+        case VK_F6:
+        case VK_F7:
+          if (bHaveListFile) {
+            if (wParam == VK_F6) {
+              curr_garg_file++;
+
+              if (curr_garg_file == num_files_in_list)
+                curr_garg_file = 0;
+            }
+            else {
+              curr_garg_file--;
+
+              if (curr_garg_file < 0)
+                curr_garg_file = num_files_in_list - 1;
+            }
+
+            do_read(hWnd,garg_file_list[curr_garg_file],&curr_game,true);
+          }
 
           break;
 
@@ -1246,6 +1296,93 @@ char *trim_name(char *name)
   n++;
 
   return &name[n];
+}
+
+int is_list_file(LPSTR file_name)
+{
+  int n;
+  int len;
+
+  len = lstrlen(file_name);
+
+  for (n = len - 1; (n >= 0); n--) {
+    if (file_name[n] == '.')
+      break;
+  }
+
+  if (n < 0)
+    return FALSE;
+
+  n++;
+
+  if (!strcmp(&file_name[n],"lst"))
+    return TRUE;
+
+  return FALSE;
+}
+
+int read_list_file(LPSTR file_name,GARG_FILE_LIST *cfl_ptr,int *num_files)
+{
+  int m;
+  int n;
+  FILE *fptr;
+  int chara;
+  char *cpt;
+
+  if (garg_file_list != NULL) {
+    free(garg_file_list);
+    garg_file_list = NULL;
+  }
+
+  if ((fptr = fopen(file_name,"r")) == NULL)
+    return 1;
+
+  num_files_in_list = 0;
+
+  for ( ; ; ) {
+    chara = fgetc(fptr);
+
+    if (feof(fptr))
+      break;
+
+    if (chara == 0x0a)
+      num_files_in_list++;
+  }
+
+  fseek(fptr,0,SEEK_SET);
+
+  garg_file_list = (GARG_FILE_LIST)malloc(MAX_FILE_NAME_LEN *
+    num_files_in_list);
+
+  if (garg_file_list == NULL)
+    return 2;
+
+  n = 0;
+  m = 0;
+  cpt = (char *)garg_file_list[n];
+
+  for ( ; ; ) {
+    chara = fgetc(fptr);
+
+    if (feof(fptr))
+      break;
+
+    if (chara == 0x0a) {
+      cpt[m] = 0;
+      m = 0;
+      n++;
+      cpt = (char *)garg_file_list[n];
+    }
+    else
+      cpt[m++] = chara;
+  }
+
+  fclose(fptr);
+
+  bHaveListFile = TRUE;
+  curr_garg_file = 0;
+
+  return 0;
 }
 
 //
