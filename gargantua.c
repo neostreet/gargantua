@@ -136,8 +136,8 @@ int afl_dbg;
 static struct game curr_game;
 
 static TBBUTTON tbButtons[] = {
-    { 0, IDM_NEW,                      TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
-    { 1, IDM_OPEN,                     TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
+    { 0, IDM_NEXT_GAME,                TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
+    { 1, IDM_PREV_GAME,                TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
     { 2, IDM_SAVE,                     TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
 };
 
@@ -150,7 +150,7 @@ BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 char *trim_name(char *name);
 
-int is_list_file(LPSTR file_name);
+bool is_list_file(LPSTR file_name);
 int read_list_file(LPSTR file_name,GARG_FILE_LIST *cfl_ptr,int *num_files);
 
 LRESULT CALLBACK About(HWND, UINT, WPARAM, LPARAM);
@@ -756,6 +756,7 @@ static void do_move(HWND hWnd)
   }
 
   curr_game.curr_move++;
+  bUnsavedChanges = true;
   redisplay_counts(hWnd,NULL);
 }
 
@@ -1261,6 +1262,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
+        case IDM_PREV_GAME:
+        case IDM_NEXT_GAME:
+          if (debug_fptr != NULL) {
+            fprintf(debug_fptr,"WndProc: bHaveListFile = %d, bAutoSave = %d, bUnsavedChanges = %d\n",
+              bHaveListFile,bAutoSave,bUnsavedChanges);
+          }
+
+          if (bHaveListFile) {
+            if (bAutoSave && bUnsavedChanges) {
+              // toggle the orientation, and save
+              curr_game.orientation ^= 1;
+              write_binary_game(garg_file_list[curr_garg_file],&curr_game);
+            }
+
+            if (wmId == IDM_NEXT_GAME) {
+              curr_garg_file++;
+
+              if (curr_garg_file == num_files_in_list)
+                curr_garg_file = 0;
+
+              bUnsavedChanges = false;
+            }
+            else {
+              curr_garg_file--;
+
+              if (curr_garg_file < 0)
+                curr_garg_file = num_files_in_list - 1;
+
+              bUnsavedChanges = false;
+            }
+
+            do_read(hWnd,garg_file_list[curr_garg_file],&curr_game,true);
+          }
+
+          break;
+
+
         // Here are all the other possible menu options,
         // all of these are currently disabled:
         case IDM_PRINT:
@@ -1314,7 +1352,7 @@ char *trim_name(char *name)
   return &name[n];
 }
 
-int is_list_file(LPSTR file_name)
+bool is_list_file(LPSTR file_name)
 {
   int n;
   int len;
@@ -1327,14 +1365,14 @@ int is_list_file(LPSTR file_name)
   }
 
   if (n < 0)
-    return FALSE;
+    return false;
 
   n++;
 
   if (!strcmp(&file_name[n],"lst"))
-    return TRUE;
+    return true;
 
-  return FALSE;
+  return false;
 }
 
 int read_list_file(LPSTR file_name,GARG_FILE_LIST *cfl_ptr,int *num_files)
@@ -1703,6 +1741,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     highlight_file = -1;
 
     curr_game.curr_move++;
+    bUnsavedChanges = true;
     curr_game.moves[curr_game.curr_move].special_move_info = 0;
     curr_game.num_moves = curr_game.curr_move;
   }
