@@ -35,3 +35,4 @@ GLOBAL int move_end_square;
 GLOBAL int move_end_square_piece;
 
 GLOBAL bool bAutoSave;
+GLOBAL bool bUnsavedChanges;
