@@ -34,6 +34,14 @@ int gargantua_move(struct game *,int,int,int,int);
 int gargantua_move2(struct game *);
 
 bool move_is_legal(struct game *gamept,char from,char to);
+void get_legal_moves(struct game *gamept,struct move *legal_moves,int *legal_moves_count);
+void legal_pawn_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
+void legal_rook_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
+void legal_knight_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
+void legal_bishop_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
+void legal_queen_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
+void legal_king_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
+void legal_gargantua_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
 
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt);
 
