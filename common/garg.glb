@@ -1,4 +1,14 @@
 #ifdef MAKE_GLOBALS_HERE
+char piece_ids[] = "RNBQKG";
+char *piece_names[] = {
+  "PAWN",
+  "ROOK",
+  "KNIGHT",
+  "BISHOP",
+  "QUEEN",
+  "KING",
+  "GARGANTUA"
+};
 char *special_moves[] = {
   "SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE",
   "SPECIAL_MOVE_KINGSIDE_CASTLE",
@@ -16,6 +26,8 @@ char *special_moves[] = {
 int num_special_moves = (sizeof special_moves / sizeof (char *));
 #define GLOBAL /* nothing = real object declaration */
 #else
+extern char piece_ids[]; /* "RNBQKG" */
+extern char *piece_names[];
 extern char *special_moves[];
 extern int num_special_moves;
 #define GLOBAL extern
