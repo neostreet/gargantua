@@ -57,9 +57,9 @@ struct move {
 };
 
 struct piece_info {
-  char piece_ix;
   char piece_id;
   char current_board_position;
+  char move_count;
 };
 
 #define BITS_PER_BOARD_SQUARE 4
@@ -87,6 +87,11 @@ struct game {
   unsigned char board[CHARS_IN_BOARD];  /* 10 columns * 8 rows / 2 (nibbles per char) */
   struct piece_info white_pieces[NUM_PIECES_PER_PLAYER];
   struct piece_info black_pieces[NUM_PIECES_PER_PLAYER];
+};
+
+struct move_offset {
+  char rank_offset;
+  char file_offset;
 };
 
 typedef char (*GARG_FILE_LIST)[MAX_FILE_NAME_LEN];
