@@ -14,8 +14,64 @@
 #include "garg.fun"
 #include "garg.glb"
 #include "garg.mac"
+#include "bitfuns.h"
 
-extern char piece_ids[]; /* "RNBQKG" */
+static unsigned char initial_board[] = {
+  (unsigned char)0x72, (unsigned char)0x34, (unsigned char)0x56, (unsigned char)0x43, (unsigned char)0x27,
+  (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
+  (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff,
+  (unsigned char)0x9e, (unsigned char)0xdc, (unsigned char)0xba, (unsigned char)0xcd, (unsigned char)0xe9,
+};
+
+static struct piece_info initial_white_pieces[] = {
+  GARGANTUA_ID,0,0,
+  ROOK_ID,1,0,
+  KNIGHT_ID,2,0,
+  BISHOP_ID,3,0,
+  QUEEN_ID,4,0,
+  KING_ID,5,0,
+  BISHOP_ID,6,0,
+  KNIGHT_ID,7,0,
+  ROOK_ID,8,0,
+  GARGANTUA_ID,9,0,
+  PAWN_ID,10,0,
+  PAWN_ID,11,0,
+  PAWN_ID,12,0,
+  PAWN_ID,13,0,
+  PAWN_ID,14,0,
+  PAWN_ID,15,0,
+  PAWN_ID,16,0,
+  PAWN_ID,17,0,
+  PAWN_ID,18,0,
+  PAWN_ID,19,0
+};
+
+static struct piece_info initial_black_pieces[] = {
+  PAWN_ID * -1,60,0,
+  PAWN_ID * -1,61,0,
+  PAWN_ID * -1,62,0,
+  PAWN_ID * -1,63,0,
+  PAWN_ID * -1,64,0,
+  PAWN_ID * -1,65,0,
+  PAWN_ID * -1,66,0,
+  PAWN_ID * -1,67,0,
+  PAWN_ID * -1,68,0,
+  PAWN_ID * -1,69,0,
+  GARGANTUA_ID * -1,70,0,
+  ROOK_ID * -1,71,0,
+  KNIGHT_ID * -1,72,0,
+  BISHOP_ID * -1,73,0,
+  QUEEN_ID * -1,74,0,
+  KING_ID * -1,75,0,
+  BISHOP_ID * -1,76,0,
+  KNIGHT_ID * -1,77,0,
+  ROOK_ID * -1,78,0,
+  GARGANTUA_ID * -1,79,0
+};
 
 static char *bad_piece_move[] = {
   "bad rook move",
@@ -54,6 +110,30 @@ int get_piece_type_ix(int chara)
       return n;
 
   return 0; /* should never happen */
+}
+
+void set_initial_board(struct game *gamept)
+{
+  int n;
+
+  for (n = 0; n < CHARS_IN_BOARD; n++)
+    gamept->board[n] = initial_board[n];
+
+  initialize_piece_info(gamept);
+}
+
+void initialize_piece_info(struct game *gamept)
+{
+  int n;
+
+  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+    gamept->white_pieces[n].piece_id = initial_white_pieces[n].piece_id;
+    gamept->white_pieces[n].current_board_position = initial_white_pieces[n].current_board_position;
+    gamept->white_pieces[n].move_count = initial_white_pieces[n].move_count;
+    gamept->black_pieces[n].piece_id = initial_black_pieces[n].piece_id;
+    gamept->black_pieces[n].current_board_position = initial_black_pieces[n].current_board_position;
+    gamept->black_pieces[n].move_count = initial_black_pieces[n].move_count;
+  }
 }
 
 int read_binary_game(char *filename,struct game *gamept)
@@ -229,6 +309,411 @@ int get_word(FILE *fptr,char *word,int maxlen,int *wordlenpt)
   *wordlenpt = wordlen;
 
   return end_of_file;
+}
+
+static int update_board_calls;
+static int dbg_update_board_call;
+static int dbg;
+
+void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares)
+{
+  bool bBlack;
+  int from_piece;
+  int to_piece;
+  bool bKingsideCastle = false;
+  bool bQueensideCastle = false;
+  bool bEnPassantCapture = false;
+  int square_to_clear;
+
+  if (gamept->curr_move == dbg_move)
+    dbg = 1;
+
+  update_board_calls++;
+
+  if (dbg_update_board_call == update_board_calls)
+    dbg = 1;
+
+  bBlack = (gamept->curr_move % 2);
+
+  from_piece = get_piece1(gamept->board,gamept->moves[gamept->curr_move].from);
+  to_piece = get_piece1(gamept->board,gamept->moves[gamept->curr_move].to);
+
+  if (from_piece * to_piece < 0)
+    gamept->moves[gamept->curr_move].special_move_info |= SPECIAL_MOVE_CAPTURE;
+
+  if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE)
+    bKingsideCastle = true;
+  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_QUEENSIDE_CASTLE)
+    bQueensideCastle = true;
+  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_EN_PASSANT_CAPTURE)
+    bEnPassantCapture = true;
+  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_QUEEN)
+    from_piece = (bBlack ? QUEEN_ID * -1 : QUEEN_ID);
+  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_ROOK)
+    from_piece = (bBlack ? ROOK_ID * -1 : ROOK_ID);
+  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_BISHOP)
+    from_piece = (bBlack ? BISHOP_ID * -1 : BISHOP_ID);
+  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_KNIGHT)
+    from_piece = (bBlack ? KNIGHT_ID * -1 : KNIGHT_ID);
+  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_GARGANTUA)
+    from_piece = (bBlack ? GARGANTUA_ID * -1 : GARGANTUA_ID);
+
+  if (invalid_squares) {
+    *num_invalid_squares = 0;
+    invalid_squares[(*num_invalid_squares)++] = gamept->moves[gamept->curr_move].from;
+    invalid_squares[(*num_invalid_squares)++] = gamept->moves[gamept->curr_move].to;
+  }
+
+  set_piece1(gamept->board,gamept->moves[gamept->curr_move].to,from_piece);
+
+  set_piece1(gamept->board,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
+
+  if (bKingsideCastle) {
+    if (!(gamept->curr_move % 2)) {
+      // it's White's move
+      set_piece1(gamept->board,6,ROOK_ID);
+
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 6;
+
+      set_piece1(gamept->board,8,0);
+
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 8;
+    }
+    else {
+      // it's Blacks's move
+      set_piece1(gamept->board,76,ROOK_ID * -1);
+
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 76;
+
+      set_piece1(gamept->board,78,0);
+
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 78;
+    }
+  }
+  else if (bQueensideCastle) {
+    if (!(gamept->curr_move % 2)) {
+      // it's White's move
+      set_piece1(gamept->board,4,ROOK_ID);
+
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 4;
+
+      set_piece1(gamept->board,1,0);
+
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 1;
+    }
+    else {
+      // it's Blacks's move
+      set_piece1(gamept->board,74,ROOK_ID * -1);
+
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 74;
+
+      set_piece1(gamept->board,71,0);
+
+      if (invalid_squares)
+        invalid_squares[(*num_invalid_squares)++] = 71;
+    }
+  }
+  else if (bEnPassantCapture) {
+    if (!(gamept->curr_move % 2)) {
+      // it's White's move
+      square_to_clear = gamept->moves[gamept->curr_move].to - NUM_FILES;
+    }
+    else {
+      // it's Blacks's move
+      square_to_clear = gamept->moves[gamept->curr_move].to + NUM_FILES;
+    }
+
+    set_piece1(gamept->board,square_to_clear,0);
+
+    if (invalid_squares)
+      invalid_squares[(*num_invalid_squares)++] = square_to_clear;
+  }
+}
+
+void update_piece_info(struct game *gamept)
+{
+  int n;
+  char from;
+  char to;
+  int special_move_info;
+  int debug;
+  unsigned char board[CHARS_IN_BOARD];
+
+  if (gamept->curr_move == dbg_move)
+    dbg = 1;
+
+  from = gamept->moves[gamept->curr_move].from;
+  to = gamept->moves[gamept->curr_move].to;
+  special_move_info = gamept->moves[gamept->curr_move].special_move_info;
+
+  if (!(gamept->curr_move % 2)) {
+    // it's White's move
+    if (special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE) {
+      gamept->white_pieces[4].current_board_position = 6;
+      gamept->white_pieces[4].move_count++;
+      gamept->white_pieces[7].current_board_position = 5;
+      gamept->white_pieces[7].move_count++;
+    }
+    else if (special_move_info & SPECIAL_MOVE_QUEENSIDE_CASTLE) {
+      gamept->white_pieces[4].current_board_position = 2;
+      gamept->white_pieces[4].move_count++;
+      gamept->white_pieces[0].current_board_position = 3;
+      gamept->white_pieces[0].move_count++;
+    }
+    else {
+      for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+        if (gamept->white_pieces[n].current_board_position == from)
+          break;
+      }
+
+      if (n == NUM_PIECES_PER_PLAYER)
+        return; // should never happen
+
+      gamept->white_pieces[n].current_board_position = to;
+      gamept->white_pieces[n].move_count++;
+
+      if (special_move_info & SPECIAL_MOVE_PROMOTION_QUEEN)
+        gamept->white_pieces[n].piece_id = QUEEN_ID;
+      else if (special_move_info & SPECIAL_MOVE_PROMOTION_ROOK)
+        gamept->white_pieces[n].piece_id = ROOK_ID;
+      else if (special_move_info & SPECIAL_MOVE_PROMOTION_KNIGHT)
+        gamept->white_pieces[n].piece_id = KNIGHT_ID;
+      else if (special_move_info & SPECIAL_MOVE_PROMOTION_BISHOP)
+        gamept->white_pieces[n].piece_id = BISHOP_ID;
+      else if (special_move_info & SPECIAL_MOVE_EN_PASSANT_CAPTURE) {
+        for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+          if (gamept->black_pieces[n].current_board_position == to - NUM_FILES)
+            break;
+        }
+
+        if (n == NUM_PIECES_PER_PLAYER)
+          return; // should never happen
+
+        gamept->black_pieces[n].current_board_position = -1;
+      }
+
+      if ((special_move_info & SPECIAL_MOVE_CAPTURE) && !(special_move_info & SPECIAL_MOVE_EN_PASSANT_CAPTURE)) {
+        for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+          if (gamept->black_pieces[n].current_board_position == to)
+            break;
+        }
+
+        if (n == NUM_PIECES_PER_PLAYER)
+          return; // should never happen
+
+        gamept->black_pieces[n].current_board_position = -1;
+      }
+    }
+  }
+  else {
+    // it's Blacks's move
+    if (special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE) {
+      gamept->black_pieces[12].current_board_position = 62;
+      gamept->black_pieces[12].move_count++;
+      gamept->black_pieces[15].current_board_position = 61;
+      gamept->black_pieces[15].move_count++;
+    }
+    else if (special_move_info & SPECIAL_MOVE_QUEENSIDE_CASTLE) {
+      gamept->black_pieces[12].current_board_position = 58;
+      gamept->black_pieces[12].move_count++;
+      gamept->black_pieces[8].current_board_position = 59;
+      gamept->black_pieces[8].move_count++;
+    }
+    else {
+      for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+        if (gamept->black_pieces[n].current_board_position == from)
+          break;
+      }
+
+      if (n == NUM_PIECES_PER_PLAYER)
+        return; // should never happen
+
+      gamept->black_pieces[n].current_board_position = to;
+      gamept->black_pieces[n].move_count++;
+
+      if (special_move_info & SPECIAL_MOVE_PROMOTION_QUEEN)
+        gamept->black_pieces[n].piece_id = QUEEN_ID* -1;
+      else if (special_move_info & SPECIAL_MOVE_PROMOTION_ROOK)
+        gamept->black_pieces[n].piece_id = ROOK_ID* -1;
+      else if (special_move_info & SPECIAL_MOVE_PROMOTION_KNIGHT)
+        gamept->black_pieces[n].piece_id = KNIGHT_ID* -1;
+      else if (special_move_info & SPECIAL_MOVE_PROMOTION_BISHOP)
+        gamept->black_pieces[n].piece_id = BISHOP_ID* -1;
+      else if (special_move_info & SPECIAL_MOVE_EN_PASSANT_CAPTURE) {
+        for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+          if (gamept->white_pieces[n].current_board_position == to + NUM_FILES)
+            break;
+        }
+
+        if (n == NUM_PIECES_PER_PLAYER)
+          return; // should never happen
+
+        gamept->white_pieces[n].current_board_position = -1;
+      }
+
+      if ((special_move_info & SPECIAL_MOVE_CAPTURE) && !(special_move_info & SPECIAL_MOVE_EN_PASSANT_CAPTURE)) {
+        for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+          if (gamept->white_pieces[n].current_board_position == to)
+            break;
+        }
+
+        if (n == NUM_PIECES_PER_PLAYER)
+          return; // should never happen
+
+        gamept->white_pieces[n].current_board_position = -1;
+      }
+    }
+  }
+
+  if (debug_fptr) {
+    fprintf(debug_fptr,"update_piece_info: curr_move = %d, num_moves = %d\n",gamept->curr_move,gamept->num_moves);
+    fprint_piece_info(gamept,debug_fptr);
+    populate_board_from_piece_info(gamept,board);
+    fprint_bd2(board,debug_fptr);
+  }
+}
+
+void fprint_piece_info(struct game *gamept,FILE *fptr)
+{
+  int n;
+
+  fprintf(fptr,"White:\n");
+
+  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+    if (gamept->white_pieces[n].current_board_position == -1) {
+      fprintf(fptr,"  %s %d %d\n",
+        piece_names[gamept->white_pieces[n].piece_id - 1],
+        gamept->white_pieces[n].current_board_position,
+        gamept->white_pieces[n].move_count);
+    }
+    else {
+      fprintf(fptr,"  %s %c%c %d\n",
+        piece_names[gamept->white_pieces[n].piece_id - 1],
+        'a' + FILE_OF(gamept->white_pieces[n].current_board_position),
+        '1' + RANK_OF(gamept->white_pieces[n].current_board_position),
+        gamept->white_pieces[n].move_count);
+    }
+  }
+
+  fprintf(fptr,"Black:\n");
+
+  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+    if (gamept->black_pieces[n].current_board_position == -1) {
+      fprintf(fptr,"  %s %d %d\n",
+        piece_names[(gamept->black_pieces[n].piece_id * -1) - 1],
+        gamept->black_pieces[n].current_board_position,
+        gamept->black_pieces[n].move_count);
+    }
+    else {
+      fprintf(fptr,"  %s %c%c %d\n",
+        piece_names[(gamept->black_pieces[n].piece_id * -1) - 1],
+        'a' + FILE_OF(gamept->black_pieces[n].current_board_position),
+        '1' + RANK_OF(gamept->black_pieces[n].current_board_position),
+        gamept->black_pieces[n].move_count);
+    }
+  }
+}
+
+void print_piece_info(struct game *gamept)
+{
+  int n;
+
+  printf("White:\n");
+
+  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+    if (gamept->white_pieces[n].current_board_position == -1) {
+      printf("  %s %d\n",
+        piece_names[gamept->white_pieces[n].piece_id - 1],
+        gamept->white_pieces[n].current_board_position);
+    }
+    else {
+      printf("  %s %c%c\n",
+        piece_names[gamept->white_pieces[n].piece_id - 1],
+        'a' + FILE_OF(gamept->white_pieces[n].current_board_position),
+        '1' + RANK_OF(gamept->white_pieces[n].current_board_position));
+    }
+  }
+
+  printf("Black:\n");
+
+  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+    if (gamept->black_pieces[n].current_board_position == -1) {
+      printf("  %s %d\n",
+        piece_names[(gamept->black_pieces[n].piece_id * -1) - 1],
+        gamept->black_pieces[n].current_board_position);
+    }
+    else {
+      printf("  %s %c%c\n",
+        piece_names[(gamept->black_pieces[n].piece_id * -1) - 1],
+        'a' + FILE_OF(gamept->black_pieces[n].current_board_position),
+        '1' + RANK_OF(gamept->black_pieces[n].current_board_position));
+    }
+  }
+}
+
+void print_piece_info2(struct piece_info *info_pt)
+{
+  int n;
+  char piece_id;
+
+  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+    piece_id = info_pt[n].piece_id;
+
+    if (piece_id < 0)
+      piece_id *= -1;
+
+    if (info_pt[n].current_board_position == -1) {
+      printf("  %s %d\n",
+        piece_names[piece_id - 1],
+        info_pt[n].current_board_position);
+    }
+    else {
+      printf("  %s %c%c\n",
+        piece_names[piece_id - 1],
+        'a' + FILE_OF(info_pt[n].current_board_position),
+        '1' + RANK_OF(info_pt[n].current_board_position));
+    }
+  }
+}
+
+void populate_board_from_piece_info(struct game *gamept,unsigned char *board)
+{
+  int n;
+  unsigned int bit_offset;
+
+  for (n = 0; n < CHARS_IN_BOARD; n++)
+    board[n] = 0;
+
+  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+    if (gamept->white_pieces[n].current_board_position != -1) {
+      bit_offset = gamept->white_pieces[n].current_board_position * BITS_PER_BOARD_SQUARE;
+      set_bits(BITS_PER_BOARD_SQUARE,board,bit_offset,gamept->white_pieces[n].piece_id);
+    }
+
+    if (gamept->black_pieces[n].current_board_position != -1) {
+      bit_offset = gamept->black_pieces[n].current_board_position * BITS_PER_BOARD_SQUARE;
+      set_bits(BITS_PER_BOARD_SQUARE,board,bit_offset,gamept->black_pieces[n].piece_id);
+    }
+  }
+}
+
+int compare_boards(unsigned char *board1,unsigned char *board2)
+{
+  int n;
+
+  for (n = 0; n < CHARS_IN_BOARD; n++) {
+    if (board1[n] != board2[n])
+      return 0;
+  }
+
+  return 1;
 }
 
 void copy_game(struct game *gamept_to,struct game *gamept_from)
