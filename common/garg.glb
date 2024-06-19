@@ -1,4 +1,5 @@
 #ifdef MAKE_GLOBALS_HERE
+#define GLOBAL /* nothing = real object declaration */
 char piece_ids[] = "RNBQKG";
 char *piece_names[] = {
   "PAWN",
@@ -24,13 +25,16 @@ char *special_moves[] = {
   "SPECIAL_MOVE_PROMOTION_GARGANTUA"
 };
 int num_special_moves = (sizeof special_moves / sizeof (char *));
-#define GLOBAL /* nothing = real object declaration */
+struct move legal_moves[MAX_LEGAL_MOVES];
+int legal_moves_count;
 #else
+#define GLOBAL extern
 extern char piece_ids[]; /* "RNBQKG" */
 extern char *piece_names[];
 extern char *special_moves[];
 extern int num_special_moves;
-#define GLOBAL extern
+extern struct move legal_moves[];
+extern int legal_moves_count;
 #endif
 
 GLOBAL char err_msg[80];
