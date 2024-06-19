@@ -5,18 +5,6 @@
 #include "garg.mac"
 #include "bitfuns.h"
 
-static unsigned char initial_board[] = {
-  (unsigned char)0x72, (unsigned char)0x34, (unsigned char)0x56, (unsigned char)0x43, (unsigned char)0x27,
-  (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11,
-  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
-  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
-  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
-  (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
-  (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff,
-  (unsigned char)0x9e, (unsigned char)0xdc, (unsigned char)0xba, (unsigned char)0xcd, (unsigned char)0xe9,
-};
-
-extern char piece_ids[]; /* "RNBQKG" */
 extern char fmt_str[];
 
 static int format_square(int square)
@@ -292,146 +280,13 @@ void print_special_moves(struct game *gamept)
     printf("SPECIAL_MOVE_NONE\n");
 }
 
-void set_initial_board(struct game *gamept)
-{
-  int n;
-
-  for (n = 0; n < CHARS_IN_BOARD; n++)
-    gamept->board[n] = initial_board[n];
-}
-
 void position_game(struct game *gamept,int move)
 {
   set_initial_board(gamept);
 
   for (gamept->curr_move = 0; gamept->curr_move < move; gamept->curr_move++) {
     update_board(gamept,NULL,NULL);
-  }
-}
-
-static int update_board_calls;
-static int dbg_update_board_call;
-static int dbg;
-
-void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares)
-{
-  bool bBlack;
-  int from_piece;
-  int to_piece;
-  bool bKingsideCastle = false;
-  bool bQueensideCastle = false;
-  bool bEnPassantCapture = false;
-  int square_to_clear;
-
-  if (gamept->curr_move == dbg_move)
-    dbg = 1;
-
-  update_board_calls++;
-
-  if (dbg_update_board_call == update_board_calls)
-    dbg = 1;
-
-  bBlack = (gamept->curr_move % 2);
-
-  from_piece = get_piece1(gamept->board,gamept->moves[gamept->curr_move].from);
-  to_piece = get_piece1(gamept->board,gamept->moves[gamept->curr_move].to);
-
-  if (from_piece * to_piece < 0)
-    gamept->moves[gamept->curr_move].special_move_info |= SPECIAL_MOVE_CAPTURE;
-
-  if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE)
-    bKingsideCastle = true;
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_QUEENSIDE_CASTLE)
-    bQueensideCastle = true;
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_EN_PASSANT_CAPTURE)
-    bEnPassantCapture = true;
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_QUEEN)
-    from_piece = (bBlack ? QUEEN_ID * -1 : QUEEN_ID);
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_ROOK)
-    from_piece = (bBlack ? ROOK_ID * -1 : ROOK_ID);
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_BISHOP)
-    from_piece = (bBlack ? BISHOP_ID * -1 : BISHOP_ID);
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_KNIGHT)
-    from_piece = (bBlack ? KNIGHT_ID * -1 : KNIGHT_ID);
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_GARGANTUA)
-    from_piece = (bBlack ? GARGANTUA_ID * -1 : GARGANTUA_ID);
-
-  if (invalid_squares) {
-    *num_invalid_squares = 0;
-    invalid_squares[(*num_invalid_squares)++] = gamept->moves[gamept->curr_move].from;
-    invalid_squares[(*num_invalid_squares)++] = gamept->moves[gamept->curr_move].to;
-  }
-
-  set_piece1(gamept->board,gamept->moves[gamept->curr_move].to,from_piece);
-
-  set_piece1(gamept->board,gamept->moves[gamept->curr_move].from,0);  /* vacate previous square */
-
-  if (bKingsideCastle) {
-    if (!(gamept->curr_move % 2)) {
-      // it's White's move
-      set_piece1(gamept->board,6,ROOK_ID);
-
-      if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 6;
-
-      set_piece1(gamept->board,8,0);
-
-      if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 8;
-    }
-    else {
-      // it's Blacks's move
-      set_piece1(gamept->board,76,ROOK_ID * -1);
-
-      if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 76;
-
-      set_piece1(gamept->board,78,0);
-
-      if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 78;
-    }
-  }
-  else if (bQueensideCastle) {
-    if (!(gamept->curr_move % 2)) {
-      // it's White's move
-      set_piece1(gamept->board,4,ROOK_ID);
-
-      if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 4;
-
-      set_piece1(gamept->board,1,0);
-
-      if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 1;
-    }
-    else {
-      // it's Blacks's move
-      set_piece1(gamept->board,74,ROOK_ID * -1);
-
-      if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 74;
-
-      set_piece1(gamept->board,71,0);
-
-      if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 71;
-    }
-  }
-  else if (bEnPassantCapture) {
-    if (!(gamept->curr_move % 2)) {
-      // it's White's move
-      square_to_clear = gamept->moves[gamept->curr_move].to - NUM_FILES;
-    }
-    else {
-      // it's Blacks's move
-      square_to_clear = gamept->moves[gamept->curr_move].to + NUM_FILES;
-    }
-
-    set_piece1(gamept->board,square_to_clear,0);
-
-    if (invalid_squares)
-      invalid_squares[(*num_invalid_squares)++] = square_to_clear;
+    update_piece_info(gamept);
   }
 }
 
@@ -468,6 +323,7 @@ static int dbg_piece;
 void set_piece1(unsigned char *board,int board_offset,int piece)
 {
   unsigned int bit_offset;
+  int dbg;
 
   set_piece_calls++;
 
