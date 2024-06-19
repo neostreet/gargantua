@@ -550,3 +550,549 @@ bool move_is_legal(struct game *gamept,char from,char to)
 
   return true;
 }
+
+void get_legal_moves(struct game *gamept,struct move *legal_moves,int *legal_moves_count)
+{
+  int n;
+  bool bWhiteToMove;
+  struct piece_info *info_pt;
+  unsigned char board[CHARS_IN_BOARD];
+  char piece_id;
+
+  bWhiteToMove = !(gamept->num_moves % 2);
+
+  if (bWhiteToMove)
+    info_pt = gamept->white_pieces;
+  else
+    info_pt = gamept->black_pieces;
+
+  populate_board_from_piece_info(gamept,board);
+
+  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+    if (info_pt[n].current_board_position == -1)
+      continue;
+
+    piece_id = info_pt[n].piece_id;
+
+    if (piece_id < 0)
+      piece_id *= -1;
+
+    switch (piece_id) {
+      case PAWN_ID:
+        legal_pawn_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
+
+        break;
+      case ROOK_ID:
+        legal_rook_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
+
+        break;
+      case KNIGHT_ID:
+        legal_knight_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
+
+        break;
+      case BISHOP_ID:
+        legal_bishop_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
+
+        break;
+      case QUEEN_ID:
+        legal_queen_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
+
+        break;
+      case KING_ID:
+        legal_king_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
+
+        break;
+      case GARGANTUA_ID:
+        legal_gargantua_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
+
+        break;
+    }
+  }
+}
+
+struct move_offset pawn_offsets[] = {
+  1, 0
+};
+#define NUM_PAWN_OFFSETS (sizeof pawn_offsets / sizeof(struct move_offset))
+
+static int promotions[] = {
+  SPECIAL_MOVE_PROMOTION_QUEEN,
+  SPECIAL_MOVE_PROMOTION_ROOK,
+  SPECIAL_MOVE_PROMOTION_KNIGHT,
+  SPECIAL_MOVE_PROMOTION_BISHOP
+};
+#define NUM_PROMOTIONS (sizeof promotions / sizeof(int))
+
+void legal_pawn_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
+{
+  int m;
+  int n;
+  int square;
+  int rank;
+  int file;
+  int work_rank;
+  int work_file;
+  int square2;
+  bool bBlack;
+  int num_legal_moves_before;
+  int num_legal_moves;
+  char to;
+
+  square = get_piece1(gamept->board,current_board_position);
+  rank = RANK_OF(current_board_position);
+  file = FILE_OF(current_board_position);
+  bBlack = gamept->curr_move & 0x1;
+  num_legal_moves_before = *legal_moves_count;
+
+  // first, see if there's a legal two square pawn advance
+
+  if (!bBlack) {
+    if (rank == 1) {
+      if (!get_piece2(gamept->board,2,file) && !get_piece2(gamept->board,3,file)) {
+        to = POS_OF(3,file);
+
+        if (move_is_legal(gamept,current_board_position,to)) {
+          if (*legal_moves_count < MAX_LEGAL_MOVES) {
+            legal_moves[*legal_moves_count].from = current_board_position;
+            legal_moves[*legal_moves_count].to = to;
+            legal_moves[*legal_moves_count].special_move_info = 0;
+
+            (*legal_moves_count)++;
+          }
+        }
+      }
+    }
+  }
+  else {
+    if (rank == 6) {
+      if (!get_piece2(gamept->board,5,file) && !get_piece2(gamept->board,4,file)) {
+        to = POS_OF(4,file);
+
+        if (move_is_legal(gamept,current_board_position,to)) {
+          if (*legal_moves_count < MAX_LEGAL_MOVES) {
+            legal_moves[*legal_moves_count].from = current_board_position;
+            legal_moves[*legal_moves_count].to = to;
+            legal_moves[*legal_moves_count].special_move_info = 0;
+
+            (*legal_moves_count)++;
+          }
+        }
+      }
+    }
+  }
+
+  // now check for a one square pawn advance
+
+  for (n = 0; n < NUM_PAWN_OFFSETS; n++) {
+    if (!bBlack)
+      work_rank = rank + pawn_offsets[n].rank_offset;
+    else
+      work_rank = rank - pawn_offsets[n].rank_offset;
+
+    work_file = file + pawn_offsets[n].file_offset;
+
+    if ((work_rank < 0) || (work_rank >= NUM_RANKS))
+      continue;
+
+    if ((work_file < 0) || (work_file >= NUM_FILES))
+      continue;
+
+    square2 = get_piece2(gamept->board,work_rank,work_file);
+
+    // pawn can only advance to an empty square
+    if (square2)
+      continue;
+
+    to = POS_OF(work_rank,work_file);
+
+    if (!move_is_legal(gamept,current_board_position,to))
+      continue;
+
+    if (!bBlack) {
+      if (work_rank == NUM_RANKS - 1) {
+        for (m = 0; m < NUM_PROMOTIONS; m++) {
+          if (*legal_moves_count < MAX_LEGAL_MOVES) {
+            legal_moves[*legal_moves_count].from = current_board_position;
+            legal_moves[*legal_moves_count].to = to;
+            legal_moves[*legal_moves_count].special_move_info = promotions[m];
+
+            (*legal_moves_count)++;
+          }
+        }
+
+        continue;
+      }
+    }
+    else {
+      if (!work_rank) {
+        for (m = 0; m < NUM_PROMOTIONS; m++) {
+          if (*legal_moves_count < MAX_LEGAL_MOVES) {
+            legal_moves[*legal_moves_count].from = current_board_position;
+            legal_moves[*legal_moves_count].to = to;
+            legal_moves[*legal_moves_count].special_move_info = promotions[m];
+
+            (*legal_moves_count)++;
+          }
+        }
+
+        continue;
+      }
+    }
+
+    if (*legal_moves_count < MAX_LEGAL_MOVES) {
+      legal_moves[*legal_moves_count].from = current_board_position;
+      legal_moves[*legal_moves_count].to = to;
+      legal_moves[*legal_moves_count].special_move_info = 0;
+
+      (*legal_moves_count)++;
+    }
+  }
+
+  // now check for captures
+
+  if (!bBlack)
+    work_rank = rank + 1;
+  else
+    work_rank = rank - 1;
+
+  if ((work_rank >= 0) && (work_rank < NUM_RANKS)) {
+    for (n = 0; n < 2; n++) {
+      if (!n)
+        work_file = file - 1;
+      else
+        work_file = file + 1;
+
+      if ((work_file < 0) || (work_file >= NUM_FILES))
+        continue;
+
+      square2 = get_piece2(gamept->board,work_rank,work_file);
+
+      // pawn can only capture an enemy piece
+      if (square * square2 >= 0)
+        continue;
+
+      to = POS_OF(work_rank,work_file);
+
+      if (!move_is_legal(gamept,current_board_position,to))
+        continue;
+
+      if (*legal_moves_count < MAX_LEGAL_MOVES) {
+        legal_moves[*legal_moves_count].from = current_board_position;
+        legal_moves[*legal_moves_count].to = to;
+        legal_moves[*legal_moves_count].special_move_info = SPECIAL_MOVE_CAPTURE;
+
+        (*legal_moves_count)++;
+      }
+    }
+  }
+
+  if (debug_fptr) {
+    num_legal_moves = *legal_moves_count - num_legal_moves_before;
+    fprintf(debug_fptr,"legal_pawn_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
+      gamept->curr_move,current_board_position,num_legal_moves);
+  }
+}
+
+struct move_offset rook_offsets[] = {
+  1,   0,
+  0,   1,
+  -1,  0,
+  0,  -1
+};
+#define NUM_ROOK_OFFSETS (sizeof rook_offsets / sizeof(struct move_offset))
+
+void legal_rook_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
+{
+  int m;
+  int n;
+  int square;
+  int rank;
+  int file;
+  int work_rank;
+  int work_file;
+  int square2;
+  int num_legal_moves_before;
+  int num_legal_moves;
+  char to;
+
+  square = get_piece1(gamept->board,current_board_position);
+  rank = RANK_OF(current_board_position);
+  file = FILE_OF(current_board_position);
+  num_legal_moves_before = *legal_moves_count;
+
+  for (n = 0; n < NUM_ROOK_OFFSETS; n++) {
+    for (m = 0; m < NUM_RANKS - 1; m++) {
+      work_rank = rank + (rook_offsets[n].rank_offset * (m + 1));
+      work_file = file + (rook_offsets[n].file_offset * (m + 1));
+
+      if ((work_rank < 0) || (work_rank >= NUM_RANKS))
+        break;
+
+      if ((work_file < 0) || (work_file >= NUM_FILES))
+        break;
+
+      square2 = get_piece2(gamept->board,work_rank,work_file);
+
+      // can't capture a piece of the same color
+      if ((square * square2) > 0)
+        break;
+
+      to = POS_OF(work_rank,work_file);
+
+      if (move_is_legal(gamept,current_board_position,to)) {
+        if (*legal_moves_count < MAX_LEGAL_MOVES) {
+          legal_moves[*legal_moves_count].from = current_board_position;
+          legal_moves[*legal_moves_count].to = to;
+          legal_moves[*legal_moves_count].special_move_info = 0;
+          (*legal_moves_count)++;
+        }
+      }
+
+      if (square2)
+        break;
+      else
+        continue;
+    }
+  }
+
+  if (debug_fptr) {
+    num_legal_moves = *legal_moves_count - num_legal_moves_before;
+    fprintf(debug_fptr,"legal_rook_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
+      gamept->curr_move,current_board_position,num_legal_moves);
+  }
+}
+
+struct move_offset knight_offsets[] = {
+  1, 2,
+  2, 1,
+  1, -2,
+  2, -1,
+  -1, -2,
+  -2, -1,
+  -1, 2,
+  -2, 1
+};
+#define NUM_KNIGHT_OFFSETS (sizeof knight_offsets / sizeof(struct move_offset))
+
+void legal_knight_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
+{
+  int n;
+  int square;
+  int rank;
+  int file;
+  int work_rank;
+  int work_file;
+  int square2;
+  int num_legal_moves_before;
+  int num_legal_moves;
+  char to;
+
+  square = get_piece1(gamept->board,current_board_position);
+  rank = RANK_OF(current_board_position);
+  file = FILE_OF(current_board_position);
+  num_legal_moves_before = *legal_moves_count;
+
+  for (n = 0; n < NUM_KNIGHT_OFFSETS; n++) {
+    work_rank = rank + knight_offsets[n].rank_offset;
+    work_file = file + knight_offsets[n].file_offset;
+
+    if ((work_rank < 0) || (work_rank >= NUM_RANKS))
+      continue;
+
+    if ((work_file < 0) || (work_file >= NUM_FILES))
+      continue;
+
+    square2 = get_piece2(gamept->board,work_rank,work_file);
+
+    // can't capture a piece of the same color
+    if ((square * square2) > 0)
+      continue;
+
+    to = POS_OF(work_rank,work_file);
+
+    if (!move_is_legal(gamept,current_board_position,to))
+      continue;
+
+    if (*legal_moves_count < MAX_LEGAL_MOVES) {
+      legal_moves[*legal_moves_count].from = current_board_position;
+      legal_moves[*legal_moves_count].to = to;
+      legal_moves[*legal_moves_count].special_move_info = 0;
+      (*legal_moves_count)++;
+    }
+  }
+
+  if (debug_fptr) {
+    num_legal_moves = *legal_moves_count - num_legal_moves_before;
+    fprintf(debug_fptr,"legal_knight_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
+      gamept->curr_move,current_board_position,num_legal_moves);
+  }
+}
+
+struct move_offset bishop_offsets[] = {
+  1,   1,
+  1,  -1,
+  -1,  1,
+  -1, -1
+};
+#define NUM_BISHOP_OFFSETS (sizeof bishop_offsets / sizeof(struct move_offset))
+
+void legal_bishop_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
+{
+  int m;
+  int n;
+  int square;
+  int rank;
+  int file;
+  int work_rank;
+  int work_file;
+  int square2;
+  int num_legal_moves_before;
+  int num_legal_moves;
+  char to;
+
+  square = get_piece1(gamept->board,current_board_position);
+  rank = RANK_OF(current_board_position);
+  file = FILE_OF(current_board_position);
+  num_legal_moves_before = *legal_moves_count;
+
+  for (n = 0; n < NUM_BISHOP_OFFSETS; n++) {
+    for (m = 0; m < NUM_RANKS - 1; m++) {
+      work_rank = rank + (bishop_offsets[n].rank_offset * (m + 1));
+      work_file = file + (bishop_offsets[n].file_offset * (m + 1));
+
+      if ((work_rank < 0) || (work_rank >= NUM_RANKS))
+        break;
+
+      if ((work_file < 0) || (work_file >= NUM_FILES))
+        break;
+
+      square2 = get_piece2(gamept->board,work_rank,work_file);
+
+      // can't capture a piece of the same color
+      if ((square * square2) > 0)
+        break;
+
+      to = POS_OF(work_rank,work_file);
+
+      if (move_is_legal(gamept,current_board_position,to)) {
+        if (*legal_moves_count < MAX_LEGAL_MOVES) {
+          legal_moves[*legal_moves_count].from = current_board_position;
+          legal_moves[*legal_moves_count].to = to;
+          legal_moves[*legal_moves_count].special_move_info = 0;
+          (*legal_moves_count)++;
+        }
+      }
+
+      if (square2)
+        break;
+      else
+        continue;
+    }
+  }
+
+  if (debug_fptr) {
+    num_legal_moves = *legal_moves_count - num_legal_moves_before;
+    fprintf(debug_fptr,"legal_bishop_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
+      gamept->curr_move,current_board_position,num_legal_moves);
+  }
+}
+
+void legal_queen_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
+{
+  int num_legal_moves_before;
+  int num_legal_moves;
+
+  num_legal_moves_before = *legal_moves_count;
+
+  legal_rook_moves(gamept,current_board_position,legal_moves,legal_moves_count);
+  legal_bishop_moves(gamept,current_board_position,legal_moves,legal_moves_count);
+
+  if (debug_fptr) {
+    num_legal_moves = *legal_moves_count - num_legal_moves_before;
+    fprintf(debug_fptr,"legal_queen_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
+      gamept->curr_move,current_board_position,num_legal_moves);
+  }
+}
+
+struct move_offset king_offsets[] = {
+  1,   0,
+  0,   1,
+  -1,  0,
+  0,  -1,
+  1,   1,
+  1,  -1,
+  -1,  1,
+  -1, -1
+};
+#define NUM_KING_OFFSETS (sizeof king_offsets / sizeof(struct move_offset))
+
+void legal_king_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
+{
+  int n;
+  int square;
+  int rank;
+  int file;
+  int work_rank;
+  int work_file;
+  int square2;
+  int num_legal_moves_before;
+  int num_legal_moves;
+  char to;
+
+  square = get_piece1(gamept->board,current_board_position);
+  rank = RANK_OF(current_board_position);
+  file = FILE_OF(current_board_position);
+  num_legal_moves_before = *legal_moves_count;
+
+  for (n = 0; n < NUM_KING_OFFSETS; n++) {
+    work_rank = rank + king_offsets[n].rank_offset;
+    work_file = file + king_offsets[n].file_offset;
+
+    if ((work_rank < 0) || (work_rank >= NUM_RANKS))
+      continue;
+
+    if ((work_file < 0) || (work_file >= NUM_FILES))
+      continue;
+
+    square2 = get_piece2(gamept->board,work_rank,work_file);
+
+    // can't capture a piece of the same color
+    if ((square * square2) > 0)
+      continue;
+
+    to = POS_OF(work_rank,work_file);
+
+    if (!move_is_legal(gamept,current_board_position,to))
+      continue;
+
+    if (*legal_moves_count < MAX_LEGAL_MOVES) {
+      legal_moves[*legal_moves_count].from = current_board_position;
+      legal_moves[*legal_moves_count].to = to;
+      legal_moves[*legal_moves_count].special_move_info = 0;
+      (*legal_moves_count)++;
+    }
+  }
+
+  if (debug_fptr) {
+    num_legal_moves = *legal_moves_count - num_legal_moves_before;
+    fprintf(debug_fptr,"legal_king_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
+      gamept->curr_move,current_board_position,num_legal_moves);
+  }
+}
+
+void legal_gargantua_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
+{
+  int num_legal_moves_before;
+  int num_legal_moves;
+
+  num_legal_moves_before = *legal_moves_count;
+
+  legal_queen_moves(gamept,current_board_position,legal_moves,legal_moves_count);
+  legal_knight_moves(gamept,current_board_position,legal_moves,legal_moves_count);
+
+  if (debug_fptr) {
+    num_legal_moves = *legal_moves_count - num_legal_moves_before;
+    fprintf(debug_fptr,"legal_gargantua_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
+      gamept->curr_move,current_board_position,num_legal_moves);
+  }
+}
