@@ -38,6 +38,7 @@
 
 #define WORDLEN 80
 #define MAX_MOVES 400
+#define MAX_LEGAL_MOVES 500
 
 #define WIDTH_IN_PIXELS 50
 #define HEIGHT_IN_PIXELS 50
