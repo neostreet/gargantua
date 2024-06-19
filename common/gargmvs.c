@@ -1,554 +1,348 @@
 #include <stdio.h>
-#include <string.h>
-
 #include "garg.h"
 #include "garg.glb"
-#include "garg.mac"
 #include "garg.fun"
+#include "garg.mac"
+#include "bitfuns.h"
 
-static struct game scratch;
+extern char fmt_str[];
 
-int do_pawn_move(struct game *gamept)
+static int format_square(int square)
 {
-  bool bWhiteMove;
-  int start_rank;
-  int start_file;
-  int end_rank;
-  int end_file;
-  int rank_diff;
-  int file_diff;
-  int retval;
+  int bBlack;
+  int return_char;
 
-  bWhiteMove = (move_start_square_piece > 0);
+  if (!square)
+    return (int)'.';
 
-  if (bWhiteMove) {
-    // white pawn move
-
-    if (move_start_square > move_end_square)
-      return 1; // failure
+  if (square < 0) {
+    bBlack = true;
+    square *= -1;
   }
-  else {
-    // black pawn move
-
-    if (move_start_square < move_end_square)
-      return 2; // failure
-  }
-
-  start_rank = RANK_OF(move_start_square);
-  start_file = FILE_OF(move_start_square);
-  end_rank = RANK_OF(move_end_square);
-  end_file = FILE_OF(move_end_square);
-
-  if (start_rank >= end_rank)
-    rank_diff = start_rank - end_rank;
   else
-    rank_diff = end_rank - start_rank;
+    bBlack = false;
 
-  if (start_file >= end_file)
-    file_diff = start_file - end_file;
+  if (square == 1)
+    return_char = 'P';
   else
-    file_diff = end_file - start_file;
+    return_char = piece_ids[square - 2];
 
-  if (file_diff == 0) {
-    if (move_end_square_piece)
-      return 3; // failure
-  }
+  if (!bBlack)
+    return_char += ('a' - 'A');
 
-  if (rank_diff == 0)
-    return 4; // failure
+  return return_char;
+}
 
-  if (file_diff > 1)
-    return 5; // failure
+void print_bd0(unsigned char *board,int orientation)
+{
+  int m;
+  int n;
+  int square;
 
-  if (rank_diff > 2)
-    return 6; // failure
-
-  if (rank_diff > 1) {
-    if (file_diff)
-      return 7; // failure
-
-    if (bWhiteMove) {
-      if (start_rank != 1)
-        return 8; // failure
-    }
-    else {
-      if (start_rank != 6)
-        return 9; // failure
-    }
-  }
-
-  if (file_diff == 1) {
-    if (rank_diff != 1)
-      return 10; // failure
-
-    if (!move_end_square_piece) {
-      // check for en passant capture
-      if (bWhiteMove && (start_rank == 4) &&
-        (get_piece2(gamept->board,4,end_file) == PAWN_ID * -1) &&
-        (gamept->moves[gamept->curr_move-1].special_move_info == SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE)) {
-
-        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_EN_PASSANT_CAPTURE;
-      }
-      else if (!bWhiteMove && (start_rank == 3) &&
-        (get_piece2(gamept->board,3,end_file) == PAWN_ID) &&
-        (gamept->moves[gamept->curr_move-1].special_move_info == SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE)) {
-
-        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_EN_PASSANT_CAPTURE;
-      }
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      if (!orientation)
+        square = get_piece2(board,(NUM_RANKS - 1) - m,n);
       else
-        return 11; // failure
+        square = get_piece2(board,m,(NUM_FILES - 1) - n);
+
+      printf("%c",format_square(square));
+
+      if (n < (NUM_FILES - 1))
+        putchar(' ');
     }
+
+    putchar(0x0a);
+  }
+}
+
+void print_bd(struct game *gamept)
+{
+  int m;
+  int n;
+  int square;
+
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      if (!gamept->orientation)
+        square = get_piece2(gamept->board,(NUM_RANKS - 1) - m,n);
+      else
+        square = get_piece2(gamept->board,m,(NUM_FILES - 1) - n);
+
+      printf("%c",format_square(square));
+
+      if (n < (NUM_FILES - 1))
+        putchar(' ');
+    }
+
+    putchar(0x0a);
+  }
+}
+
+void print_bd_cropped(struct game *gamept)
+{
+  int m;
+  int n;
+  int square;
+
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 1; n < NUM_FILES - 1; n++) {
+      if (!gamept->orientation)
+        square = get_piece2(gamept->board,(NUM_RANKS - 1) - m,n);
+      else
+        square = get_piece2(gamept->board,m,(NUM_FILES - 1) - n);
+
+      printf("%c",format_square(square));
+
+      if (n < (NUM_FILES - 2))
+        putchar(' ');
+    }
+
+    putchar(0x0a);
+  }
+}
+
+void fprint_game(struct game *gamept,char *filename)
+{
+  FILE *fptr;
+  char buf[20];
+
+  if ((fptr = fopen(filename,"w")) == NULL)
+    return;
+
+  fprintf(fptr,fmt_str,gamept->title);
+
+  set_initial_board(gamept);
+
+  for (gamept->curr_move = 0;
+       gamept->curr_move <= gamept->num_moves;
+       gamept->curr_move++) {
+
+    sprintf_move(gamept,buf,20,true);
+    fprintf(fptr,fmt_str,buf);
+
+    update_board(gamept,NULL,NULL);
   }
 
-  if (!move_is_legal(gamept,move_start_square,move_end_square))
-    return 12;
-
-  gamept->moves[gamept->curr_move].from = move_start_square;
-  gamept->moves[gamept->curr_move].to = move_end_square;
-  retval = 0;
-
-  if (rank_diff > 1)
-    gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE;
-
-  return retval; // success
+  fclose(fptr);
 }
 
-char piece_ids[] = "RNBQKG";
-
-int (*piece_functions[])(struct game *) = {
-  rook_move2,
-  knight_move2,
-  bishop_move2,
-  queen_move2,
-  king_move2,
-  gargantua_move2
-};
-
-int do_piece_move(struct game *gamept)
+void fprint_game2(struct game *gamept,FILE *fptr)
 {
-  int which_piece;
-  int retval;
+  char buf[20];
 
-  which_piece = move_start_square_piece;
+  fprintf(fptr,fmt_str,gamept->title);
 
-  if (which_piece < 0)
-    which_piece *= -1;
+  set_initial_board(gamept);
 
-  which_piece -= ROOK_ID;
+  for (gamept->curr_move = 0;
+       gamept->curr_move <= gamept->num_moves;
+       gamept->curr_move++) {
 
-  retval = (*piece_functions[which_piece])(gamept);
+    sprintf_move(gamept,buf,20,true);
+    fprintf(fptr,fmt_str,buf);
 
-  if (retval)
-    return 1;
-
-  if (!move_is_legal(gamept,move_start_square,move_end_square))
-    return 1;
-
-  gamept->moves[gamept->curr_move].from = move_start_square;
-  gamept->moves[gamept->curr_move].to = move_end_square;
-  return 0;  /* success */
+    update_board(gamept,NULL,NULL);
+  }
 }
 
-int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt)
+void fprint_bd(struct game *gamept,char *filename)
 {
-  *to_filept = word[wordlen - 2] - 'a';
+  int m;
+  int n;
+  FILE *fptr;
+  int square;
 
-  if ((*to_filept < 0) || (*to_filept > 7))
-    return false;
+  if ((fptr = fopen(filename,"w")) == NULL)
+    return;
 
-  *to_rankpt = word[wordlen - 1] - '1';
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      square = get_piece2(gamept->board,(NUM_RANKS - 1) - m,n);
+      fprintf(fptr,"%c ",format_square(square));
+    }
 
-  if ((*to_rankpt < 0) || (*to_rankpt > 7))
-    return false;
+    fputc(0x0a,fptr);
+  }
 
-  return true;
+  fclose(fptr);
 }
 
-int rook_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
+void fprint_bd2(unsigned char *board,FILE *fptr)
+{
+  int m;
+  int n;
+  int square;
+
+  for (m = 0; m < NUM_RANKS; m++) {
+    for (n = 0; n < NUM_FILES; n++) {
+      square = get_piece2(board,(NUM_RANKS - 1) - m,n);
+      fprintf(fptr,"%c ",format_square(square));
+    }
+
+    fputc(0x0a,fptr);
+  }
+}
+
+void print_moves(struct game *gamept)
+{
+  int m;
+  int n;
+  int and_val;
+  int hit;
+  int dbg_move;
+  int dbg;
+
+  dbg_move = -1;
+
+  for (n = 0; n < gamept->num_moves; n++) {
+    if (n == dbg_move)
+      dbg = 1;
+
+    printf("%3d %2d %2d",n,gamept->moves[n].from,gamept->moves[n].to);
+
+    and_val = 0x1;
+    hit = 0;
+
+    for (m = 0; m < num_special_moves; m++) {
+      if (gamept->moves[n].special_move_info & and_val) {
+        hit = 1;
+        putchar(' ' );
+        printf("%s",special_moves[m]);
+      }
+
+      and_val <<= 1;
+    }
+
+    if (!hit)
+      printf(" SPECIAL_MOVE_NONE");
+
+    putchar(0x0a);
+  }
+
+  dbg = 1; // see if you get here
+}
+
+void fprint_moves(struct game *gamept,char *filename)
+{
+  int n;
+  FILE *fptr;
+
+  if ((fptr = fopen(filename,"w")) == NULL)
+    return;
+
+  for (n = 0; n < gamept->num_moves; n++) {
+    fprintf(fptr,"%d %d %d %x\n",n,gamept->moves[n].from,gamept->moves[n].to,gamept->moves[n].special_move_info);
+  }
+
+  fclose(fptr);
+}
+
+void fprint_moves2(struct game *gamept,FILE *fptr)
 {
   int n;
 
-  if (file1 == file2) {
-    if (rank1 > rank2) {
-      for (n = rank2 + 1; n < rank1; n++)
-        if (get_piece2(gamept->board,n,file1))
-          return 1;  /* failure */
+  fprintf(fptr,"fprint_moves2:\n");
+
+  for (n = 0; n < gamept->num_moves; n++) {
+    fprintf(fptr,"%d %d %x\n",
+      gamept->moves[n].from,
+      gamept->moves[n].to,
+      gamept->moves[n].special_move_info);
+  }
+}
+
+void print_special_moves(struct game *gamept)
+{
+  int n;
+  int and_val;
+  int hit;
+
+  and_val = 0x1;
+  hit = 0;
+
+  for (n = 0; n < num_special_moves; n++) {
+    if (gamept->moves[gamept->curr_move].special_move_info & and_val) {
+      if (hit)
+        putchar(' ' );
+
+      printf("%s",special_moves[n]);
+
+      hit++;
     }
-    else
-      for (n = rank1 + 1; n < rank2; n++)
-        if (get_piece2(gamept->board,n,file1))
-          return 2;  /* failure */
 
-    return 0;  /* success */
+    and_val <<= 1;
   }
 
-  if (rank1 == rank2) {
-    if (file1 > file2) {
-      for (n = file2 + 1; n < file1; n++)
-        if (get_piece2(gamept->board,rank1,n))
-          return 1;  /* failure */
-    }
-    else
-      for (n = file1 + 1; n < file2; n++)
-        if (get_piece2(gamept->board,rank1,n))
-          return 2;  /* failure */
-
-    return 0;  /* success */
-  }
-
-  return 3;  /* failure */
-}
-
-int rook_move2(
-  struct game *gamept
-)
-{
-  int retval;
-
-  retval = rook_move(
-    gamept,
-    FILE_OF(move_start_square),
-    RANK_OF(move_start_square),
-    FILE_OF(move_end_square),
-    RANK_OF(move_end_square)
-    );
-
-  return retval;
-}
-
-int knight_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
-{
-  int dist1;
-  int dist2;
-
-  dist1 = (file1 - file2);
-
-  if (dist1 < 0)
-    dist1 *= -1;
-
-  dist2 = (rank1 - rank2);
-
-  if (dist2 < 0)
-    dist2 *= -1;
-
-  if ((dist1 == 1) && (dist2 == 2))
-    return 0;  /* success */
-
-  if ((dist1 == 2) && (dist2 == 1))
-    return 0;  /* success */
-
-  return 1;    /* failure */
-}
-
-int knight_move2(
-  struct game *gamept
-)
-{
-  int retval;
-
-  retval = knight_move(
-    gamept,
-    FILE_OF(move_start_square),
-    RANK_OF(move_start_square),
-    FILE_OF(move_end_square),
-    RANK_OF(move_end_square)
-    );
-
-  return retval;
-}
-
-int bishop_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
-{
-  int dist1;
-  int dist2;
-  int file_dir;
-  int rank_dir;
-
-  dist1 = (file1 - file2);
-
-  if (dist1 < 0) {
-    dist1 *= -1;
-    file_dir = 1;
-  }
+  if (hit)
+    putchar(0x0a);
   else
-    file_dir = -1;
+    printf("SPECIAL_MOVE_NONE\n");
+}
 
-  dist2 = (rank1 - rank2);
+void position_game(struct game *gamept,int move)
+{
+  set_initial_board(gamept);
 
-  if (dist2 < 0) {
-    dist2 *= -1;
-    rank_dir = 1;
+  for (gamept->curr_move = 0; gamept->curr_move < move; gamept->curr_move++) {
+    update_board(gamept,NULL,NULL);
+    update_piece_info(gamept);
   }
-  else
-    rank_dir = -1;
-
-  if (dist1 != dist2)
-    return 1;  /* failure */
-
-  /* make sure there are no intervening pieces */
-  for ( ; ; ) {
-    file1 += file_dir;
-
-    if (file1 == file2)
-      break;
-
-    rank1 += rank_dir;
-
-    if (get_piece2(gamept->board,rank1,file1))
-      return 2;  /* failure */
-  }
-
-  return 0;  /* success */
 }
 
-int bishop_move2(
-  struct game *gamept
-)
+int get_piece1(unsigned char *board,int board_offset)
 {
-  int retval;
+  unsigned int bit_offset;
+  unsigned short piece;
+  int piece_int;
 
-  retval = bishop_move(
-    gamept,
-    FILE_OF(move_start_square),
-    RANK_OF(move_start_square),
-    FILE_OF(move_end_square),
-    RANK_OF(move_end_square)
-    );
+  bit_offset = board_offset * BITS_PER_BOARD_SQUARE;
 
-  return retval;
+  piece = get_bits(BITS_PER_BOARD_SQUARE,board,bit_offset);
+  piece_int = piece;
+
+  if (piece & 0x8)
+    piece_int |= 0xfffffff0;
+
+  return piece_int;
 }
 
-int queen_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
+int get_piece2(unsigned char *board,int rank,int file)
 {
-  if (!rook_move(gamept,file1,rank1,file2,rank2))
-    return 0;  /* success */
+  int board_offset;
 
-  if (!bishop_move(gamept,file1,rank1,file2,rank2))
-    return 0;  /* success */
-
-  return 1;    /* failure */
+  board_offset = rank * NUM_FILES + file;
+  return get_piece1(board,board_offset);
 }
 
-int queen_move2(
-  struct game *gamept
-)
+static int set_piece_calls;
+static int dbg_set_piece_call;
+static int dbg_board_offset;
+static int dbg_piece;
+
+void set_piece1(unsigned char *board,int board_offset,int piece)
 {
-  int retval;
-
-  retval = queen_move(
-    gamept,
-    FILE_OF(move_start_square),
-    RANK_OF(move_start_square),
-    FILE_OF(move_end_square),
-    RANK_OF(move_end_square)
-    );
-
-  return retval;
-}
-
-int king_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
-{
-  int dist1;
-  int dist2;
-  int should_be_empty1;
-  int should_be_empty2;
-  int should_be_empty3;
-  int should_be_rook;
-
-  // first, check if this is a castling move
-  if (!(gamept->curr_move % 2)) {
-    // it's White's move
-
-    // check for kingside castle
-    if ((file1 == 5) && (rank1 == 0) && (file2 == 7) && (rank2 == 0)) {
-      should_be_empty1 = get_piece1(gamept->board,6);
-      should_be_empty2 = get_piece1(gamept->board,7);
-      should_be_rook = get_piece1(gamept->board,8);
-
-      if (!should_be_empty1 && !should_be_empty2 && (should_be_rook == ROOK_ID)) {
-        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
-        return 0;
-      }
-    }
-
-    // check for queenside castle
-    if ((file1 == 5) && (rank1 == 0) && (file2 == 3) && (rank2 == 0)) {
-      should_be_empty1 = get_piece1(gamept->board,2);
-      should_be_empty2 = get_piece1(gamept->board,3);
-      should_be_empty3 = get_piece1(gamept->board,4);
-      should_be_rook = get_piece1(gamept->board,1);
-
-      if (!should_be_empty1 && !should_be_empty2 && !should_be_empty3 && (should_be_rook == ROOK_ID)) {
-        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
-        return 0;
-      }
-    }
-  }
-  else {
-    // it's Black's move
-
-    // check for kingside castle
-    if ((file1 == 5) && (rank1 == 7) && (file2 == 7) && (rank2 == 7)) {
-      should_be_empty1 = get_piece1(gamept->board,76);
-      should_be_empty2 = get_piece1(gamept->board,77);
-      should_be_rook = get_piece1(gamept->board,78);
-
-      if (!should_be_empty1 && !should_be_empty2 && (should_be_rook == ROOK_ID * -1)) {
-        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_KINGSIDE_CASTLE;
-        return 0;
-      }
-    }
-
-    // check for queenside castle
-    if ((file1 == 5) && (rank1 == 7) && (file2 == 3) && (rank2 == 7)) {
-      should_be_empty1 = get_piece1(gamept->board,72);
-      should_be_empty2 = get_piece1(gamept->board,73);
-      should_be_empty3 = get_piece1(gamept->board,74);
-      should_be_rook = get_piece1(gamept->board,71);
-
-      if (!should_be_empty1 && !should_be_empty2 && !should_be_empty3 && (should_be_rook == ROOK_ID * -1)) {
-        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
-        return 0;
-      }
-    }
-  }
-
-  dist1 = (file1 - file2);
-
-  if (dist1 < 0)
-    dist1 *= -1;
-
-  dist2 = (rank1 - rank2);
-
-  if (dist2 < 0)
-    dist2 *= -1;
-
-  if ((dist1 < 2) && (dist2 < 2))
-    return 0;  /* success */
-
-  return 1;  /* failure */
-}
-
-int king_move2(
-  struct game *gamept
-)
-{
-  int retval;
-
-  retval = king_move(
-    gamept,
-    FILE_OF(move_start_square),
-    RANK_OF(move_start_square),
-    FILE_OF(move_end_square),
-    RANK_OF(move_end_square)
-    );
-
-  return retval;
-}
-
-int gargantua_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
-{
-  if (!queen_move(gamept,file1,rank1,file2,rank2))
-    return 0;  /* success */
-
-  if (!knight_move(gamept,file1,rank1,file2,rank2))
-    return 0;  /* success */
-
-  return 1;    /* failure */
-}
-
-int gargantua_move2(
-  struct game *gamept
-)
-{
-  int retval;
-
-  retval = gargantua_move(
-    gamept,
-    FILE_OF(move_start_square),
-    RANK_OF(move_start_square),
-    FILE_OF(move_end_square),
-    RANK_OF(move_end_square)
-    );
-
-  return retval;
-}
-
-bool move_is_legal(struct game *gamept,char from,char to)
-{
-  // don't allow moves which would put the mover in check; use a scratch game
-  // to achieve this
-
-  bool bBlack;
+  unsigned int bit_offset;
   int dbg;
 
-  if (debug_fptr && (gamept->curr_move == dbg_move)) {
-    fprintf(debug_fptr,"move_is_legal: curr_move = %d, special_move_info = %x, before update_board\n",
-      gamept->curr_move,gamept->moves[gamept->curr_move].special_move_info);
-    fprint_bd2(gamept->board,debug_fptr);
+  set_piece_calls++;
+
+  if (dbg_set_piece_call == set_piece_calls)
+    dbg = 0;
+
+  if (debug_level == 2) {
+    if (debug_fptr != NULL)
+      fprintf(debug_fptr,"set_piece: board_offset = %d, piece %d\n",board_offset,piece);
   }
 
-  bBlack = gamept->curr_move & 0x1;
-  copy_game(&scratch,gamept);
+  bit_offset = board_offset * BITS_PER_BOARD_SQUARE;
+  set_bits(BITS_PER_BOARD_SQUARE,board,bit_offset,piece);
+}
 
-  if ((scratch.moves[scratch.curr_move].from != from) || (scratch.moves[scratch.curr_move].to != to))
-    dbg = 1;
+void set_piece2(unsigned char *board,int rank,int file,int piece)
+{
+  int board_offset;
 
-  scratch.moves[scratch.curr_move].from = from;
-  scratch.moves[scratch.curr_move].to = to;
-  update_board(&scratch,NULL,NULL);
-
-  if (debug_fptr && (gamept->curr_move == dbg_move)) {
-    fprintf(debug_fptr,"move_is_legal: curr_move = %d, special_move_info = %x, after update_board\n",
-      gamept->curr_move,gamept->moves[gamept->curr_move].special_move_info);
-    fprint_bd2(scratch.board,debug_fptr);
-  }
-
-  if (player_is_in_check(bBlack,scratch.board)) {
-    if (debug_fptr) {
-      fprintf(debug_fptr,"move_is_legal: about to return false, curr_move = %d\n",
-        scratch.curr_move);
-      fprint_bd2(scratch.board,debug_fptr);
-    }
-
-    return false;
-  }
-
-  return true;
+  board_offset = rank * NUM_FILES + file;
+  set_piece1(board,board_offset,piece);
 }
