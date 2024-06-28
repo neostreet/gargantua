@@ -128,7 +128,7 @@ void sprintf_move(struct game *gamept,char *buf,int buf_len,bool bInline)
     sprintf(&buf[put_count],"O-O");
     put_count += 3;
   }
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_QUEENSIDE_CASTLE) {
+  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_GARGSIDE_CASTLE) {
     sprintf(&buf[put_count],"O-O-O");
     put_count += 5;
   }
