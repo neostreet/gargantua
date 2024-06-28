@@ -117,9 +117,8 @@ int (*piece_functions[])(struct game *) = {
   rook_move2,
   knight_move2,
   bishop_move2,
-  queen_move2,
-  king_move2,
-  gargantua_move2
+  gargantua_move2,
+  king_move2
 };
 
 int do_piece_move(struct game *gamept)
@@ -334,7 +333,7 @@ int bishop_move2(
   return retval;
 }
 
-int queen_move(
+int gargantua_move(
   struct game *gamept,
   int file1,
   int rank1,
@@ -348,16 +347,19 @@ int queen_move(
   if (!bishop_move(gamept,file1,rank1,file2,rank2))
     return 0;  /* success */
 
+  if (!knight_move(gamept,file1,rank1,file2,rank2))
+    return 0;  /* success */
+
   return 1;    /* failure */
 }
 
-int queen_move2(
+int gargantua_move2(
   struct game *gamept
 )
 {
   int retval;
 
-  retval = queen_move(
+  retval = gargantua_move(
     gamept,
     FILE_OF(move_start_square),
     RANK_OF(move_start_square),
@@ -367,7 +369,6 @@ int queen_move2(
 
   return retval;
 }
-
 int king_move(
   struct game *gamept,
   int file1,
@@ -399,7 +400,7 @@ int king_move(
       }
     }
 
-    // check for queenside castle
+    // check for gargside castle
     if ((file1 == 5) && (rank1 == 0) && (file2 == 3) && (rank2 == 0)) {
       should_be_empty1 = get_piece1(gamept->board,2);
       should_be_empty2 = get_piece1(gamept->board,3);
@@ -407,7 +408,7 @@ int king_move(
       should_be_rook = get_piece1(gamept->board,1);
 
       if (!should_be_empty1 && !should_be_empty2 && !should_be_empty3 && (should_be_rook == ROOK_ID)) {
-        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
+        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_GARGSIDE_CASTLE;
         return 0;
       }
     }
@@ -427,7 +428,7 @@ int king_move(
       }
     }
 
-    // check for queenside castle
+    // check for gargside castle
     if ((file1 == 5) && (rank1 == 7) && (file2 == 3) && (rank2 == 7)) {
       should_be_empty1 = get_piece1(gamept->board,72);
       should_be_empty2 = get_piece1(gamept->board,73);
@@ -435,7 +436,7 @@ int king_move(
       should_be_rook = get_piece1(gamept->board,71);
 
       if (!should_be_empty1 && !should_be_empty2 && !should_be_empty3 && (should_be_rook == ROOK_ID * -1)) {
-        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_QUEENSIDE_CASTLE;
+        gamept->moves[gamept->curr_move].special_move_info = SPECIAL_MOVE_GARGSIDE_CASTLE;
         return 0;
       }
     }
@@ -474,39 +475,6 @@ int king_move2(
   return retval;
 }
 
-int gargantua_move(
-  struct game *gamept,
-  int file1,
-  int rank1,
-  int file2,
-  int rank2
-)
-{
-  if (!queen_move(gamept,file1,rank1,file2,rank2))
-    return 0;  /* success */
-
-  if (!knight_move(gamept,file1,rank1,file2,rank2))
-    return 0;  /* success */
-
-  return 1;    /* failure */
-}
-
-int gargantua_move2(
-  struct game *gamept
-)
-{
-  int retval;
-
-  retval = gargantua_move(
-    gamept,
-    FILE_OF(move_start_square),
-    RANK_OF(move_start_square),
-    FILE_OF(move_end_square),
-    RANK_OF(move_end_square)
-    );
-
-  return retval;
-}
 
 bool move_is_legal(struct game *gamept,char from,char to)
 {
@@ -594,16 +562,12 @@ void get_legal_moves(struct game *gamept,struct move *legal_moves,int *legal_mov
         legal_bishop_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
 
         break;
-      case QUEEN_ID:
-        legal_queen_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
+      case GARGANTUA_ID:
+        legal_gargantua_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
 
         break;
       case KING_ID:
         legal_king_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
-
-        break;
-      case GARGANTUA_ID:
-        legal_gargantua_moves(gamept,info_pt[n].current_board_position,legal_moves,legal_moves_count);
 
         break;
     }
@@ -616,7 +580,7 @@ struct move_offset pawn_offsets[] = {
 #define NUM_PAWN_OFFSETS (sizeof pawn_offsets / sizeof(struct move_offset))
 
 static int promotions[] = {
-  SPECIAL_MOVE_PROMOTION_QUEEN,
+  SPECIAL_MOVE_PROMOTION_GARGANTUA,
   SPECIAL_MOVE_PROMOTION_ROOK,
   SPECIAL_MOVE_PROMOTION_KNIGHT,
   SPECIAL_MOVE_PROMOTION_BISHOP
@@ -997,7 +961,7 @@ void legal_bishop_moves(struct game *gamept,char current_board_position,struct m
   }
 }
 
-void legal_queen_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
+void legal_gargantua_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
 {
   int num_legal_moves_before;
   int num_legal_moves;
@@ -1006,10 +970,11 @@ void legal_queen_moves(struct game *gamept,char current_board_position,struct mo
 
   legal_rook_moves(gamept,current_board_position,legal_moves,legal_moves_count);
   legal_bishop_moves(gamept,current_board_position,legal_moves,legal_moves_count);
+  legal_knight_moves(gamept,current_board_position,legal_moves,legal_moves_count);
 
   if (debug_fptr) {
     num_legal_moves = *legal_moves_count - num_legal_moves_before;
-    fprintf(debug_fptr,"legal_queen_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
+    fprintf(debug_fptr,"legal_gargantua_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
       gamept->curr_move,current_board_position,num_legal_moves);
   }
 }
@@ -1076,23 +1041,6 @@ void legal_king_moves(struct game *gamept,char current_board_position,struct mov
   if (debug_fptr) {
     num_legal_moves = *legal_moves_count - num_legal_moves_before;
     fprintf(debug_fptr,"legal_king_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
-      gamept->curr_move,current_board_position,num_legal_moves);
-  }
-}
-
-void legal_gargantua_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count)
-{
-  int num_legal_moves_before;
-  int num_legal_moves;
-
-  num_legal_moves_before = *legal_moves_count;
-
-  legal_queen_moves(gamept,current_board_position,legal_moves,legal_moves_count);
-  legal_knight_moves(gamept,current_board_position,legal_moves,legal_moves_count);
-
-  if (debug_fptr) {
-    num_legal_moves = *legal_moves_count - num_legal_moves_before;
-    fprintf(debug_fptr,"legal_gargantua_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
       gamept->curr_move,current_board_position,num_legal_moves);
   }
 }
