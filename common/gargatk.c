@@ -44,16 +44,12 @@ int square_attacks_square(unsigned char *board,int square1,int square2)
       retval = bishop_attacks_square(board,square1,square2);
 
       break;
-    case QUEEN_ID:
-      retval = queen_attacks_square(board,square1,square2);
+    case GARGANTUA_ID:
+      retval = gargantua_attacks_square(board,square1,square2);
 
       break;
     case KING_ID:
       retval = king_attacks_square(board,square1,square2);
-
-      break;
-    case GARGANTUA_ID:
-      retval = gargantua_attacks_square(board,square1,square2);
 
       break;
   }
@@ -230,12 +226,15 @@ int bishop_attacks_square(unsigned char *board,int square1,int square2)
   return false;
 }
 
-int queen_attacks_square(unsigned char *board,int square1,int square2)
+int gargantua_attacks_square(unsigned char *board,int square1,int square2)
 {
   if (rook_attacks_square(board,square1,square2))
     return true;
 
   if (bishop_attacks_square(board,square1,square2))
+    return true;
+
+  if (knight_attacks_square(board,square1,square2))
     return true;
 
   return false;
@@ -259,17 +258,6 @@ int king_attacks_square(unsigned char *board,int square1,int square2)
   file_diff = ABS_VAL(file1,file2);
 
   if ((rank_diff <= 1) && (file_diff <= 1))
-    return true;
-
-  return false;
-}
-
-int gargantua_attacks_square(unsigned char *board,int square1,int square2)
-{
-  if (queen_attacks_square(board,square1,square2))
-    return true;
-
-  if (knight_attacks_square(board,square1,square2))
     return true;
 
   return false;
