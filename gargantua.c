@@ -394,11 +394,6 @@ int get_piece_offset(int piece,int rank,int file)
     }
   }
 
-  if (piece == GARGANTUA_ID)
-    piece = KNIGHT_ID; // for now
-  else if (piece == GARGANTUA_ID * -1)
-    piece = KNIGHT_ID * -1; // for now
-
   if (!piece) {
     /* this is a blank square; these are represented in the bitmap as well
        as pieces
@@ -597,14 +592,8 @@ void do_paint(HWND hWnd)
       if (piece_offset >= 0) {
         bigbmp_column = piece_offset;
 
-        if ((m == highlight_rank) && (n == highlight_file)) {
-          if ((piece == GARGANTUA_ID) || (piece == GARGANTUA_ID * -1))
-            bigbmp_row = 3;
-          else
-            bigbmp_row = 1;
-        }
-        else if ((piece == GARGANTUA_ID) || (piece == GARGANTUA_ID * -1))
-          bigbmp_row = 2;
+        if ((m == highlight_rank) && (n == highlight_file))
+          bigbmp_row = 1;
         else
           bigbmp_row = 0;
 
@@ -1518,8 +1507,8 @@ LRESULT CALLBACK Promotion(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 
       case WM_COMMAND:
         switch (LOWORD(wParam)) {
-            case IDC_QUEEN:
-                special_move_info = SPECIAL_MOVE_PROMOTION_QUEEN;
+            case IDC_GARGANTUA:
+                special_move_info = SPECIAL_MOVE_PROMOTION_GARGANTUA;
                 break;
             case IDC_ROOK:
                 special_move_info = SPECIAL_MOVE_PROMOTION_ROOK;
@@ -1529,9 +1518,6 @@ LRESULT CALLBACK Promotion(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
                 break;
             case IDC_KNIGHT:
                 special_move_info = SPECIAL_MOVE_PROMOTION_KNIGHT;
-                break;
-            case IDC_GARGANTUA:
-                special_move_info = SPECIAL_MOVE_PROMOTION_GARGANTUA;
                 break;
             case IDOK:
                 EndDialog(hDlg, TRUE);
