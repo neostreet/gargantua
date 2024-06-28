@@ -26,12 +26,10 @@ int knight_move(struct game *,int,int,int,int);
 int knight_move2(struct game *);
 int bishop_move(struct game *,int,int,int,int);
 int bishop_move2(struct game *);
-int queen_move(struct game *,int,int,int,int);
-int queen_move2(struct game *);
-int king_move(struct game *,int,int,int,int);
-int king_move2(struct game *);
 int gargantua_move(struct game *,int,int,int,int);
 int gargantua_move2(struct game *);
+int king_move(struct game *,int,int,int,int);
+int king_move2(struct game *);
 
 bool move_is_legal(struct game *gamept,char from,char to);
 void get_legal_moves(struct game *gamept,struct move *legal_moves,int *legal_moves_count);
@@ -39,9 +37,8 @@ void legal_pawn_moves(struct game *gamept,char current_board_position,struct mov
 void legal_rook_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
 void legal_knight_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
 void legal_bishop_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
-void legal_queen_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
-void legal_king_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
 void legal_gargantua_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
+void legal_king_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
 
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt);
 
@@ -81,8 +78,7 @@ int pawn_attacks_square(unsigned char *board,int square1,int color,int square2);
 int rook_attacks_square(unsigned char *board,int square1,int square2);
 int knight_attacks_square(unsigned char *board,int square1,int square2);
 int bishop_attacks_square(unsigned char *board,int square1,int square2);
-int queen_attacks_square(unsigned char *board,int square1,int square2);
-int king_attacks_square(unsigned char *board,int square1,int square2);
 int gargantua_attacks_square(unsigned char *board,int square1,int square2);
+int king_attacks_square(unsigned char *board,int square1,int square2);
 bool player_is_in_check(bool bBlack,unsigned char *board);
 int calc_square(char *algebraic_notation);
