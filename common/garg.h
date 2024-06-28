@@ -3,7 +3,7 @@
 #define NUM_PLAYERS 2
 
 #define NUM_RANKS  8
-#define NUM_FILES 10
+#define NUM_FILES  8
 
 #define NUM_BOARD_SQUARES (NUM_RANKS * NUM_FILES)
 
@@ -14,28 +14,26 @@
 #define ROOK_ID           2
 #define KNIGHT_ID         3
 #define BISHOP_ID         4
-#define QUEEN_ID          5
+#define GARGANTUA_ID      5
 #define KING_ID           6
-#define GARGANTUA_ID      7
-#define NUM_PIECE_TYPES_0 7
-#define EMPTY_ID          8
+#define NUM_PIECE_TYPES_0 6
+#define EMPTY_ID          7
 
 #define NUM_PIECES_PER_PLAYER 20
 
 #define SPECIAL_MOVE_NONE                      0x0000
 #define SPECIAL_MOVE_TWO_SQUARE_PAWN_ADVANCE   0x0001
 #define SPECIAL_MOVE_KINGSIDE_CASTLE           0x0002
-#define SPECIAL_MOVE_QUEENSIDE_CASTLE          0x0004
+#define SPECIAL_MOVE_GARGSIDE_CASTLE           0x0004
 #define SPECIAL_MOVE_CHECK                     0x0008
 #define SPECIAL_MOVE_CAPTURE                   0x0010
 #define SPECIAL_MOVE_EN_PASSANT_CAPTURE        0x0020
-#define SPECIAL_MOVE_PROMOTION_QUEEN           0x0040
+#define SPECIAL_MOVE_PROMOTION_GARGANTUA       0x0040
 #define SPECIAL_MOVE_PROMOTION_ROOK            0x0080
 #define SPECIAL_MOVE_PROMOTION_KNIGHT          0x0100
 #define SPECIAL_MOVE_PROMOTION_BISHOP          0x0200
 #define SPECIAL_MOVE_MATE                      0x0400
 #define SPECIAL_MOVE_STALEMATE                 0x0800
-#define SPECIAL_MOVE_PROMOTION_GARGANTUA       0x1000
 
 #define WORDLEN 80
 #define MAX_MOVES 400
