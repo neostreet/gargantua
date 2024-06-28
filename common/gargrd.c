@@ -360,53 +360,53 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   if (bKingsideCastle) {
     if (!(gamept->curr_move % 2)) {
       // it's White's move
-      set_piece1(gamept->board,6,ROOK_ID);
+      set_piece1(gamept->board,5,ROOK_ID);
 
       if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 6;
+        invalid_squares[(*num_invalid_squares)++] = 5;
 
-      set_piece1(gamept->board,8,0);
+      set_piece1(gamept->board,7,0);
 
       if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 8;
+        invalid_squares[(*num_invalid_squares)++] = 7;
     }
     else {
       // it's Blacks's move
-      set_piece1(gamept->board,76,ROOK_ID * -1);
+      set_piece1(gamept->board,61,ROOK_ID * -1);
 
       if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 76;
+        invalid_squares[(*num_invalid_squares)++] = 61;
 
-      set_piece1(gamept->board,78,0);
+      set_piece1(gamept->board,63,0);
 
       if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 78;
+        invalid_squares[(*num_invalid_squares)++] = 63;
     }
   }
   else if (bGargsideCastle) {
     if (!(gamept->curr_move % 2)) {
       // it's White's move
-      set_piece1(gamept->board,4,ROOK_ID);
+      set_piece1(gamept->board,3,ROOK_ID);
 
       if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 4;
+        invalid_squares[(*num_invalid_squares)++] = 3;
 
-      set_piece1(gamept->board,1,0);
+      set_piece1(gamept->board,0,0);
 
       if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 1;
+        invalid_squares[(*num_invalid_squares)++] = 0;
     }
     else {
       // it's Blacks's move
-      set_piece1(gamept->board,74,ROOK_ID * -1);
+      set_piece1(gamept->board,59,ROOK_ID * -1);
 
       if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 74;
+        invalid_squares[(*num_invalid_squares)++] = 59;
 
-      set_piece1(gamept->board,71,0);
+      set_piece1(gamept->board,56,0);
 
       if (invalid_squares)
-        invalid_squares[(*num_invalid_squares)++] = 71;
+        invalid_squares[(*num_invalid_squares)++] = 56;
     }
   }
   else if (bEnPassantCapture) {
@@ -445,16 +445,16 @@ void update_piece_info(struct game *gamept)
   if (!(gamept->curr_move % 2)) {
     // it's White's move
     if (special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE) {
-      gamept->white_pieces[5].current_board_position = 7;
-      gamept->white_pieces[5].move_count++;
-      gamept->white_pieces[8].current_board_position = 6;
-      gamept->white_pieces[8].move_count++;
+      gamept->white_pieces[4].current_board_position = 6;
+      gamept->white_pieces[4].move_count++;
+      gamept->white_pieces[7].current_board_position = 5;
+      gamept->white_pieces[7].move_count++;
     }
     else if (special_move_info & SPECIAL_MOVE_GARGSIDE_CASTLE) {
-      gamept->white_pieces[5].current_board_position = 3;
-      gamept->white_pieces[5].move_count++;
-      gamept->white_pieces[1].current_board_position = 4;
-      gamept->white_pieces[1].move_count++;
+      gamept->white_pieces[4].current_board_position = 2;
+      gamept->white_pieces[4].move_count++;
+      gamept->white_pieces[0].current_board_position = 3;
+      gamept->white_pieces[0].move_count++;
     }
     else {
       for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
@@ -504,16 +504,16 @@ void update_piece_info(struct game *gamept)
   else {
     // it's Blacks's move
     if (special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE) {
-      gamept->black_pieces[15].current_board_position = 77;
+      gamept->black_pieces[12].current_board_position = 62;
+      gamept->black_pieces[12].move_count++;
+      gamept->black_pieces[15].current_board_position = 61;
       gamept->black_pieces[15].move_count++;
-      gamept->black_pieces[18].current_board_position = 76;
-      gamept->black_pieces[18].move_count++;
     }
     else if (special_move_info & SPECIAL_MOVE_GARGSIDE_CASTLE) {
-      gamept->black_pieces[15].current_board_position = 73;
-      gamept->black_pieces[15].move_count++;
-      gamept->black_pieces[11].current_board_position = 74;
-      gamept->black_pieces[11].move_count++;
+      gamept->black_pieces[12].current_board_position = 58;
+      gamept->black_pieces[12].move_count++;
+      gamept->black_pieces[8].current_board_position = 59;
+      gamept->black_pieces[8].move_count++;
     }
     else {
       for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
