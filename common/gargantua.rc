@@ -40,7 +40,7 @@ IDI_SMALL               ICON    DISCARDABLE     "small.ico"
 // Bitmap
 //
 
-BIGBMP                  BITMAP  DISCARDABLE     "gargantua.bmp"
+BIGBMP                  BITMAP  DISCARDABLE     "bigbmp.bmp"
 IDB_TOOLBAR             BITMAP  DISCARDABLE     "toolbar.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
