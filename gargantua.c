@@ -859,7 +859,8 @@ void next_move(HWND hWnd)
     fprintf(debug_fptr,"next_move: after do_move, curr_move = %d\n",curr_game.curr_move);
   }
 
-  if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE) {
+  if ((curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE) ||
+      (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_STALEMATE)) {
     invalidate_board(hWnd);
     redisplay_counts(hWnd,NULL);
   }
@@ -1839,7 +1840,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     else {
       if (!legal_moves_count) {
         curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_STALEMATE;
-        curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_MATE;
+        invalidate_board(hWnd);
       }
     }
   }
