@@ -538,6 +538,10 @@ void do_paint(HWND hWnd)
   int bSelectedFont;
   char buf[80];
 
+  if (debug_fptr) {
+    fprintf(debug_fptr,"top of do_paint, num_moves = %d, curr_move = %d\n",curr_game.num_moves,curr_game.curr_move);
+  }
+
   if (bHaveGame)
     afl_dbg = 1;
 
@@ -562,6 +566,10 @@ void do_paint(HWND hWnd)
 
       if (!RectVisible(hdc,&rect))
         continue;
+
+      if (debug_fptr) {
+        fprintf(debug_fptr,"do_paint: m = %d, n = %d\n",m,n);
+      }
 
 #ifdef UNDEF
       if (bHaveGame && (debug_level == 2)) {
@@ -593,9 +601,14 @@ void do_paint(HWND hWnd)
         bigbmp_column = piece_offset;
 
         if ((m == highlight_rank) && (n == highlight_file))
-          bigbmp_row = 1;
-        else
-          bigbmp_row = 0;
+          bigbmp_row = 2;
+        else {
+          if ((curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE) ||
+              (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_STALEMATE))
+            bigbmp_row = 1;
+          else
+            bigbmp_row = 0;
+        }
 
         BitBlt(hdc,rect.left,rect.top,
           width_in_pixels,height_in_pixels,
@@ -836,7 +849,20 @@ void prev_move(HWND hWnd)
 
 void next_move(HWND hWnd)
 {
+  if (debug_fptr) {
+    fprintf(debug_fptr,"next_move: before do_move, curr_move = %d\n",curr_game.curr_move);
+  }
+
   do_move(hWnd);
+
+  if (debug_fptr) {
+    fprintf(debug_fptr,"next_move: after do_move, curr_move = %d\n",curr_game.curr_move);
+  }
+
+  if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE) {
+    invalidate_board(hWnd);
+    redisplay_counts(hWnd,NULL);
+  }
 }
 
 void start_of_game(HWND hWnd)
@@ -1650,6 +1676,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   bool bPromotion;
   int invalid_squares[4];
   int num_invalid_squares;
+  bool bBlack;
 
   if (debug_fptr != NULL) {
     fprintf(debug_fptr,"do_lbuttondown: rank = %d, file = %d\n",rank,file);
@@ -1793,5 +1820,27 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     bUnsavedChanges = true;
     curr_game.moves[curr_game.curr_move].special_move_info = 0;
     curr_game.num_moves = curr_game.curr_move;
+
+    bBlack = curr_game.curr_move & 0x1;
+
+    legal_moves_count = 0;
+    get_legal_moves(&curr_game,&legal_moves[0],&legal_moves_count);
+
+    if (player_is_in_check(bBlack,curr_game.board)) {
+      curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_CHECK;
+
+      // now determine if this is a checkmate
+
+      if (!legal_moves_count) {
+        curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_MATE;
+        invalidate_board(hWnd);
+      }
+    }
+    else {
+      if (!legal_moves_count) {
+        curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_STALEMATE;
+        curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_MATE;
+      }
+    }
   }
 }
