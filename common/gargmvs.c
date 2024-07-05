@@ -108,6 +108,10 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen,struct
   int capture_file;
   int piece;
   int which_piece;
+  int dbg;
+
+  if (gamept->curr_move == dbg_move)
+    dbg = 1;
 
   if (debug_fptr)
     fprintf(debug_fptr,"do_pawn_move: curr_move = %d, word = %s\n",gamept->curr_move,word);
@@ -165,7 +169,7 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen,struct
           return 6;
 
         switch (word[2]) {
-          case 'Q':
+          case 'G':
             move_ptr->special_move_info =
               SPECIAL_MOVE_PROMOTION_GARGANTUA;
 
@@ -195,7 +199,7 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen,struct
           return 8;
 
         switch (word[2]) {
-          case 'Q':
+          case 'G':
             move_ptr->special_move_info =
               SPECIAL_MOVE_PROMOTION_GARGANTUA;
 
@@ -256,7 +260,7 @@ int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen,struct
 
         if (wordlen == 4) {
           switch (word[3]) {
-            case 'Q':
+            case 'G':
               move_ptr->special_move_info =
                 SPECIAL_MOVE_PROMOTION_GARGANTUA;
 
@@ -483,6 +487,9 @@ int do_piece_move(struct game *gamept,int direction,char *word,int wordlen,struc
   int to_piece;
   int retval;
   int dbg;
+
+  if (gamept->curr_move == dbg_move)
+    dbg = 1;
 
   if (debug_fptr)
     fprintf(debug_fptr,"do_piece_move: curr_move = %d, word = %s\n",gamept->curr_move,word);
