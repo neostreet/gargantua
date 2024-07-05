@@ -232,7 +232,7 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
       case 'R':
       case 'N':
       case 'B':
-      case 'Q':
+      case 'G':
       case 'K':
         retval = do_piece_move(gamept,direction,word,wordlen,&gamept->moves[gamept->curr_move]);
 
