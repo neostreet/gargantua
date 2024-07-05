@@ -749,7 +749,7 @@ static void do_move(HWND hWnd)
   }
 
   num_invalid_squares = 0;
-  update_board(&curr_game,invalid_squares,&num_invalid_squares);
+  update_board(&curr_game,invalid_squares,&num_invalid_squares,false);
 
   for (n = 0; n < num_invalid_squares; n++)
     invalidate_square(hWnd,invalid_squares[n]);
@@ -1763,7 +1763,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
 
   if ((move_start_square_piece == PAWN_ID) ||
       (move_start_square_piece == PAWN_ID * -1)) {
-    retval = do_pawn_move(&curr_game);
+    retval = do_pawn_move2(&curr_game);
 
     if (!retval) {
       // check if this was a pawn promotion
@@ -1805,11 +1805,11 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     }
   }
   else
-    retval = do_piece_move(&curr_game);
+    retval = do_piece_move2(&curr_game);
 
   if (!retval) {
     num_invalid_squares = 0;
-    update_board(&curr_game,invalid_squares,&num_invalid_squares);
+    update_board(&curr_game,invalid_squares,&num_invalid_squares,false);
     update_piece_info(&curr_game);
 
     for (n = 0; n < num_invalid_squares; n++)
@@ -1828,7 +1828,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     legal_moves_count = 0;
     get_legal_moves(&curr_game,&legal_moves[0],&legal_moves_count);
 
-    if (player_is_in_check(bBlack,curr_game.board)) {
+    if (player_is_in_check(bBlack,curr_game.board,curr_game.curr_move)) {
       curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_CHECK;
 
       // now determine if this is a checkmate
