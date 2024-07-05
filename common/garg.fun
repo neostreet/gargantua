@@ -1,5 +1,6 @@
 /*** Gargantua function declarations ***/
 
+int read_game(char *filename,struct game *gamept,char *err_msg);
 int read_binary_game(char *filename,struct game *gamept);
 int write_binary_game(char *filename,struct game *gamept);
 char xlate_piece(char);
@@ -15,9 +16,12 @@ void GetLine(FILE *fptr,char *line,int *line_len,int maxllen);
 int populate_board_from_board_file(unsigned char *board,char *filename);
 int write_board_to_binfile(unsigned char *board,char *filename);
 
-int do_pawn_move(struct game *gamept);
+int do_castle(struct game *gamept,int direction,char *word,int wordlen,struct move *move_ptr);
+int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen,struct move *move_ptr);
+int do_pawn_move2(struct game *gamept);
 int get_piece_id_ix(char piece);
-int do_piece_move(struct game *gamept);
+int do_piece_move(struct game *gamept,int direction,char *word,int wordlen,struct move *move_ptr);
+int do_piece_move2(struct game *gamept);
 int allow_user_moves(struct game *gamept);
 
 int rook_move(struct game *,int,int,int,int);
@@ -46,7 +50,7 @@ void set_initial_board(struct game *gamept);
 void initialize_piece_info(struct game *gamept);
 void position_game(struct game *gamept,int move);
 void print_special_moves(struct game *gamept);
-void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares);
+void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares,bool bScratch);
 void update_piece_info(struct game *gamept);
 void fprint_piece_info(struct game *gamept,FILE *fptr);
 void print_piece_info(struct game *gamept);
@@ -58,6 +62,7 @@ int get_piece2(unsigned char *board,int rank,int file);
 void set_piece1(unsigned char *board,int board_offset,int piece);
 void set_piece2(unsigned char *board,int rank,int file,int piece);
 
+int format_square(int square);
 void print_bd0(unsigned char *board,int orientation);
 void print_bd(struct game *gamept);
 void print_bd_cropped(struct game *gamept);
@@ -80,5 +85,5 @@ int knight_attacks_square(unsigned char *board,int square1,int square2);
 int bishop_attacks_square(unsigned char *board,int square1,int square2);
 int gargantua_attacks_square(unsigned char *board,int square1,int square2);
 int king_attacks_square(unsigned char *board,int square1,int square2);
-bool player_is_in_check(bool bBlack,unsigned char *board);
+bool player_is_in_check(bool bBlack,unsigned char *board,int curr_move);
 int calc_square(char *algebraic_notation);
