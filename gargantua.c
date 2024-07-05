@@ -881,12 +881,13 @@ void end_of_game(HWND hWnd)
   redisplay_counts(hWnd,NULL);
 }
 
-void do_read(HWND hWnd,LPSTR name,struct game *gamept,bool bStartingUp)
+void do_read(HWND hWnd,LPSTR name,struct game *gamept,bool bBinaryFormat)
 {
   int retval;
   char buf[256];
   struct stat statbuf;
 
+#ifdef UNDEF
   if (bStartingUp) {
     // first, see if the file exists
     if (stat(name,&statbuf) == -1) {
@@ -895,8 +896,15 @@ void do_read(HWND hWnd,LPSTR name,struct game *gamept,bool bStartingUp)
       return;
     }
   }
+#endif
 
-  retval = read_binary_game(name,gamept);
+  if (debug_fptr)
+    fprintf(debug_fptr,"%s\n","do_read(): top of function");
+
+  if (!bBinaryFormat)
+    retval = read_game(name,gamept,err_msg);
+  else
+    retval = read_binary_game(name,gamept);
 
   if (!retval) {
     bHaveGame = TRUE;
@@ -909,8 +917,15 @@ void do_read(HWND hWnd,LPSTR name,struct game *gamept,bool bStartingUp)
     InvalidateRect(hWnd,NULL,TRUE);
   }
   else {
-    wsprintf(buf,read_binary_game_failure,
-      name,retval,gamept->curr_move);
+    if (!bBinaryFormat) {
+      wsprintf(buf,read_game_failure,
+        name,retval,gamept->curr_move);
+    }
+    else {
+      wsprintf(buf,read_binary_game_failure,
+        name,retval,gamept->curr_move);
+    }
+
     MessageBox(hWnd,buf,NULL,MB_OK);
   }
 }
@@ -1183,6 +1198,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           if (GetOpenFileName(&OpenFileName)) {
             name = OpenFileName.lpstrFile;
             do_read(hWnd,name,&curr_game,false);
+          }
+
+          break;
+
+        case IDM_OPEN_BINARY_GAME:
+	  // Call the common dialog function.
+          bHaveGame = FALSE;
+
+          if (GetOpenFileName(&OpenFileName)) {
+            name = OpenFileName.lpstrFile;
+            do_read(hWnd,name,&curr_game,true);
           }
 
           break;
