@@ -65,6 +65,10 @@ static struct piece_info initial_black_pieces[] = {
   ROOK_ID * -1,63,0
 };
 
+static char corrupted_msg[] = "game corrupted\n";
+static char bad_castle[] = "bad castle";
+static char bad_pawn_move[] = "bad pawn move";
+
 static char *bad_piece_move[] = {
   "bad rook move",
   "bad knight move",
@@ -125,6 +129,168 @@ void initialize_piece_info(struct game *gamept)
     gamept->black_pieces[n].current_board_position = initial_black_pieces[n].current_board_position;
     gamept->black_pieces[n].move_count = initial_black_pieces[n].move_count;
   }
+}
+
+int read_game(char *filename,struct game *gamept,char *err_msg)
+{
+  FILE *fptr;
+  int chara;
+  int end_of_file;
+  int m;
+  int n;
+  char word[WORDLEN];
+  int wordlen;
+  bool bHaveFirstWord;
+  int direction;
+  int word_no;
+  int dbg;
+  int retval;
+  int got_error;
+  bool bBlack;
+
+  bzero(gamept,sizeof (struct game));
+
+  gamept->curr_move = -1;
+
+  if ((fptr = fopen(filename,"r")) == NULL)
+    return 1;
+
+  fscanf(fptr,"%d",&gamept->orientation);  /* get board orientation */
+                                   /* 0 = standard, 1 = black on bottom */
+
+  end_of_file = get_word(fptr,word,WORDLEN,&wordlen);
+  bHaveFirstWord = true;
+
+  set_initial_board(gamept);
+
+  end_of_file = 0;
+  gamept->curr_move = 0;
+
+  gamept->title[0] = 0;
+  word_no = 0;
+  got_error = 0;
+
+  for ( ; ; ) {
+    if (word_no || !bHaveFirstWord)
+      end_of_file = get_word(fptr,word,WORDLEN,&wordlen);
+
+    if (end_of_file)
+      break;
+
+    word_no++;
+
+    if (gamept->curr_move == dbg_move)
+      dbg = 1;
+
+    /* ignore line numbers: */
+    if (line_number(word,wordlen))
+      continue;
+
+    if (!strncmp(word,"title",5)) {
+      m = 5;
+      n = 0;
+
+      for ( ; ; ) {
+        chara = word[m++];
+
+        if (!chara)
+          break;
+
+        if (n < 79)
+          if (chara == '\\')
+            gamept->title[n++] = ' ';
+          else
+            gamept->title[n++] = chara;
+      }
+
+      gamept->title[n] = 0;
+
+      continue;
+    }
+
+    if (gamept->curr_move & 0x1)
+      direction = -1;           /* black's move */
+    else
+      direction = 1;            /* white's move */
+
+    gamept->moves[gamept->curr_move].special_move_info = 0;
+
+    switch(word[0]) {
+      case 'O':
+      case '0':
+        retval = do_castle(gamept,direction,word,wordlen,&gamept->moves[gamept->curr_move]);
+
+        if (retval) {
+          /*printf(corrupted_msg);*/
+          strcpy(err_msg,bad_castle);
+
+          got_error = 1;
+        }
+
+        break;
+
+      case 'R':
+      case 'N':
+      case 'B':
+      case 'Q':
+      case 'K':
+        retval = do_piece_move(gamept,direction,word,wordlen,&gamept->moves[gamept->curr_move]);
+
+        if (retval) {
+          /*printf(corrupted_msg);*/
+          strcpy(err_msg,bad_piece_move[get_piece_type_ix(word[0])]);
+
+          got_error = 1;
+        }
+
+        break;
+
+      default:
+        retval = do_pawn_move(gamept,direction,word,wordlen,&gamept->moves[gamept->curr_move]);
+
+        if (retval) {
+          /*printf(corrupted_msg);*/
+          strcpy(err_msg,bad_pawn_move);
+
+          got_error = 1;
+        }
+
+        break;
+    }
+
+    if (got_error)
+      break;
+
+    update_board(gamept,NULL,NULL,false);
+    update_piece_info(gamept);
+
+    gamept->curr_move++;
+    gamept->moves[gamept->curr_move].special_move_info = 0;
+    gamept->num_moves = gamept->curr_move;
+
+    bBlack = gamept->curr_move & 0x1;
+
+    if (player_is_in_check(bBlack,gamept->board,gamept->curr_move))
+      gamept->moves[gamept->curr_move-1].special_move_info |= SPECIAL_MOVE_CHECK;
+  }
+
+  fclose(fptr);
+
+  if (got_error)
+    return 3;
+
+  legal_moves_count = 0;
+  get_legal_moves(gamept,&legal_moves[0],&legal_moves_count);
+
+  if (!legal_moves_count) {
+    // determine if this is a checkmate or a stalemate
+    if (gamept->moves[gamept->curr_move-1].special_move_info & SPECIAL_MOVE_CHECK)
+      gamept->moves[gamept->curr_move-1].special_move_info |= SPECIAL_MOVE_MATE;
+    else
+      gamept->moves[gamept->curr_move-1].special_move_info |= SPECIAL_MOVE_STALEMATE;
+  }
+
+  return 0;
 }
 
 int read_binary_game(char *filename,struct game *gamept)
@@ -306,8 +472,9 @@ static int update_board_calls;
 static int dbg_update_board_call;
 static int dbg;
 
-void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares)
+void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares,bool bScratch)
 {
+  int n;
   bool bBlack;
   int from_piece;
   int to_piece;
@@ -329,7 +496,7 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   from_piece = get_piece1(gamept->board,gamept->moves[gamept->curr_move].from);
   to_piece = get_piece1(gamept->board,gamept->moves[gamept->curr_move].to);
 
-  if (from_piece * to_piece < 0)
+  if (!bScratch && (from_piece * to_piece < 0))
     gamept->moves[gamept->curr_move].special_move_info |= SPECIAL_MOVE_CAPTURE;
 
   if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE)
@@ -423,6 +590,18 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
 
     if (invalid_squares)
       invalid_squares[(*num_invalid_squares)++] = square_to_clear;
+  }
+
+  if (debug_fptr) {
+    if (invalid_squares) {
+      for (n = 0; n < *num_invalid_squares; n++) {
+        fprintf(debug_fptr,"update_board (%d): invalid_squares[%d] = %d\n",
+          update_board_calls,n,invalid_squares[n]);
+      }
+    }
+
+    if (!bScratch)
+      fprint_bd2(gamept->board,debug_fptr);
   }
 }
 
