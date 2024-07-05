@@ -5,11 +5,9 @@
 #include "garg.mac"
 #include "bitfuns.h"
 
-extern char fmt_str[];
-
-static int format_square(int square)
+int format_square(int square)
 {
-  int bBlack;
+  bool bBlack;
   int return_char;
 
   if (!square)
@@ -121,7 +119,7 @@ void fprint_game(struct game *gamept,char *filename)
     sprintf_move(gamept,buf,20,true);
     fprintf(fptr,fmt_str,buf);
 
-    update_board(gamept,NULL,NULL);
+    update_board(gamept,NULL,NULL,false);
   }
 
   fclose(fptr);
@@ -142,7 +140,7 @@ void fprint_game2(struct game *gamept,FILE *fptr)
     sprintf_move(gamept,buf,20,true);
     fprintf(fptr,fmt_str,buf);
 
-    update_board(gamept,NULL,NULL);
+    update_board(gamept,NULL,NULL,false);
   }
 }
 
@@ -285,7 +283,7 @@ void position_game(struct game *gamept,int move)
   set_initial_board(gamept);
 
   for (gamept->curr_move = 0; gamept->curr_move < move; gamept->curr_move++) {
-    update_board(gamept,NULL,NULL);
+    update_board(gamept,NULL,NULL,false);
     update_piece_info(gamept);
   }
 }
