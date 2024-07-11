@@ -224,7 +224,7 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
           /*printf(corrupted_msg);*/
           strcpy(err_msg,bad_castle);
 
-          got_error = 1;
+          got_error = 2;
         }
 
         break;
@@ -240,7 +240,7 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
           /*printf(corrupted_msg);*/
           strcpy(err_msg,bad_piece_move[get_piece_type_ix(word[0])]);
 
-          got_error = 1;
+          got_error = 3;
         }
 
         break;
@@ -252,7 +252,7 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
           /*printf(corrupted_msg);*/
           strcpy(err_msg,bad_pawn_move);
 
-          got_error = 1;
+          got_error = 4;
         }
 
         break;
@@ -276,9 +276,6 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
 
   fclose(fptr);
 
-  if (got_error)
-    return 3;
-
   legal_moves_count = 0;
   get_legal_moves(gamept,&legal_moves[0],&legal_moves_count);
 
@@ -289,6 +286,9 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
     else
       gamept->moves[gamept->curr_move-1].special_move_info |= SPECIAL_MOVE_STALEMATE;
   }
+
+  if (got_error)
+    return got_error;
 
   return 0;
 }
