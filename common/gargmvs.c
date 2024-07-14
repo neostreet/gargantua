@@ -576,8 +576,10 @@ int do_piece_move2(struct game *gamept)
   if (retval)
     return 1;
 
-  if (!move_is_legal(gamept,move_start_square,move_end_square))
+  if (!move_is_legal(gamept,move_start_square,move_end_square)) {
+    gamept->moves[gamept->curr_move].special_move_info = 0;
     return 1;
+  }
 
   gamept->moves[gamept->curr_move].from = move_start_square;
   gamept->moves[gamept->curr_move].to = move_end_square;
@@ -923,6 +925,9 @@ bool move_is_legal(struct game *gamept,char from,char to)
   bool bBlack;
   int dbg;
 
+  if (!bInGetLegalMoves)
+    dbg = 1;
+
   if (debug_fptr && (gamept->curr_move == dbg_move)) {
     fprintf(debug_fptr,"move_is_legal: curr_move = %d, special_move_info = %x, before update_board\n",
       gamept->curr_move,gamept->moves[gamept->curr_move].special_move_info);
@@ -966,6 +971,7 @@ void get_legal_moves(struct game *gamept,struct move *legal_moves,int *legal_mov
   unsigned char board[CHARS_IN_BOARD];
   char piece_id;
 
+  bInGetLegalMoves = true;
   bWhiteToMove = !(gamept->num_moves % 2);
 
   if (bWhiteToMove)
@@ -1011,6 +1017,8 @@ void get_legal_moves(struct game *gamept,struct move *legal_moves,int *legal_mov
         break;
     }
   }
+
+  bInGetLegalMoves = false;
 }
 
 struct move_offset pawn_offsets[] = {
