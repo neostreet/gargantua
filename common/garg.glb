@@ -28,6 +28,7 @@ GLOBAL bool bAutoSave;
 GLOBAL bool bUnsavedChanges;
 GLOBAL bool bAssumeMoveIsLegal;
 GLOBAL bool bSkipChecks;
+GLOBAL bool bInGetLegalMoves;
 
 #ifdef MAKE_GLOBALS_HERE
 char piece_ids[] = "RNBGK";
