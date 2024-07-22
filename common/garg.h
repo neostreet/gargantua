@@ -2,8 +2,8 @@
 #define BLACK 1
 #define NUM_PLAYERS 2
 
-#define NUM_RANKS  8
-#define NUM_FILES  8
+#define NUM_RANKS 8
+#define NUM_FILES 8
 
 #define NUM_BOARD_SQUARES (NUM_RANKS * NUM_FILES)
 
@@ -35,7 +35,11 @@
 #define SPECIAL_MOVE_MATE                      0x0400
 #define SPECIAL_MOVE_STALEMATE                 0x0800
 
-#define WORDLEN 80
+#define WHITE_WIN 1
+#define BLACK_WIN 2
+#define DRAW      3
+
+#define WORDLEN 256
 #define MAX_MOVES 400
 #define MAX_LEGAL_MOVES 500
 
@@ -83,6 +87,7 @@ struct game {
   int orientation;
   int num_moves;
   int curr_move;
+  int result;
   struct move moves[MAX_MOVES];
   unsigned char board[CHARS_IN_BOARD];  /* 8 columns * 8 rows / 2 (nibbles per char) */
   struct piece_info white_pieces[NUM_PIECES_PER_PLAYER];
