@@ -1131,7 +1131,7 @@ void get_legal_moves(struct game *gamept,struct move *legal_moves,int *legal_mov
   char piece_id;
 
   bInGetLegalMoves = true;
-  bWhiteToMove = !(gamept->num_moves % 2);
+  bWhiteToMove = !(gamept->curr_move % 2);
 
   if (bWhiteToMove)
     info_pt = gamept->white_pieces;
@@ -1356,8 +1356,9 @@ void legal_pawn_moves(struct game *gamept,char current_board_position,struct mov
     }
   }
 
+  num_legal_moves = *legal_moves_count - num_legal_moves_before;
+
   if (debug_fptr) {
-    num_legal_moves = *legal_moves_count - num_legal_moves_before;
     fprintf(debug_fptr,"legal_pawn_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
       gamept->curr_move,current_board_position,num_legal_moves);
   }
@@ -1425,8 +1426,9 @@ void legal_rook_moves(struct game *gamept,char current_board_position,struct mov
     }
   }
 
+  num_legal_moves = *legal_moves_count - num_legal_moves_before;
+
   if (debug_fptr) {
-    num_legal_moves = *legal_moves_count - num_legal_moves_before;
     fprintf(debug_fptr,"legal_rook_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
       gamept->curr_move,current_board_position,num_legal_moves);
   }
@@ -1491,8 +1493,9 @@ void legal_knight_moves(struct game *gamept,char current_board_position,struct m
     }
   }
 
+  num_legal_moves = *legal_moves_count - num_legal_moves_before;
+
   if (debug_fptr) {
-    num_legal_moves = *legal_moves_count - num_legal_moves_before;
     fprintf(debug_fptr,"legal_knight_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
       gamept->curr_move,current_board_position,num_legal_moves);
   }
@@ -1560,8 +1563,9 @@ void legal_bishop_moves(struct game *gamept,char current_board_position,struct m
     }
   }
 
+  num_legal_moves = *legal_moves_count - num_legal_moves_before;
+
   if (debug_fptr) {
-    num_legal_moves = *legal_moves_count - num_legal_moves_before;
     fprintf(debug_fptr,"legal_bishop_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
       gamept->curr_move,current_board_position,num_legal_moves);
   }
@@ -1578,8 +1582,9 @@ void legal_gargantua_moves(struct game *gamept,char current_board_position,struc
   legal_bishop_moves(gamept,current_board_position,legal_moves,legal_moves_count);
   legal_knight_moves(gamept,current_board_position,legal_moves,legal_moves_count);
 
+  num_legal_moves = *legal_moves_count - num_legal_moves_before;
+
   if (debug_fptr) {
-    num_legal_moves = *legal_moves_count - num_legal_moves_before;
     fprintf(debug_fptr,"legal_gargantua_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
       gamept->curr_move,current_board_position,num_legal_moves);
   }
@@ -1644,8 +1649,9 @@ void legal_king_moves(struct game *gamept,char current_board_position,struct mov
     }
   }
 
+  num_legal_moves = *legal_moves_count - num_legal_moves_before;
+
   if (debug_fptr) {
-    num_legal_moves = *legal_moves_count - num_legal_moves_before;
     fprintf(debug_fptr,"legal_king_moves: curr_move = %d, current_board_position = %d, num_legal_moves = %d\n",
       gamept->curr_move,current_board_position,num_legal_moves);
   }
