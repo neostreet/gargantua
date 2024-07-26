@@ -516,20 +516,22 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   if (!bScratch && (from_piece * to_piece < 0))
     gamept->moves[gamept->curr_move].special_move_info |= SPECIAL_MOVE_CAPTURE;
 
-  if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE)
-    bKingsideCastle = true;
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_GARGSIDE_CASTLE)
-    bGargsideCastle = true;
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_EN_PASSANT_CAPTURE)
-    bEnPassantCapture = true;
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_GARGANTUA)
-    from_piece = (bBlack ? GARGANTUA_ID * -1 : GARGANTUA_ID);
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_ROOK)
-    from_piece = (bBlack ? ROOK_ID * -1 : ROOK_ID);
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_BISHOP)
-    from_piece = (bBlack ? BISHOP_ID * -1 : BISHOP_ID);
-  else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_KNIGHT)
-    from_piece = (bBlack ? KNIGHT_ID * -1 : KNIGHT_ID);
+  if (!bScratch) {
+    if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE)
+      bKingsideCastle = true;
+    else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_GARGSIDE_CASTLE)
+      bGargsideCastle = true;
+    else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_EN_PASSANT_CAPTURE)
+      bEnPassantCapture = true;
+    else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_GARGANTUA)
+      from_piece = (bBlack ? GARGANTUA_ID * -1 : GARGANTUA_ID);
+    else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_ROOK)
+      from_piece = (bBlack ? ROOK_ID * -1 : ROOK_ID);
+    else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_BISHOP)
+      from_piece = (bBlack ? BISHOP_ID * -1 : BISHOP_ID);
+    else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_PROMOTION_KNIGHT)
+      from_piece = (bBlack ? KNIGHT_ID * -1 : KNIGHT_ID);
+  }
 
   if (invalid_squares) {
     *num_invalid_squares = 0;
