@@ -1587,7 +1587,7 @@ LRESULT CALLBACK Promotion(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
     return FALSE;
 }
 
-#define MAX_MOVE_NUMBER_LEN 3
+#define MAX_MOVE_NUMBER_LEN 4
 static char move_number_buf[MAX_MOVE_NUMBER_LEN+1];
 
 //
