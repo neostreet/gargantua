@@ -516,7 +516,7 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
   if (!bScratch && (from_piece * to_piece < 0))
     gamept->moves[gamept->curr_move].special_move_info |= SPECIAL_MOVE_CAPTURE;
 
-  if (!bScratch) {
+  if (!bInGetLegalMoves) {
     if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_KINGSIDE_CASTLE)
       bKingsideCastle = true;
     else if (gamept->moves[gamept->curr_move].special_move_info & SPECIAL_MOVE_GARGSIDE_CASTLE)
