@@ -609,6 +609,8 @@ void do_paint(HWND hWnd)
             bigbmp_row = 3;
           else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_CHECK)
             bigbmp_row = 5;
+          else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_GARG_IS_ATTACKED)
+            bigbmp_row = 6;
           else
             bigbmp_row = 0;
         }
@@ -865,7 +867,9 @@ void next_move(HWND hWnd)
   if ((curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE) ||
       (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_STALEMATE) ||
       (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_CHECK) ||
-      ((curr_game.curr_move > 2) && (curr_game.moves[curr_game.curr_move-2].special_move_info & SPECIAL_MOVE_CHECK))) {
+      (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_GARG_IS_ATTACKED) ||
+      ((curr_game.curr_move > 2) && (curr_game.moves[curr_game.curr_move-2].special_move_info & SPECIAL_MOVE_CHECK)) ||
+      ((curr_game.curr_move > 2) && (curr_game.moves[curr_game.curr_move-2].special_move_info & SPECIAL_MOVE_GARG_IS_ATTACKED))) {
     invalidate_board(hWnd);
     redisplay_counts(hWnd,NULL);
   }
