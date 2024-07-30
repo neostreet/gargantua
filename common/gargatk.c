@@ -338,6 +338,48 @@ bool player_is_in_check(bool bBlack,unsigned char *board,int curr_move)
   return false;
 }
 
+bool garg_is_attacked(bool bBlack,unsigned char *board,int curr_move)
+{
+  int n;
+  int movers_garg;
+  int movers_garg_square;
+  int piece;
+  int dbg;
+
+  if (curr_move == debug_move)
+    dbg = 1;
+
+  if (debug_fptr)
+    fprintf(debug_fptr,"garg_is_attacked: bBlack = %d, curr_move = %d\n",bBlack,curr_move);
+
+  // first, find the mover's garg
+
+  if (bBlack)
+    movers_garg = GARGANTUA_ID * -1;
+  else
+    movers_garg = GARGANTUA_ID;
+
+  movers_garg_square = -1;
+
+  for (n = 0; n < NUM_BOARD_SQUARES; n++) {
+    piece = get_piece1(board,n);
+
+    if (piece == movers_garg) {
+      movers_garg_square = n;
+      break;
+    }
+  }
+
+  if (n == NUM_BOARD_SQUARES)
+    return false;
+
+  // now determine if any of the opponent's pieces attack the mover's garg
+  if (any_opponent_piece_attacks_square(movers_garg_square,bBlack,board,curr_move))
+    return true;
+
+  return false;
+}
+
 int calc_square(char *algebraic_notation)
 {
   char file_char;
