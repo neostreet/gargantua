@@ -443,7 +443,8 @@ int ignore_character(int chara)
     (chara == ')') ||
     (chara == 'x') ||
     (chara == '=') ||
-    (chara == '+'))
+    (chara == '+') ||
+    (chara == '#'))
     return true;
 
   return false;
