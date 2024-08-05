@@ -1263,7 +1263,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDM_PRINT_MOVES:
           lstrcpy(szGargMovesFile,szGargFile);
           replace_extension(szGargMovesFile,"moves");
-          fprint_moves(&curr_game,szGargMovesFile);
+          fprint_moves(curr_game.moves,curr_game.num_moves,szGargMovesFile);
 
           break;
 
