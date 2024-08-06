@@ -377,7 +377,7 @@ check_for_illegal_move:
     if (debug_fptr && (debug_level == 11)) {
       fprintf(debug_fptr,"do_pawn_move: about to return 15, curr_move = %d\n",
         gamept->curr_move);
-      fprint_bd2(gamept->board,debug_fptr);
+      fprint_bd3(gamept->board,gamept->orientation,debug_fptr);
     }
 
     return 15;
@@ -1114,7 +1114,7 @@ bool move_is_legal(struct game *gamept,char from,char to)
     if (debug_fptr && (debug_level == 5)) {
       fprintf(debug_fptr,"move_is_legal: about to return false, curr_move = %d\n",
         scratch.curr_move);
-      fprint_bd2(scratch.board,debug_fptr);
+      fprint_bd3(scratch.board,scratch.orientation,debug_fptr);
     }
 
     return false;
