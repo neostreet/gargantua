@@ -373,3 +373,11 @@ void set_piece2(unsigned char *board,int rank,int file,int piece)
   board_offset = rank * NUM_FILES + file;
   set_piece1(board,board_offset,piece);
 }
+
+void copy_board(unsigned char *from_board,unsigned char *to_board)
+{
+  int n;
+
+  for (n = 0; n < CHARS_IN_BOARD; n++)
+    to_board[n] = from_board[n];
+}
