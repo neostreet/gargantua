@@ -62,6 +62,7 @@ int get_piece1(unsigned char *board,int board_offset);
 int get_piece2(unsigned char *board,int rank,int file);
 void set_piece1(unsigned char *board,int board_offset,int piece);
 void set_piece2(unsigned char *board,int rank,int file,int piece);
+void copy_board(unsigned char *from_board,unsigned char *to_board);
 
 int format_square(int square);
 void print_bd0(unsigned char *board,int orientation);
