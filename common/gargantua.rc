@@ -67,6 +67,7 @@ BEGIN
     POPUP "&View"
     BEGIN
         MENUITEM "&Toggle orientation (F2)",    IDM_TOGGLE_ORIENTATION
+        MENUITEM "To&ggle color changes",       IDM_TOGGLE_COLOR_CHANGES
     END
     POPUP "&Options"
     BEGIN
