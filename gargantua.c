@@ -603,7 +603,9 @@ void do_paint(HWND hWnd)
         if ((m == highlight_rank) && (n == highlight_file))
           bigbmp_row = 2;
         else {
-          if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE)
+          if (!bDoColorChanges)
+            bigbmp_row = 0;
+          else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE)
             bigbmp_row = 1;
           else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_STALEMATE)
             bigbmp_row = 3;
@@ -810,6 +812,11 @@ static void toggle_orientation(HWND hWnd)
   }
 
   invalidate_board_and_coords(hWnd);
+}
+
+static void toggle_color_changes()
+{
+  bDoColorChanges ^= 1;
 }
 
 static void toggle_auto_save(HWND hWnd)
@@ -1284,6 +1291,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           toggle_orientation(hWnd);
 
           break;
+
+        case IDM_TOGGLE_COLOR_CHANGES:
+          toggle_color_changes();
 
         case IDM_TOGGLE_AUTO_SAVE:
           toggle_auto_save(hWnd);
