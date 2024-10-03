@@ -1295,6 +1295,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDM_TOGGLE_COLOR_CHANGES:
           toggle_color_changes();
 
+          break;
+
         case IDM_TOGGLE_AUTO_SAVE:
           toggle_auto_save(hWnd);
 
