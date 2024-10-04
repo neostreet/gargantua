@@ -1400,7 +1400,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           }
 
           if (bHaveListFile) {
-            if (message == IDM_NEXT_GAME)
+            if (wmId == IDM_NEXT_GAME)
               advance_to_next_game(hWnd,VK_F6);
             else
               advance_to_next_game(hWnd,VK_F7);
