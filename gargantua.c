@@ -180,6 +180,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   char *cpt;
 
   bBig = TRUE;
+  bDoColorChanges = TRUE;
+  bAutoAdvance = TRUE;
 
   width_in_pixels = WIDTH_IN_PIXELS;
   height_in_pixels = HEIGHT_IN_PIXELS;
@@ -819,6 +821,11 @@ static void toggle_color_changes()
   bDoColorChanges ^= 1;
 }
 
+static void toggle_auto_advance()
+{
+  bAutoAdvance ^= 1;
+}
+
 static void toggle_auto_save(HWND hWnd)
 {
   bAutoSave ^= 1;
@@ -1294,6 +1301,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case IDM_TOGGLE_COLOR_CHANGES:
           toggle_color_changes();
+
+          break;
+
+        case IDM_TOGGLE_AUTO_ADVANCE:
+          toggle_auto_advance();
 
           break;
 
@@ -1870,6 +1882,11 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     highlight_file = -1;
 
     curr_game.curr_move++;
+
+    if (bHaveListFile && bAutoAdvance) {
+      SendMessage(hWnd,IDM_NEXT_GAME,0L,0L);
+    }
+
     bUnsavedChanges = true;
     curr_game.moves[curr_game.curr_move].special_move_info = 0;
     curr_game.num_moves = curr_game.curr_move;
