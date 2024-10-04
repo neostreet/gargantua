@@ -831,6 +831,28 @@ static void toggle_auto_save(HWND hWnd)
   bAutoSave ^= 1;
 }
 
+static void show_puzzle_stats(HWND hWnd)
+{
+  double correct_pct;
+  char buf[256];
+
+  if (!puzzle_count)
+    correct_pct = (double)0;
+  else
+    correct_pct = (double)puzzles_solved / (double)puzzle_count;
+
+  sprintf(buf,"puzzles solved: %d, puzzles attempted: %d, percent_correct: %lf",
+    puzzles_solved,puzzle_count,correct_pct);
+
+  MessageBox(hWnd,buf,NULL,MB_OK);
+}
+
+static void clear_puzzle_stats()
+{
+  puzzles_solved = 0;
+  puzzle_count = 0;
+}
+
 void do_new(HWND hWnd,struct game *gamept,char *name)
 {
   char *cpt;
@@ -1319,6 +1341,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case IDM_TOGGLE_AUTO_SAVE:
           toggle_auto_save(hWnd);
+
+          break;
+
+        case IDM_SHOW_PUZZLE_STATS:
+          show_puzzle_stats(hWnd);
+
+          break;
+
+        case IDM_CLEAR_PUZZLE_STATS:
+          clear_puzzle_stats();
 
           break;
 
@@ -1871,8 +1903,16 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
 
     curr_game.curr_move++;
 
-    if (bHaveListFile && bAutoAdvance)
+    if (bHaveListFile && bAutoAdvance) {
+      puzzle_count++;
+      legal_moves_count = 0;
+      get_legal_moves(&curr_game,&legal_moves[0],&legal_moves_count);
+
+      if (!legal_moves_count)
+        puzzles_solved++;
+
       advance_to_next_game(hWnd,VK_F6);
+    }
     else {
       bUnsavedChanges = true;
       curr_game.moves[curr_game.curr_move].special_move_info = 0;
