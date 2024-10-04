@@ -22,16 +22,17 @@
 #define IDM_TOGGLE_ORIENTATION   205
 #define IDM_TOGGLE_COLOR_CHANGES 206
 #define IDM_TOGGLE_AUTO_SAVE     207
+#define IDM_TOGGLE_AUTO_ADVANCE  208
 
-#define IDM_PREV_MOVE          208
-#define IDM_NEXT_MOVE          209
-#define IDM_START_OF_GAME      210
-#define IDM_END_OF_GAME        211
+#define IDM_PREV_MOVE          209
+#define IDM_NEXT_MOVE          210
+#define IDM_START_OF_GAME      211
+#define IDM_END_OF_GAME        212
 
-#define IDM_ABOUT              212
+#define IDM_ABOUT              213
 
-#define IDM_PREV_GAME          213
-#define IDM_NEXT_GAME          214
+#define IDM_PREV_GAME          214
+#define IDM_NEXT_GAME          215
 
 #define IDC_STATIC -1
 
