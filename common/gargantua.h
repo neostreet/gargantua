@@ -34,6 +34,9 @@
 #define IDM_PREV_GAME          214
 #define IDM_NEXT_GAME          215
 
+#define IDM_SHOW_PUZZLE_STATS  216
+#define IDM_CLEAR_PUZZLE_STATS 217
+
 #define IDC_STATIC -1
 
 #define DLG_VERFIRST        400
