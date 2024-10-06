@@ -15,6 +15,7 @@ void copy_game(struct game *gamept_to,struct game *gamept_from);
 void GetLine(FILE *fptr,char *line,int *line_len,int maxllen);
 int populate_board_from_board_file(unsigned char *board,char *filename);
 int write_board_to_binfile(unsigned char *board,char *filename);
+void calculate_seirawan_counts(struct game *gamept);
 
 int do_castle(struct game *gamept,int direction,char *word,int wordlen,struct move *move_ptr);
 int do_pawn_move(struct game *gamept,int direction,char *word,int wordlen,struct move *move_ptr);
