@@ -135,6 +135,8 @@ int afl_dbg;
 
 static struct game curr_game;
 
+static char space_fmt[] = "Space: %2d - %2d";
+
 static TBBUTTON tbButtons[] = {
     { 0, IDM_NEXT_GAME,                TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
     { 1, IDM_PREV_GAME,                TBSTATE_ENABLED, TBSTYLE_BUTTON, 0L, 0},
@@ -234,7 +236,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   else
     window_extra_height = WINDOW_EXTRA_HEIGHT;
 
-  board_y_offset = TOOLBAR_HEIGHT + font_height; // * 3;
+  board_y_offset = TOOLBAR_HEIGHT + font_height * 2;
 
   // Initialize global strings
   lstrcpy (szAppName, appname);
@@ -505,8 +507,6 @@ static void redisplay_counts(HWND hWnd,HDC hdc)
   RECT rect;
   char buf[80];
 
-  return; // for now
-
   if (hdc != NULL)
     local_hdc = hdc;
   else {
@@ -518,10 +518,9 @@ static void redisplay_counts(HWND hWnd,HDC hdc)
     SelectObject(local_hdc,hfont);
   }
 
+  wsprintf(buf,space_fmt,seirawan_count[WHITE],seirawan_count[BLACK]);
   rect.left = 0;
-  rect.top = TOOLBAR_HEIGHT;
-
-  sprintf_move(&curr_game,buf,20,true);
+  rect.top = TOOLBAR_HEIGHT + 16;
   TextOut(local_hdc,rect.left,rect.top,buf,lstrlen(buf));
 }
 
@@ -621,6 +620,9 @@ void do_paint(HWND hWnd)
             bigbmp_row = 0;
         }
 
+        if (debug_fptr && (debug_level == 2))
+          fprintf(debug_fptr,"  bigbmp_column = %d, bigbmp_row = %d\n",bigbmp_column,bigbmp_row);
+
         BitBlt(hdc,rect.left,rect.top,
           width_in_pixels,height_in_pixels,
           hdc_compatible,
@@ -644,7 +646,7 @@ void do_paint(HWND hWnd)
   rect.left = 0;
   rect.top = TOOLBAR_HEIGHT;
   rect.right = garg_window_width;
-  rect.bottom = TOOLBAR_HEIGHT + 16;
+  rect.bottom = rect.top + 16;
 
   if (RectVisible(hdc,&rect)) {
     if (bHaveGame && (debug_level == 2)) {
@@ -667,7 +669,7 @@ void do_paint(HWND hWnd)
 
   rect.top = TOOLBAR_HEIGHT + 16;
   rect.right = garg_window_width;
-  rect.bottom = TOOLBAR_HEIGHT + 64;
+  rect.bottom = rect.top + 16;
 
   if (RectVisible(hdc,&rect)) {
     if (!bSetBkColor && (bk_color != COLOR_WHITE)) {
@@ -772,6 +774,8 @@ static void do_move(HWND hWnd)
 
   curr_game.curr_move++;
   bUnsavedChanges = true;
+
+  calculate_seirawan_counts(&curr_game);
   redisplay_counts(hWnd,NULL);
 }
 
@@ -887,6 +891,7 @@ void prev_move(HWND hWnd)
 
   position_game(&curr_game,curr_game.curr_move - 1);
   invalidate_board(hWnd);
+  redisplay_counts(hWnd,NULL);
 }
 
 void next_move(HWND hWnd)
@@ -917,12 +922,14 @@ void start_of_game(HWND hWnd)
 {
   position_game(&curr_game,0);
   invalidate_board(hWnd);
+  redisplay_counts(hWnd,NULL);
 }
 
 void end_of_game(HWND hWnd)
 {
   position_game(&curr_game,curr_game.num_moves);
   invalidate_board(hWnd);
+  redisplay_counts(hWnd,NULL);
 }
 
 void do_read(HWND hWnd,LPSTR name,struct game *gamept,bool bBinaryFormat)
@@ -1902,6 +1909,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     highlight_file = -1;
 
     curr_game.curr_move++;
+    calculate_seirawan_counts(&curr_game);
 
     if (bHaveListFile && bAutoAdvance) {
       puzzle_count++;
