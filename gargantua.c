@@ -183,7 +183,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
   bBig = TRUE;
   bDoColorChanges = TRUE;
-  bAutoAdvance = TRUE;
 
   width_in_pixels = WIDTH_IN_PIXELS;
   height_in_pixels = HEIGHT_IN_PIXELS;
@@ -538,6 +537,7 @@ void do_paint(HWND hWnd)
   int bSetBkColor;
   int bSelectedFont;
   char buf[80];
+  int dbg;
 
   if (debug_fptr) {
     fprintf(debug_fptr,"top of do_paint, num_moves = %d, curr_move = %d\n",curr_game.num_moves,curr_game.curr_move);
@@ -606,18 +606,23 @@ void do_paint(HWND hWnd)
         else {
           if (!bDoColorChanges)
             bigbmp_row = 0;
-          else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE)
-            bigbmp_row = 1;
-          else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_STALEMATE)
-            bigbmp_row = 3;
-          else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_CHECK)
-            bigbmp_row = 5;
-          else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE_IN_ONE)
-            bigbmp_row = 4;
-          else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_GARG_IS_ATTACKED)
-            bigbmp_row = 6;
-          else
-            bigbmp_row = 0;
+          else {
+            if (curr_game.curr_move == dbg_move)
+              dbg = 1;
+
+            if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE)
+              bigbmp_row = 1;
+            else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_STALEMATE)
+              bigbmp_row = 3;
+            else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_CHECK)
+              bigbmp_row = 5;
+            else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_MATE_IN_ONE)
+              bigbmp_row = 4;
+            else if (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_GARG_IS_ATTACKED)
+              bigbmp_row = 6;
+            else
+              bigbmp_row = 0;
+          }
         }
 
         if (debug_fptr && (debug_level == 2))
