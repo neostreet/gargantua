@@ -144,6 +144,7 @@ static TBBUTTON tbButtons[] = {
 };
 
 static int special_move_info;
+static int default_bigbmp_row;
 static int move_number;
 
 // Forward declarations of functions included in this code module:
@@ -200,6 +201,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     debug_level = 0;
     debug_fptr = NULL;
   }
+
+  cpt = getenv("DEFAULT_BIGBMP_ROW");
+
+  if (cpt != NULL)
+    default_bigbmp_row = atoi(cpt);
 
   if ((cpt = getenv("TOP_MARGIN")) != NULL)
     top_margin = atoi(cpt);
@@ -601,7 +607,9 @@ void do_paint(HWND hWnd)
       if (piece_offset >= 0) {
         bigbmp_column = piece_offset;
 
-        if ((m == highlight_rank) && (n == highlight_file))
+        if (default_bigbmp_row)
+          bigbmp_row = default_bigbmp_row;
+        else if ((m == highlight_rank) && (n == highlight_file))
           bigbmp_row = 2;
         else {
           if (!bDoColorChanges)
