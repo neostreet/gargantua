@@ -809,6 +809,7 @@ void fprint_piece_info(struct game *gamept,FILE *fptr)
 {
   int n;
 
+  fprintf(fptr,"fprint_piece_info: curr_move = %d\n",gamept->curr_move);
   fprintf(fptr,"White:\n");
 
   for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
