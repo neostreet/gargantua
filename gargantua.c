@@ -453,7 +453,7 @@ void invalidate_rect(HWND hWnd,int rank,int file)
   rect.right = rect.left + width_in_pixels;
   rect.bottom = rect.top + height_in_pixels;
 
-  if (debug_fptr) {
+  if (debug_fptr&& (debug_level == 2)) {
     fprintf(debug_fptr,"invalidate_rect(): left = %d, top = %d, right = %d, bottom = %d\n",
       rect.left,rect.top,rect.right,rect.bottom);
   }
@@ -474,7 +474,7 @@ void invalidate_square(HWND hWnd,int square)
   else
     file = (NUM_FILES - 1) - file;
 
-  if (debug_fptr) {
+  if (debug_fptr&& (debug_level == 2)) {
     fprintf(debug_fptr,"invalidate_square(): rank = %d, file = %d\n",
       rank,file);
   }
@@ -545,7 +545,7 @@ void do_paint(HWND hWnd)
   char buf[80];
   int dbg;
 
-  if (debug_fptr) {
+  if (debug_fptr&& (debug_level == 2)) {
     fprintf(debug_fptr,"top of do_paint, num_moves = %d, curr_move = %d\n",curr_game.num_moves,curr_game.curr_move);
   }
 
@@ -574,7 +574,7 @@ void do_paint(HWND hWnd)
       if (!RectVisible(hdc,&rect))
         continue;
 
-      if (debug_fptr) {
+      if (debug_fptr&& (debug_level == 2)) {
         fprintf(debug_fptr,"do_paint: m = %d, n = %d\n",m,n);
       }
 
@@ -644,7 +644,7 @@ void do_paint(HWND hWnd)
           SRCCOPY);
 
         if (bHaveGame && (debug_level == 2)) {
-          if (debug_fptr) {
+          if (debug_fptr&& (debug_level == 2)) {
             fprintf(debug_fptr,"BitBlt() %d %d %d %d\n",
               rect.left,rect.top,width_in_pixels,height_in_pixels);
           }
@@ -763,11 +763,11 @@ static void do_move(HWND hWnd)
   int invalid_squares[4];
   int num_invalid_squares;
 
-  if (debug_fptr != NULL)
+  if (debug_fptr && (debug_level == 2))
     fprintf(debug_fptr,"do_move(): curr_move = %d\n",curr_game.curr_move);
 
   if (curr_game.curr_move == curr_game.num_moves) {
-    if (debug_fptr != NULL)
+    if (debug_fptr && (debug_level == 2))
       fprintf(debug_fptr,"do_move(): early exit\n");
 
     return;
@@ -909,13 +909,13 @@ void prev_move(HWND hWnd)
 
 void next_move(HWND hWnd)
 {
-  if (debug_fptr) {
+  if (debug_fptr&& (debug_level == 2)) {
     fprintf(debug_fptr,"next_move: before do_move, curr_move = %d\n",curr_game.curr_move);
   }
 
   do_move(hWnd);
 
-  if (debug_fptr) {
+  if (debug_fptr&& (debug_level == 2)) {
     fprintf(debug_fptr,"next_move: after do_move, curr_move = %d\n",curr_game.curr_move);
   }
 
@@ -962,7 +962,7 @@ void do_read(HWND hWnd,LPSTR name,struct game *gamept,bool bBinaryFormat)
   }
 #endif
 
-  if (debug_fptr)
+  if (debug_fptr && (debug_level == 2))
     fprintf(debug_fptr,"%s\n","do_read(): top of function");
 
   if (!bBinaryFormat)
@@ -1331,6 +1331,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
+        case IDM_PRINT_PIECE_INFO:
+          if (debug_fptr && (debug_level == 17)) {
+            fprint_piece_info(&curr_game,debug_fptr);
+          }
+
+          break;
+
         case IDM_GO_TO_MOVE_NUMBER:
            if (DialogBox(hInst,"MoveNumberBox",hWnd,(DLGPROC)MoveNumber)) {
              if (move_number < 0)
@@ -1414,7 +1421,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case IDM_PREV_GAME:
         case IDM_NEXT_GAME:
-          if (debug_fptr != NULL) {
+          if (debug_fptr && (debug_level == 2)) {
             fprintf(debug_fptr,"WndProc: bHaveListFile = %d, bAutoSave = %d, bUnsavedChanges = %d\n",
               bHaveListFile,bAutoSave,bUnsavedChanges);
           }
@@ -1778,7 +1785,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   int num_invalid_squares;
   bool bBlack;
 
-  if (debug_fptr != NULL) {
+  if (debug_fptr && (debug_level == 2)) {
     fprintf(debug_fptr,"do_lbuttondown: rank = %d, file = %d\n",rank,file);
   }
 
@@ -1824,14 +1831,14 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   }
 
   if (highlight_rank == -1) {
-    if (debug_fptr) {
+    if (debug_fptr&& (debug_level == 2)) {
       fprintf(debug_fptr,"do_lbuttondown:   start_square_piece = %d, curr_move = %d\n",
         move_start_square_piece,curr_game.curr_move);
     }
 
     if ( ((move_start_square_piece > 0) && !((curr_game.curr_move) % 2)) ||
          ((move_start_square_piece < 0) &&  ((curr_game.curr_move) % 2)) ) {
-      if (debug_fptr) {
+      if (debug_fptr&& (debug_level == 2)) {
         fprintf(debug_fptr,"do_lbuttondown:   setting highlight: rank = %d, file = %d\n",rank,file);
       }
 
@@ -1841,7 +1848,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
       invalidate_rect(hWnd,rank,file);
     }
     else {
-      if (debug_fptr) {
+      if (debug_fptr&& (debug_level == 2)) {
         fprintf(debug_fptr,"do_lbuttondown:   not setting highlight: rank = %d, file = %d\n",rank,file);
       }
     }
@@ -1853,7 +1860,7 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   if ((move_start_square_piece * move_end_square_piece) > 0)
     return;
 
-  if (debug_fptr) {
+  if (debug_fptr&& (debug_level == 2)) {
     fprintf(debug_fptr,"do_lbuttondown:   attempting move: rank = %d,file = %d\n",rank,file);
   }
 
