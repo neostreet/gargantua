@@ -17,26 +17,27 @@
 #define IDM_PRINT_BOARD        201
 #define IDM_PRINT_GAME         202
 #define IDM_PRINT_MOVES        203
-#define IDM_GO_TO_MOVE_NUMBER  204
+#define IDM_PRINT_PIECE_INFO   204
+#define IDM_GO_TO_MOVE_NUMBER  205
 
-#define IDM_TOGGLE_ORIENTATION   205
-#define IDM_TOGGLE_BOARD_SIZE    206
-#define IDM_TOGGLE_COLOR_CHANGES 207
-#define IDM_TOGGLE_AUTO_SAVE     208
-#define IDM_TOGGLE_AUTO_ADVANCE  209
+#define IDM_TOGGLE_ORIENTATION   206
+#define IDM_TOGGLE_BOARD_SIZE    207
+#define IDM_TOGGLE_COLOR_CHANGES 208
+#define IDM_TOGGLE_AUTO_SAVE     209
+#define IDM_TOGGLE_AUTO_ADVANCE  210
 
-#define IDM_PREV_MOVE          210
-#define IDM_NEXT_MOVE          211
-#define IDM_START_OF_GAME      212
-#define IDM_END_OF_GAME        213
+#define IDM_PREV_MOVE          211
+#define IDM_NEXT_MOVE          212
+#define IDM_START_OF_GAME      213
+#define IDM_END_OF_GAME        214
 
-#define IDM_ABOUT              214
+#define IDM_ABOUT              215
 
-#define IDM_PREV_GAME          215
-#define IDM_NEXT_GAME          216
+#define IDM_PREV_GAME          216
+#define IDM_NEXT_GAME          217
 
-#define IDM_SHOW_PUZZLE_STATS  217
-#define IDM_CLEAR_PUZZLE_STATS 218
+#define IDM_SHOW_PUZZLE_STATS  218
+#define IDM_CLEAR_PUZZLE_STATS 219
 
 #define IDC_STATIC -1
 
