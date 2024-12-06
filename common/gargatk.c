@@ -286,7 +286,7 @@ bool any_opponent_piece_attacks_square(int square,bool bBlack,unsigned char *boa
     }
 
     if (square_attacks_square(board,n,square)) {
-      if (debug_fptr)
+      if (debug_fptr && (debug_level == 2))
         fprint_bd2(board,debug_fptr);
 
       return true;
@@ -307,7 +307,7 @@ bool player_is_in_check(bool bBlack,unsigned char *board,int curr_move)
   if (curr_move == debug_move)
     dbg = 1;
 
-  if (debug_fptr)
+  if (debug_fptr && (debug_level == 2))
     fprintf(debug_fptr,"player_is_in_check: bBlack = %d, curr_move = %d\n",bBlack,curr_move);
 
   // first, find the mover's king
@@ -349,7 +349,7 @@ bool garg_is_attacked(bool bBlack,unsigned char *board,int curr_move)
   if (curr_move == debug_move)
     dbg = 1;
 
-  if (debug_fptr)
+  if (debug_fptr && (debug_level == 2))
     fprintf(debug_fptr,"garg_is_attacked: bBlack = %d, curr_move = %d\n",bBlack,curr_move);
 
   // first, find the mover's garg
