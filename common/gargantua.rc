@@ -79,6 +79,7 @@ BEGIN
         MENUITEM "Print &board",                IDM_PRINT_BOARD
         MENUITEM "Print &game",                 IDM_PRINT_GAME
         MENUITEM "Print m&oves",                IDM_PRINT_MOVES
+        MENUITEM "Print &piece_info",           IDM_PRINT_PIECE_INFO
         MENUITEM "&Toggle auto save",           IDM_TOGGLE_AUTO_SAVE
         MENUITEM "Show pu&zzle_stats",          IDM_SHOW_PUZZLE_STATS
         MENUITEM "&Clear puzzle_stats",         IDM_CLEAR_PUZZLE_STATS
