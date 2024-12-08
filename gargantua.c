@@ -1915,7 +1915,6 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   if (!retval) {
     num_invalid_squares = 0;
     update_board(&curr_game,invalid_squares,&num_invalid_squares,false);
-    update_piece_info(&curr_game);
 
     if ((curr_game.curr_move >= 1) && (curr_game.moves[curr_game.curr_move-1].special_move_info & SPECIAL_MOVE_CHECK)) {
       invalidate_board(hWnd);
