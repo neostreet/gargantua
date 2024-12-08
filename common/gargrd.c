@@ -279,7 +279,6 @@ int read_game(char *filename,struct game *gamept,char *err_msg)
       break;
 
     update_board(gamept,NULL,NULL,false);
-    update_piece_info(gamept);
 
     gamept->curr_move++;
     gamept->moves[gamept->curr_move].special_move_info = 0;
@@ -664,6 +663,8 @@ void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squa
     if (!bScratch)
       fprint_bd3(gamept->board,gamept->orientation,debug_fptr);
   }
+
+  update_piece_info(gamept);
 }
 
 void update_piece_info(struct game *gamept)
