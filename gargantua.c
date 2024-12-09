@@ -1972,6 +1972,11 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
           curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_STALEMATE;
           invalidate_board(hWnd);
         }
+
+        if (mate_in_one_exists(&curr_game)) {
+          curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_MATE_IN_ONE;
+          invalidate_board(hWnd);
+        }
       }
 
       if (garg_is_attacked(bBlack,curr_game.board,curr_game.curr_move)) {
