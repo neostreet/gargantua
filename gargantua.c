@@ -184,6 +184,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
   bBig = TRUE;
   bDoColorChanges = TRUE;
+  bAutoAdvance = TRUE;
+  bWarnOnWrongSolution = TRUE;
 
   width_in_pixels = WIDTH_IN_PIXELS;
   height_in_pixels = HEIGHT_IN_PIXELS;
@@ -870,6 +872,11 @@ static void clear_puzzle_stats()
   puzzle_count = 0;
 }
 
+static void toggle_wrong_solution(HWND hWnd)
+{
+  bWarnOnWrongSolution ^= 1;
+}
+
 void do_new(HWND hWnd,struct game *gamept,char *name)
 {
   char *cpt;
@@ -1378,6 +1385,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case IDM_CLEAR_PUZZLE_STATS:
           clear_puzzle_stats();
+
+          break;
+
+        case IDM_TOGGLE_WRONG_SOLUTION:
+          toggle_wrong_solution(hWnd);
 
           break;
 
@@ -1937,6 +1949,8 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
 
       if (!legal_moves_count)
         puzzles_solved++;
+      else if (bWarnOnWrongSolution)
+        MessageBox(hWnd,"Wrong solution",NULL,MB_OK);
 
       advance_to_next_game(hWnd,VK_F6);
     }
