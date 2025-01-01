@@ -858,7 +858,7 @@ static void show_puzzle_stats(HWND hWnd)
   if (!puzzle_count)
     correct_pct = (double)0;
   else
-    correct_pct = (double)puzzles_solved / (double)puzzle_count;
+    correct_pct = (double)puzzles_solved / (double)puzzle_count * (double)100;
 
   sprintf(buf,"puzzles solved: %d, puzzles attempted: %d, percent_correct: %lf",
     puzzles_solved,puzzle_count,correct_pct);
