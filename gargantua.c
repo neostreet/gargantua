@@ -185,7 +185,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   bBig = TRUE;
   bDoColorChanges = TRUE;
   bAutoAdvance = TRUE;
-  bWarnOnWrongSolution = TRUE;
+  bPuzzleMode = TRUE;
 
   width_in_pixels = WIDTH_IN_PIXELS;
   height_in_pixels = HEIGHT_IN_PIXELS;
@@ -872,9 +872,9 @@ static void clear_puzzle_stats()
   puzzle_count = 0;
 }
 
-static void toggle_wrong_solution(HWND hWnd)
+static void toggle_puzzle_mode(HWND hWnd)
 {
-  bWarnOnWrongSolution ^= 1;
+  bPuzzleMode ^= 1;
 }
 
 void do_new(HWND hWnd,struct game *gamept,char *name)
@@ -1388,8 +1388,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
           break;
 
-        case IDM_TOGGLE_WRONG_SOLUTION:
-          toggle_wrong_solution(hWnd);
+        case IDM_TOGGLE_PUZZLE_MODE:
+          toggle_puzzle_mode(hWnd);
 
           break;
 
@@ -1788,6 +1788,8 @@ BOOL CenterWindow (HWND hwndChild, HWND hwndParent)
    return SetWindowPos (hwndChild, NULL, xNew, yNew, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
+static bool bAdvance;
+
 void do_lbuttondown(HWND hWnd,int file,int rank)
 {
   int n;
@@ -1796,6 +1798,12 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
   int invalid_squares[4];
   int num_invalid_squares;
   bool bBlack;
+
+  if (bAdvance) {
+    bAdvance = false;
+    advance_to_next_game(hWnd,VK_F6);
+    return;
+  }
 
   if (debug_fptr && (debug_level == 2)) {
     fprintf(debug_fptr,"do_lbuttondown: rank = %d, file = %d\n",rank,file);
@@ -1942,63 +1950,59 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
     curr_game.curr_move++;
     calculate_seirawan_counts(&curr_game);
 
-    if (bHaveListFile && bAutoAdvance) {
+    if (bHaveListFile && bPuzzleMode) {
       puzzle_count++;
       legal_moves_count = 0;
       get_legal_moves(&curr_game,&legal_moves[0],&legal_moves_count);
 
       if (!legal_moves_count)
         puzzles_solved++;
-      else if (bWarnOnWrongSolution) {
-        invalidate_board(hWnd);
-        MessageBox(hWnd,"Wrong solution",NULL,MB_OK);
-      }
 
-      advance_to_next_game(hWnd,VK_F6);
+      if (bAutoAdvance)
+        bAdvance = true;
+    }
+
+    bUnsavedChanges = true;
+    curr_game.moves[curr_game.curr_move].special_move_info = 0;
+    curr_game.num_moves = curr_game.curr_move;
+
+    if (((curr_game.curr_move > 2) && (curr_game.moves[curr_game.curr_move-2].special_move_info & SPECIAL_MOVE_CHECK)) ||
+      ((curr_game.curr_move > 2) && (curr_game.moves[curr_game.curr_move-2].special_move_info & SPECIAL_MOVE_GARG_IS_ATTACKED))) {
+
+      invalidate_board(hWnd);
+    }
+
+    bBlack = curr_game.curr_move & 0x1;
+
+    legal_moves_count = 0;
+    get_legal_moves(&curr_game,&legal_moves[0],&legal_moves_count);
+
+    if (player_is_in_check(bBlack,curr_game.board,curr_game.curr_move)) {
+      invalidate_board(hWnd);
+      curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_CHECK;
+
+      // now determine if this is a checkmate
+
+      if (!legal_moves_count) {
+        curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_MATE;
+        invalidate_board(hWnd);
+      }
     }
     else {
-      bUnsavedChanges = true;
-      curr_game.moves[curr_game.curr_move].special_move_info = 0;
-      curr_game.num_moves = curr_game.curr_move;
-
-      if (((curr_game.curr_move > 2) && (curr_game.moves[curr_game.curr_move-2].special_move_info & SPECIAL_MOVE_CHECK)) ||
-        ((curr_game.curr_move > 2) && (curr_game.moves[curr_game.curr_move-2].special_move_info & SPECIAL_MOVE_GARG_IS_ATTACKED))) {
-
+      if (!legal_moves_count) {
+        curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_STALEMATE;
         invalidate_board(hWnd);
       }
 
-      bBlack = curr_game.curr_move & 0x1;
-
-      legal_moves_count = 0;
-      get_legal_moves(&curr_game,&legal_moves[0],&legal_moves_count);
-
-      if (player_is_in_check(bBlack,curr_game.board,curr_game.curr_move)) {
+      if (mate_in_one_exists(&curr_game)) {
+        curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_MATE_IN_ONE;
         invalidate_board(hWnd);
-        curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_CHECK;
-
-        // now determine if this is a checkmate
-
-        if (!legal_moves_count) {
-          curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_MATE;
-          invalidate_board(hWnd);
-        }
       }
-      else {
-        if (!legal_moves_count) {
-          curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_STALEMATE;
-          invalidate_board(hWnd);
-        }
+    }
 
-        if (mate_in_one_exists(&curr_game)) {
-          curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_MATE_IN_ONE;
-          invalidate_board(hWnd);
-        }
-      }
-
-      if (garg_is_attacked(bBlack,curr_game.board,curr_game.curr_move)) {
-        invalidate_board(hWnd);
-        curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_GARG_IS_ATTACKED;
-      }
+    if (garg_is_attacked(bBlack,curr_game.board,curr_game.curr_move)) {
+      invalidate_board(hWnd);
+      curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_GARG_IS_ATTACKED;
     }
   }
 }
