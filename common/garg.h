@@ -81,7 +81,6 @@ struct piece_info {
 #define ANNOTATION_X (8 * XLEN + 2 + FONT_WIDTH)
 #define ANNOTATION_Y 5
 
-#define MAX_FILE_NAME_LEN 32
 #define MAX_TITLE_LEN 128
 
 struct game {
@@ -101,4 +100,6 @@ struct move_offset {
   char file_offset;
 };
 
-typedef char (*GARG_FILE_LIST)[MAX_FILE_NAME_LEN];
+#define LINEFEED 0x0a
+
+typedef char **CPPT;
