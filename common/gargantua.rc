@@ -84,6 +84,7 @@ BEGIN
         MENUITEM "Show pu&zzle_stats",          IDM_SHOW_PUZZLE_STATS
         MENUITEM "&Clear puzzle_stats",         IDM_CLEAR_PUZZLE_STATS
         MENUITEM "Toggle p&uzzle mode",         IDM_TOGGLE_PUZZLE_MODE
+        MENUITEM "Toggle &randomize_puzzle",    IDM_TOGGLE_RANDOMIZE_PUZZLE
     END
     POPUP "&Help"
     BEGIN
