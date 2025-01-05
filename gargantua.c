@@ -132,6 +132,8 @@ static int num_files_in_list;
 static int curr_garg_file;
 
 static CPPT garg_file_list;
+static int *random_sample_ixs;
+static int *random_sample_hits;
 
 int bHaveGame;
 int afl_dbg;
@@ -165,6 +167,7 @@ LRESULT CALLBACK Promotion(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK MoveNumber(HWND, UINT, WPARAM, LPARAM);
 BOOL CenterWindow (HWND, HWND);
 void do_lbuttondown(HWND hWnd,int file,int rank);
+void populate_random_sample_ixs(int sample_size,int *random_sample_ixs,int *random_sample_hits);
 
 //
 //  FUNCTION: WinMain(HANDLE, HANDLE, LPSTR, int)
@@ -184,6 +187,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   int n;
   MSG msg;
   char *cpt;
+  time_t now;
+  int cmd_len;
 
   bBig = TRUE;
   bDoColorChanges = TRUE;
@@ -250,13 +255,42 @@ int APIENTRY WinMain(HINSTANCE hInstance,
   // Initialize global strings
   lstrcpy (szAppName, appname);
 
-  // save name of Gargantua game
-  lstrcpy(szGargFile,lpCmdLine);
+  // read seed if it's there
+  if (!strncmp(lpCmdLine,"seed",4)) {
+    sscanf(&lpCmdLine[4],"%d",&seed);
+
+    // save name of Gargantua game, if one is specified after the seed
+
+    cmd_len = strlen(lpCmdLine);
+
+    for (n = 0; n < cmd_len; n++) {
+      if (lpCmdLine[n] == ' ') {
+        if (n < cmd_len - 1)
+          lstrcpy(szGargFile,&lpCmdLine[n+1]);
+        else
+          szGargFile[0] = 0;
+
+        break;
+      }
+    }
+
+    if (n == cmd_len)
+      szGargFile[0] = 0;
+  }
+  else {
+    time(&now);
+    seed = (int)now;
+
+    // save name of Gargantua game
+    lstrcpy(szGargFile,lpCmdLine);
+  }
 
   if (debug_level == 2) {
     if (debug_fptr != NULL)
       fprintf(debug_fptr,"WinMain: lpCmdLine = %s\n",lpCmdLine);
   }
+
+  srand(seed);
 
   if (szGargFile[0])
     wsprintf(szTitle,"%s - %s",szAppName,
@@ -879,6 +913,24 @@ static void toggle_puzzle_mode(HWND hWnd)
   bPuzzleMode ^= 1;
 }
 
+static void toggle_randomize_puzzle(HWND hWnd)
+{
+  int n;
+
+  bRandomizePuzzle ^= 1;
+
+  if (!bRandomizePuzzle) {
+    for (n = 0; n < num_files_in_list; n++)
+      random_sample_ixs[n] = n;
+  }
+  else {
+    for (n = 0; n < num_files_in_list; n++)
+      random_sample_hits[n] = 0;
+
+    populate_random_sample_ixs(num_files_in_list,random_sample_ixs,random_sample_hits);
+  }
+}
+
 void do_new(HWND hWnd,struct game *gamept,char *name)
 {
   char *cpt;
@@ -1008,7 +1060,7 @@ void advance_to_next_game(HWND hWnd,WPARAM wParam)
   if (bAutoSave && bUnsavedChanges) {
     // toggle the orientation, and save
     curr_game.orientation ^= 1;
-    write_binary_game(garg_file_list[curr_garg_file],&curr_game);
+    write_binary_game(garg_file_list[random_sample_ixs[curr_garg_file]],&curr_game);
   }
 
   if (wParam == VK_F6) {
@@ -1028,7 +1080,7 @@ void advance_to_next_game(HWND hWnd,WPARAM wParam)
     bUnsavedChanges = false;
   }
 
-  do_read(hWnd,garg_file_list[curr_garg_file],&curr_game,true);
+  do_read(hWnd,garg_file_list[random_sample_ixs[curr_garg_file]],&curr_game,true);
 }
 
 void replace_extension(LPSTR name,LPSTR ext)
@@ -1085,6 +1137,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
   int bHaveName;
   HDC hdc;
   RECT rect;
+  int mem_amount;
 
   switch (message) {
     case WM_CREATE:
@@ -1188,7 +1241,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
           garg_file_list = read_list_file(szGargFile,&num_files_in_list,&retval);
 
           if (!retval) {
-            name = garg_file_list[curr_garg_file];
+            mem_amount = num_files_in_list * sizeof(int *);
+
+            if ((random_sample_ixs = (int *)malloc(mem_amount)) == NULL) {
+              ; // should never happen
+            }
+
+            if ((random_sample_hits = (int *)malloc(mem_amount)) == NULL) {
+              ; // should never happen
+            }
+
+            for (n = 0; n < num_files_in_list; n++) {
+              random_sample_ixs[n] = n;
+              random_sample_hits[n] = 0;
+            }
+
+            name = garg_file_list[random_sample_ixs[curr_garg_file]];
             bHaveName = TRUE;
           }
         }
@@ -1393,6 +1461,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case IDM_TOGGLE_PUZZLE_MODE:
           toggle_puzzle_mode(hWnd);
+
+          break;
+
+        case IDM_TOGGLE_RANDOMIZE_PUZZLE:
+          toggle_randomize_puzzle(hWnd);
 
           break;
 
@@ -2020,5 +2093,42 @@ void do_lbuttondown(HWND hWnd,int file,int rank)
       invalidate_board(hWnd);
       curr_game.moves[curr_game.curr_move-1].special_move_info |= SPECIAL_MOVE_GARG_IS_ATTACKED;
     }
+  }
+}
+
+void populate_random_sample_ixs(int sample_size,int *random_sample_ixs,int *random_sample_hits)
+{
+  int m;
+  int n;
+  int work;
+  int curr_sample_size;
+  int unused_count;
+
+  curr_sample_size = sample_size;
+
+  for (n = 0; n < sample_size; n++)
+    random_sample_hits[n] = 0;
+
+  for (n = 0; n < sample_size; n++) {
+    work = rand();
+    work %= curr_sample_size;
+    work++;
+ 
+    unused_count = 0;
+ 
+    for (m = 0; m < sample_size; m++) {
+      if (!random_sample_hits[m]) {
+        unused_count++;
+ 
+        if (unused_count == work) {
+          random_sample_hits[m] = 1;
+          break;
+        }
+      }
+    }
+ 
+    random_sample_ixs[n] = m;
+ 
+    curr_sample_size--;
   }
 }
