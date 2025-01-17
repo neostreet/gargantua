@@ -86,6 +86,8 @@ struct piece_info {
 struct game {
   char title[MAX_TITLE_LEN];
   int orientation;
+  int has_custom_initial_board;
+  int black_moves_first;
   int num_moves;
   int curr_move;
   int result;
@@ -93,6 +95,11 @@ struct game {
   unsigned char board[CHARS_IN_BOARD];  /* 8 columns * 8 rows / 2 (nibbles per char) */
   struct piece_info white_pieces[NUM_PIECES_PER_PLAYER];
   struct piece_info black_pieces[NUM_PIECES_PER_PLAYER];
+};
+
+struct game_position {
+  char orientation;
+  unsigned char board[CHARS_IN_BOARD];  /* 8 columns * 8 rows / 2 (nibbles per char) */
 };
 
 struct move_offset {
