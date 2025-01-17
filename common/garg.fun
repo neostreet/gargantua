@@ -2,7 +2,9 @@
 
 int read_game(char *filename,struct game *gamept,char *err_msg);
 int read_binary_game(char *filename,struct game *gamept);
+int read_game_position(char *filename,struct game_position *position_pt);
 int write_binary_game(char *filename,struct game *gamept);
+int write_game_position(char *filename,struct game_position *position_pt);
 char xlate_piece(char);
 int get_word(FILE *fptr,char *word,int maxlen,int *wordlenpt);
 int get_draw_input(struct game *gamept);
@@ -13,7 +15,7 @@ void put_square(struct game *gamept,int what,int where);
 void update_move_number(struct game *gamept);
 void copy_game(struct game *gamept_to,struct game *gamept_from);
 void GetLine(FILE *fptr,char *line,int *line_len,int maxllen);
-int populate_board_from_board_file(unsigned char *board,char *filename);
+int populate_board_from_board_file(unsigned char *board,char *filename,int orientation);
 int write_board_to_binfile(unsigned char *board,char *filename);
 void calculate_seirawan_counts(struct game *gamept);
 
@@ -45,19 +47,20 @@ void legal_bishop_moves(struct game *gamept,char current_board_position,struct m
 void legal_gargantua_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
 void legal_king_moves(struct game *gamept,char current_board_position,struct move *legal_moves,int *legal_moves_count);
 bool mate_in_one_exists(struct game *gamept);
+bool white_to_move(struct game *gamept);
 
 int get_to_position(char *word,int wordlen,int *to_filept,int *to_rankpt);
 
 void set_initial_board(struct game *gamept);
-void initialize_piece_info(struct game *gamept);
 void position_game(struct game *gamept,int move);
 void print_special_moves(struct game *gamept);
 void update_board(struct game *gamept,int *invalid_squares,int *num_invalid_squares,bool bScratch);
 void update_piece_info(struct game *gamept);
 void fprint_piece_info(struct game *gamept,FILE *fptr);
 void print_piece_info(struct game *gamept);
-void print_piece_info2(struct piece_info *info_pt);
-void populate_board_from_piece_info(struct game *gamept,unsigned char *board);
+void print_piece_info2(struct piece_info *info_pt,bool bWhite,bool bAbbrev,bool bOnlyRemaining);
+void populate_board_from_piece_info(struct piece_info *white_pt,struct piece_info *black_pt,unsigned char *board);
+int populate_piece_info_from_board(unsigned char *board,struct piece_info *white_pt,struct piece_info *black_pt);
 int compare_boards(unsigned char *board1,unsigned char *board2);
 int get_piece1(unsigned char *board,int board_offset);
 int get_piece2(unsigned char *board,int rank,int file);
