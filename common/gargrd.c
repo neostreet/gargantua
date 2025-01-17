@@ -16,7 +16,7 @@
 #include "garg.mac"
 #include "bitfuns.h"
 
-static unsigned char initial_board[] = {
+static unsigned char canonical_initial_board[] = {
   (unsigned char)0x23, (unsigned char)0x45, (unsigned char)0x64, (unsigned char)0x32,
   (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11, (unsigned char)0x11,
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
@@ -25,44 +25,6 @@ static unsigned char initial_board[] = {
   (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00, (unsigned char)0x00,
   (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff, (unsigned char)0xff,
   (unsigned char)0xed, (unsigned char)0xcb, (unsigned char)0xac, (unsigned char)0xde
-};
-
-static struct piece_info initial_white_pieces[] = {
-  ROOK_ID,0,0,
-  KNIGHT_ID,1,0,
-  BISHOP_ID,2,0,
-  GARGANTUA_ID,3,0,
-  KING_ID,4,0,
-  BISHOP_ID,5,0,
-  KNIGHT_ID,6,0,
-  ROOK_ID,7,0,
-  PAWN_ID,8,0,
-  PAWN_ID,9,0,
-  PAWN_ID,10,0,
-  PAWN_ID,11,0,
-  PAWN_ID,12,0,
-  PAWN_ID,13,0,
-  PAWN_ID,14,0,
-  PAWN_ID,15,0
-};
-
-static struct piece_info initial_black_pieces[] = {
-  PAWN_ID * -1,48,0,
-  PAWN_ID * -1,49,0,
-  PAWN_ID * -1,50,0,
-  PAWN_ID * -1,51,0,
-  PAWN_ID * -1,52,0,
-  PAWN_ID * -1,53,0,
-  PAWN_ID * -1,54,0,
-  PAWN_ID * -1,55,0,
-  ROOK_ID * -1,56,0,
-  KNIGHT_ID * -1,57,0,
-  BISHOP_ID * -1,58,0,
-  GARGANTUA_ID * -1,59,0,
-  KING_ID * -1,60,0,
-  BISHOP_ID * -1,61,0,
-  KNIGHT_ID * -1,62,0,
-  ROOK_ID * -1,63,0
 };
 
 static char corrupted_msg[] = "game corrupted\n";
@@ -111,24 +73,16 @@ void set_initial_board(struct game *gamept)
 {
   int n;
 
-  for (n = 0; n < CHARS_IN_BOARD; n++)
-    gamept->board[n] = initial_board[n];
-
-  initialize_piece_info(gamept);
-}
-
-void initialize_piece_info(struct game *gamept)
-{
-  int n;
-
-  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
-    gamept->white_pieces[n].piece_id = initial_white_pieces[n].piece_id;
-    gamept->white_pieces[n].current_board_position = initial_white_pieces[n].current_board_position;
-    gamept->white_pieces[n].move_count = initial_white_pieces[n].move_count;
-    gamept->black_pieces[n].piece_id = initial_black_pieces[n].piece_id;
-    gamept->black_pieces[n].current_board_position = initial_black_pieces[n].current_board_position;
-    gamept->black_pieces[n].move_count = initial_black_pieces[n].move_count;
+  if (gamept->has_custom_initial_board) {
+    for (n = 0; n < CHARS_IN_BOARD; n++)
+      gamept->board[n] = custom_initial_board[n];
   }
+  else {
+    for (n = 0; n < CHARS_IN_BOARD; n++)
+      gamept->board[n] = canonical_initial_board[n];
+  }
+
+  populate_piece_info_from_board(gamept->board,gamept->white_pieces,gamept->black_pieces);
 }
 
 int read_game(char *filename,struct game *gamept,char *err_msg)
@@ -399,9 +353,42 @@ int read_binary_game(char *filename,struct game *gamept)
     }
   }
 
+  if (gamept->has_custom_initial_board) {
+    bytes_to_read = CHARS_IN_BOARD;
+    bytes_read = read(fhndl,(char *)custom_initial_board,bytes_to_read);
+
+    if (bytes_read != bytes_to_read) {
+      close(fhndl);
+      return 4;
+    }
+  }
+
   close(fhndl);
 
   position_game(gamept,gamept->curr_move);
+
+  return 0;
+}
+
+int read_game_position(char *filename,struct game_position *position_pt)
+{
+  int fhndl;
+  unsigned int bytes_to_read;
+  unsigned int bytes_read;
+
+  if ((fhndl = open(filename,O_RDONLY | O_BINARY)) == -1)
+    return 1;
+
+  bytes_to_read = sizeof (struct game_position);
+
+  bytes_read = read(fhndl,(char *)position_pt,bytes_to_read);
+
+  if (bytes_read != bytes_to_read) {
+    close(fhndl);
+    return 2;
+  }
+
+  close(fhndl);
 
   return 0;
 }
@@ -428,11 +415,47 @@ int write_binary_game(char *filename,struct game *gamept)
 
   bytes_to_write = gamept->num_moves * sizeof (struct move);
 
-  bytes_written = write(fhndl,(char *)gamept->moves,bytes_to_write);
+  if (bytes_to_write) {
+    bytes_written = write(fhndl,(char *)gamept->moves,bytes_to_write);
+
+    if (bytes_written != bytes_to_write) {
+      close(fhndl);
+      return 3;
+    }
+  }
+
+  if (gamept->has_custom_initial_board) {
+    bytes_to_write = CHARS_IN_BOARD;
+    bytes_written = write(fhndl,(char *)custom_initial_board,bytes_to_write);
+
+    if (bytes_written != bytes_to_write) {
+      close(fhndl);
+      return 4;
+    }
+  }
+
+  close(fhndl);
+
+  return 0;
+}
+
+int write_game_position(char *filename,struct game_position *position_pt)
+{
+  int fhndl;
+  unsigned int bytes_to_write;
+  unsigned int bytes_written;
+
+  if ((fhndl = open(filename,O_CREAT | O_TRUNC | O_WRONLY | O_BINARY,
+      S_IREAD | S_IWRITE)) == -1)
+    return 1;
+
+  bytes_to_write = sizeof (struct game_position);
+
+  bytes_written = write(fhndl,(char *)position_pt,bytes_to_write);
 
   if (bytes_written != bytes_to_write) {
     close(fhndl);
-    return 3;
+    return 2;
   }
 
   close(fhndl);
@@ -801,7 +824,7 @@ void update_piece_info(struct game *gamept)
   if (debug_fptr && (debug_level == 4)) {
     fprintf(debug_fptr,"update_piece_info: curr_move = %d, num_moves = %d\n",gamept->curr_move,gamept->num_moves);
     fprint_piece_info(gamept,debug_fptr);
-    populate_board_from_piece_info(gamept,board);
+    populate_board_from_piece_info(gamept->white_pieces,gamept->black_pieces,board);
     fprint_bd3(board,gamept->orientation,debug_fptr);
   }
 }
@@ -889,7 +912,7 @@ void print_piece_info(struct game *gamept)
   }
 }
 
-void print_piece_info2(struct piece_info *info_pt)
+void print_piece_info2(struct piece_info *info_pt,bool bWhite,bool bAbbrev,bool bOnlyRemaining)
 {
   int n;
   char piece_id;
@@ -901,22 +924,54 @@ void print_piece_info2(struct piece_info *info_pt)
       piece_id *= -1;
 
     if (info_pt[n].current_board_position == -1) {
-      printf("  %s %d %d\n",
-        piece_names[piece_id - 1],
-        info_pt[n].current_board_position,
-        info_pt[n].move_count);
+      if (!bOnlyRemaining) {
+        if (!bAbbrev) {
+          printf("  %s %d %d\n",
+            piece_names[piece_id - 1],
+            info_pt[n].current_board_position,
+            info_pt[n].move_count);
+        }
+        else if (bWhite) {
+          printf("  %c %d %d\n",
+            piece_ids2[piece_id - 1] + ('a' - 'A'),
+            info_pt[n].current_board_position,
+            info_pt[n].move_count);
+        }
+        else {
+          printf("  %c %d %d\n",
+            piece_ids2[piece_id - 1],
+            info_pt[n].current_board_position,
+            info_pt[n].move_count);
+        }
+      }
     }
     else {
-      printf("  %s %c%c %d\n",
-        piece_names[piece_id - 1],
-        'a' + FILE_OF(info_pt[n].current_board_position),
-        '1' + RANK_OF(info_pt[n].current_board_position),
-        info_pt[n].move_count);
+      if (!bAbbrev) {
+        printf("  %s %c%c %d\n",
+          piece_names[piece_id - 1],
+          'a' + FILE_OF(info_pt[n].current_board_position),
+          '1' + RANK_OF(info_pt[n].current_board_position),
+          info_pt[n].move_count);
+      }
+      else if (bWhite) {
+        printf("  %c %c%c %d\n",
+          piece_ids2[piece_id - 1] + ('a' - 'A'),
+          'a' + FILE_OF(info_pt[n].current_board_position),
+          '1' + RANK_OF(info_pt[n].current_board_position),
+          info_pt[n].move_count);
+      }
+      else {
+        printf("  %c %c%c %d\n",
+          piece_ids2[piece_id - 1],
+          'a' + FILE_OF(info_pt[n].current_board_position),
+          '1' + RANK_OF(info_pt[n].current_board_position),
+          info_pt[n].move_count);
+      }
     }
   }
 }
 
-void populate_board_from_piece_info(struct game *gamept,unsigned char *board)
+void populate_board_from_piece_info(struct piece_info *white_pt,struct piece_info *black_pt,unsigned char *board)
 {
   int n;
   unsigned int bit_offset;
@@ -925,16 +980,59 @@ void populate_board_from_piece_info(struct game *gamept,unsigned char *board)
     board[n] = 0;
 
   for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
-    if (gamept->white_pieces[n].current_board_position != -1) {
-      bit_offset = gamept->white_pieces[n].current_board_position * BITS_PER_BOARD_SQUARE;
-      set_bits(BITS_PER_BOARD_SQUARE,board,bit_offset,gamept->white_pieces[n].piece_id);
+    if (white_pt[n].current_board_position != -1) {
+      bit_offset = white_pt[n].current_board_position * BITS_PER_BOARD_SQUARE;
+      set_bits(BITS_PER_BOARD_SQUARE,board,bit_offset,white_pt[n].piece_id);
     }
 
-    if (gamept->black_pieces[n].current_board_position != -1) {
-      bit_offset = gamept->black_pieces[n].current_board_position * BITS_PER_BOARD_SQUARE;
-      set_bits(BITS_PER_BOARD_SQUARE,board,bit_offset,gamept->black_pieces[n].piece_id);
+    if (black_pt[n].current_board_position != -1) {
+      bit_offset = black_pt[n].current_board_position * BITS_PER_BOARD_SQUARE;
+      set_bits(BITS_PER_BOARD_SQUARE,board,bit_offset,black_pt[n].piece_id);
     }
   }
+}
+
+int populate_piece_info_from_board(unsigned char *board,struct piece_info *white_pt,struct piece_info *black_pt)
+{
+  int m;
+  int n;
+  int piece;
+  struct piece_info *info_pt;
+
+  for (n = 0; n < NUM_PIECES_PER_PLAYER; n++) {
+    white_pt[n].piece_id = EMPTY_ID;
+    white_pt[n].current_board_position = -1;
+    white_pt[n].move_count = 0;
+    black_pt[n].piece_id = EMPTY_ID;
+    black_pt[n].current_board_position = -1;
+    black_pt[n].move_count = 0;
+  }
+
+  for (n = 0; n < NUM_BOARD_SQUARES; n++) {
+    piece = get_piece1(board,n);
+
+    if (!piece)
+      continue;
+
+    if (piece < 0)
+      info_pt = black_pt;
+    else
+      info_pt = white_pt;
+
+    for (m = 0; m < NUM_PIECES_PER_PLAYER; m++) {
+      if (info_pt[m].piece_id != EMPTY_ID)
+        continue;
+
+      info_pt[m].piece_id = piece;
+      info_pt[m].current_board_position = n;
+      break;
+    }
+
+    if (m == NUM_PIECES_PER_PLAYER)
+      return 1;
+  }
+
+  return 0;
 }
 
 int compare_boards(unsigned char *board1,unsigned char *board2)
@@ -981,7 +1079,7 @@ void GetLine(FILE *fptr,char *line,int *line_len,int maxllen)
 #define MAX_LINE_LEN 256
 static char line[MAX_LINE_LEN];
 
-int populate_board_from_board_file(unsigned char *board,char *filename)
+int populate_board_from_board_file(unsigned char *board,char *filename,int orientation)
 {
   int m;
   int n;
@@ -1002,7 +1100,7 @@ int populate_board_from_board_file(unsigned char *board,char *filename)
     if (feof(fptr))
       break;
 
-    if (line_len != 19)
+    if (line_len != 15)
       return 2;
 
     for (n = 0; n < NUM_FILES; n++) {
@@ -1010,15 +1108,31 @@ int populate_board_from_board_file(unsigned char *board,char *filename)
 
       if (chara == '.') {
         piece = 0;
-        set_piece2(board,7 - line_no,n,piece);
+
+        if (!orientation)
+          set_piece2(board,7 - line_no,n,piece);
+        else
+          set_piece2(board,line_no,7 - n,piece);
       }
       else {
-        if (chara == 'p')
-          set_piece2(board,7 - line_no,n,PAWN_ID);
-        else if (chara == 'P')
-          set_piece2(board,7 - line_no,n,PAWN_ID * -1);
-        else if (chara == 'e')
-          set_piece2(board,7 - line_no,n,EMPTY_ID);
+        if (chara == 'p') {
+          if (!orientation)
+            set_piece2(board,7 - line_no,n,PAWN_ID);
+          else
+            set_piece2(board,line_no,7 - n,PAWN_ID);
+        }
+        else if (chara == 'P') {
+          if (!orientation)
+            set_piece2(board,7 - line_no,n,PAWN_ID * -1);
+          else
+            set_piece2(board,line_no,7 - n,PAWN_ID * -1);
+        }
+        else if (chara == 'e') {
+          if (!orientation)
+            set_piece2(board,7 - line_no,n,EMPTY_ID);
+          else
+            set_piece2(board,line_no,7 - n,EMPTY_ID);
+        }
         else {
           for (m = 0; m < NUM_PIECE_TYPES; m++) {
             if (chara == piece_ids[m]) {
@@ -1031,8 +1145,12 @@ int populate_board_from_board_file(unsigned char *board,char *filename)
             }
           }
 
-          if (m < NUM_PIECE_TYPES)
-            set_piece2(board,7 - line_no,n,piece);
+          if (m < NUM_PIECE_TYPES) {
+            if (!orientation)
+              set_piece2(board,7 - line_no,n,piece);
+            else
+              set_piece2(board,line_no,7 - n,piece);
+          }
         }
       }
     }
