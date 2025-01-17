@@ -37,8 +37,11 @@ GLOBAL bool bRandomizePuzzle;
 GLOBAL int puzzle_count;
 GLOBAL int puzzles_solved;
 
+GLOBAL unsigned char custom_initial_board[CHARS_IN_BOARD];
+
 #ifdef MAKE_GLOBALS_HERE
 char piece_ids[] = "RNBGK";
+char piece_ids2[] = "PRNBGK";
 char *piece_names[] = {
   "PAWN",
   "ROOK",
@@ -71,6 +74,7 @@ int legal_moves_count;
 short seirawan_count[NUM_PLAYERS];
 #else
 extern char piece_ids[];
+extern char piece_ids2[];
 extern char *piece_names[];
 extern char fmt_str[];
 extern char *special_moves[];
