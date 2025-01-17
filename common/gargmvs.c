@@ -1151,7 +1151,7 @@ void get_legal_moves(struct game *gamept,struct move *legal_moves,int *legal_mov
     info_pt = gamept->black_pieces;
 
   copy_board(gamept->board,board1);
-  populate_board_from_piece_info(gamept,board2);
+  populate_board_from_piece_info(gamept->white_pieces,gamept->black_pieces,board2);
 
   retval = compare_boards(board1,board2);
 
@@ -1794,4 +1794,12 @@ bool mate_in_one_exists(struct game *gamept)
   }
 
   return false;
+}
+
+bool white_to_move(struct game *gamept)
+{
+  if (!gamept->black_moves_first)
+    return !(gamept->curr_move % 2);
+  else
+    return (gamept->curr_move % 2);
 }
